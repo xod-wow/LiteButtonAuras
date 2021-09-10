@@ -1,0 +1,33 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+
+<!--
+
+  Copyright 2021 Mike Battersby
+
+  LiteButtonAuras is free software: you can redistribute it and/or modify it
+  under the terms of the GNU General Public License, version 2, as published
+  by the Free Software Foundation.
+
+  LiteButtonAuras is distributed in the hope that it will be useful, but
+  WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+  or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+  for more details.
+
+  The file LICENSE.txt included with LiteButtonAuras contains a copy of
+  the license. If the LICENSE.txt file is missing, you can find a copy at
+  http://www.gnu.org/licenses/old-licenses/gpl-2.0.txt
+
+-->
+
+  <Script file="Controller.lua"/>
+  <Script file="Overlay.lua"/>
+
+  <Frame name="LiteButtonAurasOverlayTemplate" virtual="true">
+    <Layers>
+      <Layer level="ARTWORK">
+        <Texture name="$parentBorder" parentKey="Border" setAllPoints="true" />
+      </Layer>
+    </Layers>
+  </Frame>
+
+</Ui>

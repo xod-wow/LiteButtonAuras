@@ -1,0 +1,23 @@
+<Ui xmlns="http://www.blizzard.com/wow/ui/">
+
+  <Script file="Overlay.lua"/>
+
+  <Frame name="LiteButtonAurasOverlayTemplate" mixin="LiteButtonAurasOverlayMixin" setAllPoints="true" hidden="true" virtual="true">
+    <Scripts>
+      <OnLoad method="OnLoad" />
+    </Scripts>
+    <Layers>
+      <Layer level="ARTWORK">
+        <Texture parentKey="Glow" file="Interface\AddOns\LiteButtonAuras\Textures\Overlay" setAllPoints="true" />
+      </Layer>
+      <Layer level="OVERLAY">
+      <FontString name="Time" inherits="GameFontHighlightSmall" text="10.5">
+          <Anchors>
+            <Anchor point="BOTTOM" y="4" />
+          </Anchors>
+        </FontString>
+      </Layer>
+    </Layers>
+  </Frame>
+
+</Ui>
