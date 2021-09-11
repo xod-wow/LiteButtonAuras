@@ -86,7 +86,7 @@ function LiteButtonAurasControllerMixin:UpdateTargetCast()
         return
     end
 
-    name, _, _, endTime, _, cantInterrupt = UnitChannelInfo('target')
+    name, _, _, _, endTime, _, cantInterrupt = UnitChannelInfo('target')
     if name and not cantInterrupt then
         self.targetInterrupt = endTime / 1000
         return
