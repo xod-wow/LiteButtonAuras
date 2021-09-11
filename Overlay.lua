@@ -102,11 +102,12 @@ end
 function LiteButtonAurasOverlayMixin:ShowAura(info)
     if info[6] and info[6] ~= 0 then
         self.expireTime = info[6]
+        self.timeMod = info[15]
         self:SetScript('OnUpdate', self.UpdateDuration)
     else
         self.expireTime = nil
+        self.timeMod = nil
     end
-    self.timeMod = info[15]
     self.Glow:Show()
 end
 
