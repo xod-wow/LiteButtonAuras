@@ -67,8 +67,8 @@ local function DurationAbbrev(duration)
         return "%dh", math.ceil(duration/3600)
     elseif duration >= 60 then
         return "%dm", math.ceil(duration/60)
-    elseif duration >= 5 then
-        return "%d", duration
+    elseif duration >= 3 then
+        return "%d", math.ceil(duration)
     else
         return "%0.1f", duration
     end
