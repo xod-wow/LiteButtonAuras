@@ -97,16 +97,24 @@ end
 
 function LiteButtonAurasControllerMixin:UpdateOverlays()
     for actionButton, overlay in pairs(self.frames) do
+        local show = false
         if overlay.name then
             if overlay.isInterrupt and self.targetInterrupt then
-                overlay:ShowInterrupt(self.targetInterrupt)
-            elseif self.playerBuffs[overlay.name] then
+                overlay:ShowInterrupt()
+                show = true
+            else
+                overlay:HideInterrupt()
+            end
+            if self.playerBuffs[overlay.name] then
                 overlay:ShowBuff(self.playerBuffs[overlay.name])
+                show = true
             elseif self.targetDebuffs[overlay.name] then
                 overlay:ShowDebuff(self.targetDebuffs[overlay.name])
+                show = true
             else
-                overlay:ShowNothing()
+                overlay:HideAura()
             end
+            overlay:SetShown(show)
         end
     end
 end

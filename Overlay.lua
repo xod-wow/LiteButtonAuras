@@ -9,8 +9,8 @@ local _, LBA = ...
 
 local InterruptSpellIDs = {
     [ 47528] = true,    -- Mind Freeze (Death Knight)
-    [183725] = true,    -- Disrupt (Demon Hunter)
-    [204490] = true,    -- Sigil of Silence (Demon Hunter)
+    [183752] = true,    -- Disrupt (Demon Hunter)
+    [202137] = true,    -- Sigil of Silence (Demon Hunter)
     [ 78675] = true,    -- Solar Beam (Druid)
     [106839] = true,    -- Skull Bash (Druid)
     [147362] = true,    -- Counter Shot (Hunter)
@@ -34,11 +34,16 @@ local InterruptSpellIDs = {
 LiteButtonAurasOverlayMixin = {}
 
 function LiteButtonAurasOverlayMixin:OnLoad()
+    -- Bump it so it's on top of the cooldown frame
+    local parent = self:GetParent()
+    self:SetFrameLevel(parent.cooldown:GetFrameLevel() + 1)
 end
 
 function LiteButtonAurasOverlayMixin:ScanAction()
     local actionButton = self:GetParent()
     self.actionID = actionButton.action
+    self.name = nil
+    self.isInterrupt = nil
     
     local type, id, subType = GetActionInfo(actionButton.action)
     if type == 'spell' then
@@ -51,14 +56,9 @@ function LiteButtonAurasOverlayMixin:ScanAction()
             self.name = GetItemSpell(itemID) or GetItemInfo(itemID)
         elseif spellID then
             self.name = GetSpellInfo(spellID)
+            self.isInterrupt = InterruptSpellIDs[spellID]
         end
-    else
-        self.name = nil
     end
-end
-
-function LiteButtonAurasOverlayMixin:OnUpdate()
-    self:UpdateDuration()
 end
 
 local function DurationAbbrev(duration)
@@ -71,14 +71,26 @@ local function DurationAbbrev(duration)
     elseif duration >= 3 then
         return "%d", math.ceil(duration)
     else
-        return "%0.1f", duration
+        return "%.1f", duration
+    end
+end
+
+local function DurationRGB(duration)
+    if duration >= 2 then
+        return 1, 1, 1
+    else
+        return RED_FONT_COLOR:GetRGB()
     end
 end
 
 function LiteButtonAurasOverlayMixin:UpdateDuration()
     if self.expireTime then
         local duration = self.expireTime - GetTime()
+        if self.timeMod > 0 then
+            duration = duration / self.timeMod
+        end
         self.Duration:SetFormattedText(DurationAbbrev(duration))
+        self.Duration:SetTextColor(DurationRGB(duration))
         self.Duration:Show()
     else
         self.Duration:Hide()
@@ -90,7 +102,15 @@ end
 function LiteButtonAurasOverlayMixin:ShowAura(info)
     self.expireTime = info[6]
     self.timeMod = info[15]
-    self:Show()
+    self.Glow:Show()
+    self:SetScript('OnUpdate', self.UpdateDuration)
+end
+
+function LiteButtonAurasOverlayMixin:HideAura()
+    self.expireTime = nil
+    self.timeMod = nil
+    self.Glow:Hide()
+    self:SetScript('OnUpdate', nil)
 end
 
 function LiteButtonAurasOverlayMixin:ShowBuff(info)
@@ -103,20 +123,13 @@ function LiteButtonAurasOverlayMixin:ShowDebuff(info)
     self:ShowAura(info)
 end
 
-function LiteButtonAurasOverlayMixin:ShowInterrupt(endTime)
-    self.expireTime = endTime
-    self.Highlight:SetVertexColor(1.0, 1.0, 0.0, 0.7)
-    self.Highlight:Show()
-    self.HighlightAnim:Play()
-    self:Show()
+function LiteButtonAurasOverlayMixin:ShowInterrupt()
+    ActionButton_ShowOverlayGlow(self)
+end
+
+function LiteButtonAurasOverlayMixin:HideInterrupt()
+    ActionButton_HideOverlayGlow(self)
 end
 
 function LiteButtonAurasOverlayMixin:ShowDispel(info)
-end
-
-function LiteButtonAurasOverlayMixin:ShowNothing()
-    self.HighlightAnim:Stop()
-    self.Highlight:Hide()
-    self.Glow:Hide()
-    self:Hide()
 end
