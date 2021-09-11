@@ -23,8 +23,16 @@ function LiteButtonAurasControllerMixin:OnLoad()
         Dominos.RegisterCallback(self, 'LAYOUT_LOADED', 'InitDominos')
     end
 
-    self:RegisterEvent('UNIT_AURA')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
+    self:RegisterEvent('UNIT_AURA')
+    self:RegisterEvent('UNIT_SPELLCAST_START')
+    self:RegisterEvent('UNIT_SPELLCAST_STOP')
+    self:RegisterEvent('UNIT_SPELLCAST_DELAYED')
+    self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE')
+    self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE')
+    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START')
+    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP')
+    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
 end
 
 function LiteButtonAurasControllerMixin:InitBlizzard()
@@ -69,10 +77,30 @@ function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
         end)
 end
 
+function LiteButtonAurasControllerMixin:UpdateTargetCast()
+    local name, endTime, cantInterrupt, _
+
+    name, _, _, _, endTime, _, _, cantInterrupt = UnitCastingInfo('target')
+    if name and not cantInterrupt then
+        self.targetInterrupt = endTime / 1000
+        return
+    end
+
+    name, _, _, endTime, _, cantInterrupt = UnitChannelInfo('target')
+    if name and not cantInterrupt then
+        self.targetInterrupt = endTime / 1000
+        return
+    end
+
+    self.targetInterrupt = nil
+end
+
 function LiteButtonAurasControllerMixin:UpdateOverlays()
     for actionButton, overlay in pairs(self.frames) do
         if overlay.name then
-            if self.playerBuffs[overlay.name] then
+            if overlay.isInterrupt and self.targetInterrupt then
+                overlay:ShowInterrupt(self.targetInterrupt)
+            elseif self.playerBuffs[overlay.name] then
                 overlay:ShowBuff(self.playerBuffs[overlay.name])
             elseif self.targetDebuffs[overlay.name] then
                 overlay:ShowDebuff(self.targetDebuffs[overlay.name])
@@ -86,6 +114,7 @@ end
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     if event == 'PLAYER_TARGET_CHANGED' then
         self:UpdateTargetDebuffs()
+        self:UpdateTargetCast()
         self:UpdateOverlays()
     elseif event == 'UNIT_AURA' then
         local unit = ...
@@ -96,6 +125,11 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
             self:UpdateTargetDebuffs()
             self:UpdateOverlays()
         end
+    elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
+        local unit = ...
+        if unit == 'target' then
+            self:UpdateTargetCast()
+            self:UpdateOverlays()
+        end
     end
 end
-

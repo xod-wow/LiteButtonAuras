@@ -43,6 +43,7 @@ function LiteButtonAurasOverlayMixin:ScanAction()
     local type, id, subType = GetActionInfo(actionButton.action)
     if type == 'spell' then
         self.name = GetSpellInfo(id)
+        self.isInterrupt = InterruptSpellIDs[id]
     elseif type == 'macro' then
         local itemID = GetMacroItem(id)
         local spellID = GetMacroSpell(id)
@@ -102,7 +103,10 @@ function LiteButtonAurasOverlayMixin:ShowDebuff(info)
     self:ShowAura(info)
 end
 
-function LiteButtonAurasOverlayMixin:ShowInterrupt(info)
+function LiteButtonAurasOverlayMixin:ShowInterrupt(endTime)
+    self.Glow:SetVertexColor(1.0, 1.0, 0.0, 0.7)
+    self.expireTime = endTime
+    self:Show()
 end
 
 function LiteButtonAurasOverlayMixin:ShowDispel(info)
