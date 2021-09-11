@@ -100,10 +100,14 @@ end
 -- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ...
 
 function LiteButtonAurasOverlayMixin:ShowAura(info)
-    self.expireTime = info[6]
+    if info[6] and info[6] ~= 0 then
+        self.expireTime = info[6]
+        self:SetScript('OnUpdate', self.UpdateDuration)
+    else
+        self.expireTime = nil
+    end
     self.timeMod = info[15]
     self.Glow:Show()
-    self:SetScript('OnUpdate', self.UpdateDuration)
 end
 
 function LiteButtonAurasOverlayMixin:HideAura()
