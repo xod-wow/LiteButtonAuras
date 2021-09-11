@@ -16,6 +16,7 @@ function LiteButtonAurasControllerMixin:OnLoad()
     self.frames = {}
     self.playerBuffs = {}
     self.targetDebuffs = {}
+    self.targetBuffTypes = {}
 
     self:InitBlizzard()
 
@@ -23,6 +24,7 @@ function LiteButtonAurasControllerMixin:OnLoad()
         Dominos.RegisterCallback(self, 'LAYOUT_LOADED', 'InitDominos')
     end
 
+    self:RegisterEvent('PLAYER_ENTERING_WORLD')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
     self:RegisterEvent('UNIT_AURA')
     self:RegisterEvent('UNIT_SPELLCAST_START')
@@ -67,6 +69,10 @@ function LiteButtonAurasControllerMixin:UpdatePlayerBuffs()
         function (name, ...)
             self.playerBuffs[name] = { name, ... }
         end)
+    AuraUtil.ForEachAura('player', 'HELPFUL RAID', nil,
+        function (name, ...)
+            self.playerBuffs[name] = { name, ... }
+        end)
 end
 
 function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
@@ -74,6 +80,17 @@ function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
     AuraUtil.ForEachAura('target', 'HARMFUL PLAYER', nil,
         function (name, ...)
             self.targetDebuffs[name] = { name, ... }
+        end)
+end
+
+function LiteButtonAurasControllerMixin:UpdateTargetBuffTypes()
+    table.wipe(self.targetBuffTypes)
+    AuraUtil.ForEachAura('target', 'HELPFUL RAID', nil,
+        function (...)
+            local buffType = select(4, ...)
+            if buffType then
+                self.targetBuffTypes[buffType] = true
+            end
         end)
 end
 
@@ -95,6 +112,16 @@ function LiteButtonAurasControllerMixin:UpdateTargetCast()
     self.targetInterrupt = nil
 end
 
+function LiteButtonAurasControllerMixin:CanDispel(overlay)
+    if UnitIsEnemy('player', 'target') and overlay.dispels then
+        for k in pairs(overlay.dispels) do
+            if self.targetBuffTypes[k] then
+                return true
+            end
+        end
+    end
+end
+
 function LiteButtonAurasControllerMixin:UpdateOverlays()
     for actionButton, overlay in pairs(self.frames) do
         local show = false
@@ -111,16 +138,26 @@ function LiteButtonAurasControllerMixin:UpdateOverlays()
             elseif self.targetDebuffs[overlay.name] then
                 overlay:ShowDebuff(self.targetDebuffs[overlay.name])
                 show = true
+            elseif self:CanDispel(overlay) then
+                overlay:ShowDispel(self.targetBuffTypes)
+                show = true
             else
                 overlay:HideAura()
             end
-            overlay:SetShown(show)
         end
+        overlay:SetShown(show)
     end
 end
 
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
-    if event == 'PLAYER_TARGET_CHANGED' then
+    if event == 'PLAYER_ENTERING_WORLD' then
+        self:UpdateTargetBuffTypes()
+        self:UpdateTargetDebuffs()
+        self:UpdateTargetCast()
+        self:UpdatePlayerBuffs()
+        self:UpdateOverlays()
+    elseif event == 'PLAYER_TARGET_CHANGED' then
+        self:UpdateTargetBuffTypes()
         self:UpdateTargetDebuffs()
         self:UpdateTargetCast()
         self:UpdateOverlays()
@@ -130,6 +167,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
             self:UpdatePlayerBuffs()
             self:UpdateOverlays()
         elseif unit == 'target' then
+            self:UpdateTargetBuffTypes()
             self:UpdateTargetDebuffs()
             self:UpdateOverlays()
         end

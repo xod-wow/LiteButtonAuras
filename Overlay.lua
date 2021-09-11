@@ -7,7 +7,7 @@
 
 local _, LBA = ...
 
-local InterruptSpellIDs = {
+local Interrupts = {
     [ 47528] = true,    -- Mind Freeze (Death Knight)
     [183752] = true,    -- Disrupt (Demon Hunter)
     [202137] = true,    -- Sigil of Silence (Demon Hunter)
@@ -29,6 +29,25 @@ local InterruptSpellIDs = {
     [  6552] = true,    -- Pummel (Warrior)
 }
 
+local Dispels = {
+    [205604] = { Magic = true },    -- Reverse Magic (Demon Hunter)
+    [278326] = { Magic = true },    -- Consume Magic (Demon Hunter)
+    [  2908] = { Enrage = true },   -- Soothe (Druid)
+    [ 19801] = { Enrage = true, Magic = true }, -- Tranquilizing Shot (Hunter)
+    [ 30449] = { Magic = true },    -- Spellsteal (Mage)
+    [   528] = { Magic = true },    -- Dispel Magic (Priest)
+    [ 25046] = { Magic = true },    -- Arcane Torrent (Blood Elf Rogue)
+    [ 28730] = { Magic = true },    -- Arcane Torrent (Blood Elf Mage/Warlock)
+    [ 50613] = { Magic = true },    -- Arcane Torrent (Blood Elf Death Knight)
+    [ 69179] = { Magic = true },    -- Arcane Torrent (Blood Elf Warrior)
+    [ 80483] = { Magic = true },    -- Arcane Torrent (Blood Elf Hunter)
+    [129597] = { Magic = true },    -- Arcane Torrent (Blood Elf Monk)
+    [155145] = { Magic = true },    -- Arcane Torrent (Blood Elf Paladin)
+    [202719] = { Magic = true },    -- Arcane Torrent (Blood Elf Demon Hunter)
+    [232633] = { Magic = true },    -- Arcane Torrent (Blood Elf Priest)
+}
+
+
 --[[------------------------------------------------------------------------]]--
 
 LiteButtonAurasOverlayMixin = {}
@@ -48,7 +67,8 @@ function LiteButtonAurasOverlayMixin:ScanAction()
     local type, id, subType = GetActionInfo(actionButton.action)
     if type == 'spell' then
         self.name = GetSpellInfo(id)
-        self.isInterrupt = InterruptSpellIDs[id]
+        self.isInterrupt = Interrupts[id]
+        self.dispels = Dispels[id]
     elseif type == 'macro' then
         local itemID = GetMacroItem(id)
         local spellID = GetMacroSpell(id)
@@ -56,7 +76,8 @@ function LiteButtonAurasOverlayMixin:ScanAction()
             self.name = GetItemSpell(itemID) or GetItemInfo(itemID)
         elseif spellID then
             self.name = GetSpellInfo(spellID)
-            self.isInterrupt = InterruptSpellIDs[spellID]
+            self.isInterrupt = Interrupts[spellID]
+            self.dispels = Dispels[spellID]
         end
     end
 end
@@ -136,5 +157,12 @@ function LiteButtonAurasOverlayMixin:HideInterrupt()
     ActionButton_HideOverlayGlow(self)
 end
 
-function LiteButtonAurasOverlayMixin:ShowDispel(info)
+function LiteButtonAurasOverlayMixin:ShowDispel(buffTypes)
+    for k in pairs(self.dispels) do
+        if buffTypes[k] then
+            self.Glow:SetVertexColor(0.5, 0.0, 1.0, 0.7)
+            self.Glow:Show()
+            break
+        end
+    end
 end
