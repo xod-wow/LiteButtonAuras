@@ -104,11 +104,19 @@ function LiteButtonAurasOverlayMixin:ShowDebuff(info)
 end
 
 function LiteButtonAurasOverlayMixin:ShowInterrupt(endTime)
-    self.Glow:SetVertexColor(1.0, 1.0, 0.0, 0.7)
     self.expireTime = endTime
+    self.Highlight:SetVertexColor(1.0, 1.0, 0.0, 0.7)
+    self.Highlight:Show()
+    self.HighlightAnim:Play()
     self:Show()
 end
 
 function LiteButtonAurasOverlayMixin:ShowDispel(info)
 end
 
+function LiteButtonAurasOverlayMixin:ShowNothing()
+    self.HighlightAnim:Stop()
+    self.Highlight:Hide()
+    self.Glow:Hide()
+    self:Hide()
+end

@@ -105,7 +105,7 @@ function LiteButtonAurasControllerMixin:UpdateOverlays()
             elseif self.targetDebuffs[overlay.name] then
                 overlay:ShowDebuff(self.targetDebuffs[overlay.name])
             else
-                overlay:Hide()
+                overlay:ShowNothing()
             end
         end
     end
