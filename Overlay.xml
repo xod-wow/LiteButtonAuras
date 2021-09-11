@@ -14,7 +14,7 @@
       <Layer level="OVERLAY">
       <FontString parentKey="Duration" inherits="GameFontHighlight">
           <Anchors>
-            <Anchor point="BOTTOM" />
+            <Anchor point="BOTTOM" y="1" />
           </Anchors>
         </FontString>
       </Layer>

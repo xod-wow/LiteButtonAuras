@@ -7,13 +7,33 @@
 
 local _, LBA = ...
 
+local InterruptSpellIDs = {
+    [ 47528] = true,    -- Mind Freeze (Death Knight)
+    [183725] = true,    -- Disrupt (Demon Hunter)
+    [204490] = true,    -- Sigil of Silence (Demon Hunter)
+    [ 78675] = true,    -- Solar Beam (Druid)
+    [106839] = true,    -- Skull Bash (Druid)
+    [147362] = true,    -- Counter Shot (Hunter)
+    [187707] = true,    -- Muzzle (Hunter)
+    [ 96231] = true,    -- Counterspell (Mage)
+    [116705] = true,    -- Spear Hand Strike (Monk)
+    [ 96231] = true,    -- Rebuke (Paladin)
+    [ 31935] = true,    -- Avenger's Shield (Paladin)
+    [ 15487] = true,    -- Silence (Priest)
+    [  1766] = true,    -- Kick (Rogue)
+    [ 57994] = true,    -- Wind Shear (Paladin)
+    [ 89808] = true,    -- Singe Magic (Warlock)
+    [199905] = true,    -- Command Demon: Singe Magic (Warlock)
+    [132411] = true,    -- Command Demon: Singe Magic (Warlock)
+    [212623] = true,    -- Command Demon: Singe Magic (Warlock PvP Talent)
+    [  6552] = true,    -- Pummel (Warrior)
+}
 
 --[[------------------------------------------------------------------------]]--
 
 LiteButtonAurasOverlayMixin = {}
 
 function LiteButtonAurasOverlayMixin:OnLoad()
-    self.Glow:SetAlpha(0.6)
 end
 
 function LiteButtonAurasOverlayMixin:ScanAction()
@@ -27,7 +47,7 @@ function LiteButtonAurasOverlayMixin:ScanAction()
         local itemID = GetMacroItem(id)
         local spellID = GetMacroSpell(id)
         if itemID then
-            self.name = GetItemInfo(itemID)
+            self.name = GetItemSpell(itemID) or GetItemInfo(itemID)
         elseif spellID then
             self.name = GetSpellInfo(spellID)
         end
@@ -66,21 +86,25 @@ end
 
 -- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ...
 
-function LiteButtonAurasOverlayMixin:ShowBuff(index)
-    self.expireTime = select(6, UnitAura('player', index))
-    self.Glow:SetVertexColor(0.7, 1.0, 0.7)
+function LiteButtonAurasOverlayMixin:ShowAura(info)
+    self.expireTime = info[6]
+    self.timeMod = info[15]
     self:Show()
 end
 
-function LiteButtonAurasOverlayMixin:ShowDebuff(index)
-    self.expireTime = select(6, UnitAura('target', index))
-    self.Glow:SetVertexColor(1.0, 0.7, 0.7)
-    self:Show()
+function LiteButtonAurasOverlayMixin:ShowBuff(info)
+    self.Glow:SetVertexColor(0.0, 1.0, 0.0, 0.7)
+    self:ShowAura(info)
 end
 
-function LiteButtonAurasOverlayMixin:ShowInterrupt(index)
+function LiteButtonAurasOverlayMixin:ShowDebuff(info)
+    self.Glow:SetVertexColor(1.0, 0.0, 0.0, 0.7)
+    self:ShowAura(info)
 end
 
-function LiteButtonAurasOverlayMixin:ShowDispel(index)
+function LiteButtonAurasOverlayMixin:ShowInterrupt(info)
+end
+
+function LiteButtonAurasOverlayMixin:ShowDispel(info)
 end
 

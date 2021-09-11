@@ -55,24 +55,18 @@ end
 
 function LiteButtonAurasControllerMixin:UpdatePlayerBuffs()
     table.wipe(self.playerBuffs)
-    local i = 1
-    while true do
-        local name = UnitAura('player', i, 'HELPFUL PLAYER')
-        if not name then break end
-        self.playerBuffs[name] = i
-        i = i + 1
-    end
+    AuraUtil.ForEachAura('player', 'HELPFUL PLAYER', nil,
+        function (name, ...)
+            self.playerBuffs[name] = { name, ... }
+        end)
 end
 
 function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
     table.wipe(self.targetDebuffs)
-    local i = 1
-    while true do
-        local name = UnitAura('target', i, 'HARMFUL PLAYER')
-        if not name then break end
-        self.targetDebuffs[name] = i
-        i = i + 1
-    end
+    AuraUtil.ForEachAura('target', 'HARMFUL PLAYER', nil,
+        function (name, ...)
+            self.targetDebuffs[name] = { name, ... }
+        end)
 end
 
 function LiteButtonAurasControllerMixin:UpdateOverlays()
