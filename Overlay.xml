@@ -5,15 +5,16 @@
   <Frame name="LiteButtonAurasOverlayTemplate" mixin="LiteButtonAurasOverlayMixin" setAllPoints="true" hidden="true" virtual="true">
     <Scripts>
       <OnLoad method="OnLoad" />
+      <OnUpdate method="OnUpdate" />
     </Scripts>
     <Layers>
       <Layer level="ARTWORK">
         <Texture parentKey="Glow" file="Interface\AddOns\LiteButtonAuras\Textures\Overlay" setAllPoints="true" />
       </Layer>
       <Layer level="OVERLAY">
-      <FontString name="Time" inherits="GameFontHighlightSmall" text="10.5">
+      <FontString parentKey="Duration" inherits="GameFontHighlight">
           <Anchors>
-            <Anchor point="BOTTOM" y="4" />
+            <Anchor point="BOTTOM" />
           </Anchors>
         </FontString>
       </Layer>
