@@ -119,7 +119,8 @@ function LiteButtonAurasOverlayMixin:HideSuggestion()
 end
 
 function LiteButtonAurasOverlayMixin:ShowDispel(info)
-    self.Glow:SetVertexColor(0.5, 0.0, 1.0, 0.7)
+    local color = DebuffTypeColor[info[4] or "none"]
+    self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
     self:ShowAura(info)
 end
 
