@@ -15,6 +15,7 @@ LiteButtonAurasControllerMixin = {}
 function LiteButtonAurasControllerMixin:OnLoad()
     self.frames = {}
     self.playerBuffs = {}
+    self.playerTotems = {}
     self.targetDebuffs = {}
     self.targetBuffTypes = {}
 
@@ -27,6 +28,9 @@ function LiteButtonAurasControllerMixin:OnLoad()
     self:RegisterEvent('PLAYER_ENTERING_WORLD')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
     self:RegisterEvent('UNIT_AURA')
+    self:RegisterEvent('PLAYER_TOTEM_UPDATE')
+
+    -- All of these are for the interrupt detection
     self:RegisterEvent('UNIT_SPELLCAST_START')
     self:RegisterEvent('UNIT_SPELLCAST_STOP')
     self:RegisterEvent('UNIT_SPELLCAST_DELAYED')
@@ -73,6 +77,17 @@ function LiteButtonAurasControllerMixin:UpdatePlayerBuffs()
         function (name, ...)
             self.playerBuffs[name] = { name, ... }
         end)
+end
+
+function LiteButtonAurasControllerMixin:UpdatePlayerTotems()
+    table.wipe(self.playerTotems)
+    for i = 1, MAX_TOTEMS do
+        local exists, name, startTime, duration, texture = GetTotemInfo(i)
+        if exists then
+            name = LBA.TotemTextures[texture] or name
+            self.playerTotems[name] = startTime + duration
+        end
+    end
 end
 
 function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
@@ -135,6 +150,9 @@ function LiteButtonAurasControllerMixin:UpdateOverlays()
             if self.playerBuffs[overlay.name] then
                 overlay:ShowBuff(self.playerBuffs[overlay.name])
                 show = true
+            elseif self.playerTotems[overlay.name] then
+                overlay:ShowTotem(self.playerTotems[overlay.name])
+                show = true
             elseif self.targetDebuffs[overlay.name] then
                 overlay:ShowDebuff(self.targetDebuffs[overlay.name])
                 show = true
@@ -155,6 +173,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         self:UpdateTargetDebuffs()
         self:UpdateTargetCast()
         self:UpdatePlayerBuffs()
+        self:UpdatePlayerTotems()
         self:UpdateOverlays()
     elseif event == 'PLAYER_TARGET_CHANGED' then
         self:UpdateTargetBuffTypes()
@@ -171,6 +190,9 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
             self:UpdateTargetDebuffs()
             self:UpdateOverlays()
         end
+    elseif event == 'PLAYER_TOTEM_UPDATE' then
+        self:UpdatePlayerTotems()
+        self:UpdateOverlays()
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
         local unit = ...
         if unit == 'target' then

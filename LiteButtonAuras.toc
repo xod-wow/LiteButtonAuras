@@ -6,5 +6,6 @@
 ## OptionalDependencies: LibDebug, Dominos
 ## SavedVariables: LiteButtonAurasDB
 
+SpellData.lua
 Overlay.xml
 Controller.xml

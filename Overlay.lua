@@ -7,49 +7,6 @@
 
 local _, LBA = ...
 
-local Interrupts = {
-    [ 47528] = true,    -- Mind Freeze (Death Knight)
-    [183752] = true,    -- Disrupt (Demon Hunter)
-    [202137] = true,    -- Sigil of Silence (Demon Hunter)
-    [ 78675] = true,    -- Solar Beam (Druid)
-    [106839] = true,    -- Skull Bash (Druid)
-    [147362] = true,    -- Counter Shot (Hunter)
-    [187707] = true,    -- Muzzle (Hunter)
-    [  2139] = true,    -- Counterspell (Mage)
-    [116705] = true,    -- Spear Hand Strike (Monk)
-    [ 96231] = true,    -- Rebuke (Paladin)
-    [ 31935] = true,    -- Avenger's Shield (Paladin)
-    [ 15487] = true,    -- Silence (Priest)
-    [  1766] = true,    -- Kick (Rogue)
-    [ 57994] = true,    -- Wind Shear (Paladin)
-    [ 89808] = true,    -- Singe Magic (Warlock)
-    [119905] = true,    -- Command Demon: Singe Magic (Warlock)
-    [132411] = true,    -- Command Demon: Singe Magic (Warlock)
-    [212623] = true,    -- Command Demon: Singe Magic (Warlock PvP Talent)
-    [  6552] = true,    -- Pummel (Warrior)
-}
-
-local Dispels = {
-    [205604] = { Magic = true },    -- Reverse Magic (Demon Hunter)
-    [278326] = { Magic = true },    -- Consume Magic (Demon Hunter)
-    [  2908] = { Enrage = true },   -- Soothe (Druid)
-    [ 19801] = { Enrage = true, Magic = true }, -- Tranquilizing Shot (Hunter)
-    [ 30449] = { Magic = true },    -- Spellsteal (Mage)
-    [   528] = { Magic = true },    -- Dispel Magic (Priest)
-    [ 25046] = { Magic = true },    -- Arcane Torrent (Blood Elf Rogue)
-    [ 28730] = { Magic = true },    -- Arcane Torrent (Blood Elf Mage/Warlock)
-    [ 50613] = { Magic = true },    -- Arcane Torrent (Blood Elf Death Knight)
-    [ 69179] = { Magic = true },    -- Arcane Torrent (Blood Elf Warrior)
-    [ 80483] = { Magic = true },    -- Arcane Torrent (Blood Elf Hunter)
-    [129597] = { Magic = true },    -- Arcane Torrent (Blood Elf Monk)
-    [155145] = { Magic = true },    -- Arcane Torrent (Blood Elf Paladin)
-    [202719] = { Magic = true },    -- Arcane Torrent (Blood Elf Demon Hunter)
-    [232633] = { Magic = true },    -- Arcane Torrent (Blood Elf Priest)
-}
-
-
---[[------------------------------------------------------------------------]]--
-
 LiteButtonAurasOverlayMixin = {}
 
 function LiteButtonAurasOverlayMixin:OnLoad()
@@ -67,8 +24,8 @@ function LiteButtonAurasOverlayMixin:ScanAction()
     local type, id, subType = GetActionInfo(actionButton.action)
     if type == 'spell' then
         self.name = GetSpellInfo(id)
-        self.isInterrupt = Interrupts[id]
-        self.dispels = Dispels[id]
+        self.isInterrupt = LBA.Interrupts[id]
+        self.dispels = LBA.Dispels[id]
     elseif type == 'macro' then
         local itemID = GetMacroItem(id)
         local spellID = GetMacroSpell(id)
@@ -76,8 +33,8 @@ function LiteButtonAurasOverlayMixin:ScanAction()
             self.name = GetItemSpell(itemID) or GetItemInfo(itemID)
         elseif spellID then
             self.name = GetSpellInfo(spellID)
-            self.isInterrupt = Interrupts[spellID]
-            self.dispels = Dispels[spellID]
+            self.isInterrupt = LBA.Interrupts[spellID]
+            self.dispels = LBA.Dispels[spellID]
         end
     end
 end
@@ -107,7 +64,7 @@ end
 function LiteButtonAurasOverlayMixin:UpdateDuration()
     if self.expireTime then
         local duration = self.expireTime - GetTime()
-        if self.timeMod > 0 then
+        if self.timeMod and self.timeMod > 0 then
             duration = duration / self.timeMod
         end
         self.Duration:SetFormattedText(DurationAbbrev(duration))
@@ -165,4 +122,11 @@ function LiteButtonAurasOverlayMixin:ShowDispel(buffTypes)
             break
         end
     end
+end
+
+function LiteButtonAurasOverlayMixin:ShowTotem(expireTime)
+    self.expireTime = expireTime
+    self.Glow:SetVertexColor(0.0, 1.0, 0.0, 0.7)
+    self.Glow:Show()
+    self:SetScript('OnUpdate', self.UpdateDuration)
 end
