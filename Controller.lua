@@ -180,8 +180,11 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         self:UpdateOverlays()
     elseif event == 'ACTIONBAR_SLOT_CHANGED' then
         local action = ...
-        self.framesByAction[action]:ScanAction()
-        self:UpdateOverlays()
+        local overlay = self.framesByAction[action]
+        if overlay then
+            overlay:ScanAction()
+            self:UpdateOverlays()
+        end
     elseif event == 'PLAYER_TARGET_CHANGED' then
         self:UpdateTargetBuffTypes()
         self:UpdateTargetDebuffs()
