@@ -14,6 +14,7 @@ LiteButtonAurasControllerMixin = {}
 
 function LiteButtonAurasControllerMixin:OnLoad()
     self.frames = {}
+    self.framesByAction = {}
     self.playerBuffs = {}
     self.playerTotems = {}
     self.targetDebuffs = {}
@@ -26,6 +27,7 @@ function LiteButtonAurasControllerMixin:OnLoad()
     end
 
     self:RegisterEvent('PLAYER_ENTERING_WORLD')
+    self:RegisterEvent('ACTIONBAR_SLOT_CHANGED')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
     self:RegisterEvent('UNIT_AURA')
     self:RegisterEvent('PLAYER_TOTEM_UPDATE')
@@ -60,6 +62,7 @@ function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
         local name = actionButton:GetName() .. "LiteButtonAurasOverlay"
         local overlay = CreateFrame('Frame', name, actionButton, "LiteButtonAurasOverlayTemplate")
         self.frames[actionButton] = overlay
+        self.framesByAction[actionButton.action] = overlay
     end
     return self.frames[actionButton]
 end
@@ -174,6 +177,10 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         self:UpdateTargetCast()
         self:UpdatePlayerBuffs()
         self:UpdatePlayerTotems()
+        self:UpdateOverlays()
+    elseif event == 'ACTIONBAR_SLOT_CHANGED' then
+        local action = ...
+        self.framesByAction[action]:ScanAction()
         self:UpdateOverlays()
     elseif event == 'PLAYER_TARGET_CHANGED' then
         self:UpdateTargetBuffTypes()
