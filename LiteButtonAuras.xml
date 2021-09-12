@@ -18,6 +18,9 @@
   You should have received a copy of the GNU General Public License
   along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+  LiteButtonAuras contains code from AdiButtonAuras
+  Copyright 2013-2018 Adirelle (adirelle@gmail.com)
+
 -->
 
   <Script file="Controller.lua"/>

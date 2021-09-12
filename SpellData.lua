@@ -81,7 +81,7 @@ LBA.DenySpellIDs = {
 
 do
     LBA.DenySpells = { }
-    for _, id in ipairs(LBA.DenySpells) do
+    for _, id in ipairs(LBA.DenySpellIDs) do
         local name = GetSpellInfo(id)
         if name then
             LBA.DenySpells[name] = true
