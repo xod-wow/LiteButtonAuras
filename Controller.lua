@@ -91,9 +91,9 @@ end
 function LiteButtonAurasControllerMixin:UpdatePlayerTotems()
     table.wipe(self.playerTotems)
     for i = 1, MAX_TOTEMS do
-        local exists, name, startTime, duration, texture = GetTotemInfo(i)
+        local exists, name, startTime, duration, model = GetTotemInfo(i)
         if exists then
-            name = LBA.TotemTextures[texture] or name
+            name = LBA.TotemOrGuardianModels[model] or name
             self.playerTotems[name] = startTime + duration
         end
     end
@@ -168,7 +168,7 @@ end
 function LiteButtonAurasControllerMixin:UpdateOverlays()
     for actionButton, overlay in pairs(self.frames) do
         local show = false
-        if overlay.name then
+        if overlay.name and not LBA.DenySpells[overlay.name] then
             if overlay.isInterrupt and self.targetInterrupt then
                 overlay:ShowSuggestion()
                 show = true

@@ -59,7 +59,7 @@ LBA.FriendlyDispels = {
 -- of these that I think it's possible to maintain it.
 -- [Texture ID] = Summoning Spell Name
 
-LBA.TotemTextures = {
+LBA.TotemOrGuardianModels = {
     [ 627607] = GetSpellInfo(132578),   -- Niuzao, The Black Ox (Monk)
     [ 620831] = GetSpellInfo(115313),   -- Jade Serpent Statue (Monk)
     [ 574571] = GetSpellInfo(322118),   -- Yu'lon, The Jade Serpent (Monk)
@@ -69,6 +69,25 @@ LBA.TotemTextures = {
     [1020304] = GetSpellInfo(192249),   -- Storm Elemental (Shaman)
     [ 237577] = GetSpellInfo(51533),    -- Feral Spirit (Shaman)
 }
+
+-- Just don't show these names at all. Probably only ability spell IDs will
+-- work here because they are the only ones GetSpellInfo() is guaranteed to
+-- return for straight away.
+
+LBA.DenySpellIDs = {
+    -- Monk
+    152175,                             -- Whirling Dragon Punch (Monk)
+}
+
+do
+    LBA.DenySpells = { }
+    for _, id in ipairs(LBA.DenySpells) do
+        local name = GetSpellInfo(id)
+        if name then
+            LBA.DenySpells[name] = true
+        end
+    end
+end
 
 --@debug
 _G.LBA = LBA
