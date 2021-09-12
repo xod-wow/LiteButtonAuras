@@ -43,10 +43,15 @@ function LiteButtonAurasControllerMixin:OnLoad()
     self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
 end
 
+-- The OverrideActionButtons have the same actionID as the main buttons and
+-- mess up framesByAction (as well as we don't want to handle them)
+
 function LiteButtonAurasControllerMixin:InitBlizzard()
     for _, actionButton in pairs(ActionBarButtonEventsFrame.frames) do
-        local overlay = self:CreateOverlay(actionButton)
-        overlay:ScanAction()
+        if actionButton:GetName():sub(1,8) ~= 'Override' then
+            local overlay = self:CreateOverlay(actionButton)
+            overlay:ScanAction()
+        end
     end
 end
 
@@ -63,6 +68,7 @@ function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
         local overlay = CreateFrame('Frame', name, actionButton, "LiteButtonAurasOverlayTemplate")
         self.frames[actionButton] = overlay
         self.framesByAction[actionButton.action] = overlay
+        hooksecurefunc(actionButton, 'UpdateAction', function () overlay:ScanAction() end)
     end
     return self.frames[actionButton]
 end
