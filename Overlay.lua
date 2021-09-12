@@ -25,7 +25,9 @@ function LiteButtonAurasOverlayMixin:ScanAction()
     if type == 'spell' then
         self.name = GetSpellInfo(id)
         self.isInterrupt = LBA.Interrupts[id]
-        self.dispels = LBA.Dispels[id]
+        self.friendlyDispels = LBA.FriendlyDispels[id]
+        self.hostileDispels = LBA.HostileDispels[id]
+        self.isSoothe = LBA.Soothes[id]
     elseif type == 'macro' then
         local itemID = GetMacroItem(id)
         local spellID = GetMacroSpell(id)
@@ -34,7 +36,9 @@ function LiteButtonAurasOverlayMixin:ScanAction()
         elseif spellID then
             self.name = GetSpellInfo(spellID)
             self.isInterrupt = LBA.Interrupts[spellID]
-            self.dispels = LBA.Dispels[spellID]
+            self.friendlyDispels = LBA.FriendlyDispels[spellID]
+            self.hostileDispels = LBA.HostileDispels[spellID]
+            self.isSoothe = LBA.Soothes[spellID]
         end
     end
 end
@@ -106,22 +110,17 @@ function LiteButtonAurasOverlayMixin:ShowDebuff(info)
     self:ShowAura(info)
 end
 
-function LiteButtonAurasOverlayMixin:ShowInterrupt()
+function LiteButtonAurasOverlayMixin:ShowSuggestion()
     ActionButton_ShowOverlayGlow(self)
 end
 
-function LiteButtonAurasOverlayMixin:HideInterrupt()
+function LiteButtonAurasOverlayMixin:HideSuggestion()
     ActionButton_HideOverlayGlow(self)
 end
 
-function LiteButtonAurasOverlayMixin:ShowDispel(buffTypes)
-    for k in pairs(self.dispels) do
-        if buffTypes[k] then
-            self.Glow:SetVertexColor(0.5, 0.0, 1.0, 0.7)
-            self.Glow:Show()
-            break
-        end
-    end
+function LiteButtonAurasOverlayMixin:ShowDispel(info)
+    self.Glow:SetVertexColor(0.5, 0.0, 1.0, 0.7)
+    self:ShowAura(info)
 end
 
 function LiteButtonAurasOverlayMixin:ShowTotem(expireTime)

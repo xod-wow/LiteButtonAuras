@@ -29,11 +29,16 @@ LBA.Interrupts = {
     [  6552] = true,    -- Pummel (Warrior)
 }
 
-LBA.Dispels = {
+LBA.Soothes = {
+    [  2908] = true,                -- Soothe (Druid)
+    [ 19801] = true,                -- Tranquilizing Shot (Hunter)
+    [  5938] = true,                -- Shiv (Rogue)
+}
+
+LBA.HostileDispels = {
     [205604] = { Magic = true },    -- Reverse Magic (Demon Hunter)
     [278326] = { Magic = true },    -- Consume Magic (Demon Hunter)
-    [  2908] = { Enrage = true },   -- Soothe (Druid)
-    [ 19801] = { Enrage = true, Magic = true }, -- Tranquilizing Shot (Hunter)
+    [ 19801] = { Magic = true },    -- Tranquilizing Shot (Hunter)
     [ 30449] = { Magic = true },    -- Spellsteal (Mage)
     [   528] = { Magic = true },    -- Dispel Magic (Priest)
     [ 25046] = { Magic = true },    -- Arcane Torrent (Blood Elf Rogue)
@@ -47,6 +52,11 @@ LBA.Dispels = {
     [232633] = { Magic = true },    -- Arcane Torrent (Blood Elf Priest)
 }
 
+LBA.FriendlyDispels = {
+}
+
+-- Where the totem name does not match the spell name. There's few enough
+-- of these that I think it's possible to maintain it.
 -- [Texture ID] = Summoning Spell Name
 
 LBA.TotemTextures = {

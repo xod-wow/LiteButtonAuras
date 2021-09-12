@@ -18,7 +18,7 @@ function LiteButtonAurasControllerMixin:OnLoad()
     self.playerBuffs = {}
     self.playerTotems = {}
     self.targetDebuffs = {}
-    self.targetBuffTypes = {}
+    self.targetBuffs = {}
 
     self:InitBlizzard()
 
@@ -101,14 +101,11 @@ function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
         end)
 end
 
-function LiteButtonAurasControllerMixin:UpdateTargetBuffTypes()
-    table.wipe(self.targetBuffTypes)
-    AuraUtil.ForEachAura('target', 'HELPFUL RAID', nil,
-        function (...)
-            local buffType = select(4, ...)
-            if buffType then
-                self.targetBuffTypes[buffType] = true
-            end
+function LiteButtonAurasControllerMixin:UpdateTargetBuffs()
+    table.wipe(self.targetBuffs)
+    AuraUtil.ForEachAura('target', 'HELPFUL', nil,
+        function (name, ...)
+            self.targetBuffs[name] = { name, ... }
         end)
 end
 
@@ -130,12 +127,34 @@ function LiteButtonAurasControllerMixin:UpdateTargetCast()
     self.targetInterrupt = nil
 end
 
-function LiteButtonAurasControllerMixin:CanDispel(overlay)
-    if UnitIsEnemy('player', 'target') and overlay.dispels then
-        for k in pairs(overlay.dispels) do
-            if self.targetBuffTypes[k] then
+-- The expectation for users of targetBuffs is that there are VERY few
+-- of them and that looping over them is OK because it'll be fast.
+
+function LiteButtonAurasControllerMixin:TryShowDispel(overlay)
+    local dispels
+    if UnitIsFriend('player', 'target') then
+        dispels = overlay.friendlyDispels
+    elseif UnitIsEnemy('player', 'target') then
+        dispels = overlay.hostileDispels
+    end
+    if not dispels then
+        return
+    end
+
+    for k in pairs(dispels) do
+        for _, info in pairs(self.targetBuffs) do
+            if info[4] == k then
+                overlay:ShowDispel(info)
                 return true
             end
+        end
+    end
+end
+
+function LiteButtonAurasControllerMixin:CanSoothe(overlay)
+    for _, info in pairs(self.targetBuffs) do
+        if info[8] and info[4] == "" then
+            return true
         end
     end
 end
@@ -145,10 +164,13 @@ function LiteButtonAurasControllerMixin:UpdateOverlays()
         local show = false
         if overlay.name then
             if overlay.isInterrupt and self.targetInterrupt then
-                overlay:ShowInterrupt()
+                overlay:ShowSuggestion()
+                show = true
+            elseif overlay.isSoothe and self:CanSoothe(overlay) then
+                overlay:ShowSuggestion()
                 show = true
             else
-                overlay:HideInterrupt()
+                overlay:HideSuggestion()
             end
             if self.playerBuffs[overlay.name] then
                 overlay:ShowBuff(self.playerBuffs[overlay.name])
@@ -159,8 +181,7 @@ function LiteButtonAurasControllerMixin:UpdateOverlays()
             elseif self.targetDebuffs[overlay.name] then
                 overlay:ShowDebuff(self.targetDebuffs[overlay.name])
                 show = true
-            elseif self:CanDispel(overlay) then
-                overlay:ShowDispel(self.targetBuffTypes)
+            elseif self:TryShowDispel(overlay) then
                 show = true
             else
                 overlay:HideAura()
@@ -172,7 +193,7 @@ end
 
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     if event == 'PLAYER_ENTERING_WORLD' then
-        self:UpdateTargetBuffTypes()
+        self:UpdateTargetBuffs()
         self:UpdateTargetDebuffs()
         self:UpdateTargetCast()
         self:UpdatePlayerBuffs()
@@ -186,7 +207,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
             self:UpdateOverlays()
         end
     elseif event == 'PLAYER_TARGET_CHANGED' then
-        self:UpdateTargetBuffTypes()
+        self:UpdateTargetBuffs()
         self:UpdateTargetDebuffs()
         self:UpdateTargetCast()
         self:UpdateOverlays()
@@ -196,7 +217,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
             self:UpdatePlayerBuffs()
             self:UpdateOverlays()
         elseif unit == 'target' then
-            self:UpdateTargetBuffTypes()
+            self:UpdateTargetBuffs()
             self:UpdateTargetDebuffs()
             self:UpdateOverlays()
         end
