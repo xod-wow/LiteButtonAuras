@@ -17,7 +17,7 @@ end
 
 function LiteButtonAurasOverlayMixin:ScanAction()
     local actionButton = self:GetParent()
-    self.actionID = actionButton.action
+    self.action = actionButton.action
     self.name = nil
     self.isInterrupt = nil
     
