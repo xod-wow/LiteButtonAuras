@@ -19,14 +19,13 @@ LBA.state = {
 LiteButtonAurasControllerMixin = {}
 
 function LiteButtonAurasControllerMixin:OnLoad()
-    self.frames = {}
-    self.framesByAction = {}
+    self.overlayFrames = {}
 
     LBA.Options:Initialize()
     LBA.BarIntegrations:Initialize()
 
-    self:RegisterEvent('PLAYER_TARGET_CHANGED')
     self:RegisterEvent('UNIT_AURA')
+    self:RegisterEvent('PLAYER_TARGET_CHANGED')
     self:RegisterEvent('PLAYER_TOTEM_UPDATE')
 
     -- All of these are for the interrupt detection
@@ -41,13 +40,12 @@ function LiteButtonAurasControllerMixin:OnLoad()
 end
 
 function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
-    if not self.frames[actionButton] then
+    if not self.overlayFrames[actionButton] then
         local name = actionButton:GetName() .. "LiteButtonAurasOverlay"
         local overlay = CreateFrame('Frame', name, actionButton, "LiteButtonAurasOverlayTemplate")
-        self.frames[actionButton] = overlay
-        self.framesByAction[actionButton.action] = overlay
+        self.overlayFrames[actionButton] = overlay
     end
-    return self.frames[actionButton]
+    return self.overlayFrames[actionButton]
 end
 
 
@@ -115,7 +113,7 @@ function LiteButtonAurasControllerMixin:UpdateTargetCast()
 end
 
 function LiteButtonAurasControllerMixin:UpdateAllOverlays(stateOnly)
-    for _, overlay in pairs(self.frames) do
+    for _, overlay in pairs(self.overlayFrames) do
         overlay:Update(stateOnly)
     end
 end
