@@ -36,16 +36,16 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
     end
 
     if type == 'item' then
-        self.spellID = GetItemSpell(id)
-        self.name = GetSpellInfo(self.spellID)
+        self.name, self.spellID = GetItemSpell(id)
         return
     end
 
     if type == 'macro' then
-        local itemID = GetMacroItem(id)
-        if itemID then
-            self.spellID = GetItemSpell(itemID)
-            self.name = GetSpellInfo(self.spellID) or GetItemInfo(itemID)
+        local itemName = GetMacroItem(id)
+        if itemName then
+            local name, spellID = GetItemSpell(itemName)
+            self.spellID = spellID
+            self.name = name or itemName
             return
         else
             self.spellID = GetMacroSpell(id)
