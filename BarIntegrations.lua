@@ -22,7 +22,7 @@ end
 -- The OverrideActionButtons have the same action (ID) as the main buttons and
 -- mess up framesByAction (as well as we don't want to handle them)
 
-local function InitBlizzard()
+function LBA.BarIntegrations:InitBlizzard()
     for _, actionButton in pairs(ActionBarButtonEventsFrame.frames) do
         if actionButton:GetName():sub(1,8) ~= 'Override' then
             InitGenericButton(actionButton)
@@ -39,7 +39,7 @@ local function InitDominosCallback()
     end
 end
 
-local function InitDominos()
+function LBA.BarIntegrations:InitDominos()
     if Dominos then
         Dominos.RegisterCallback(self, 'LAYOUT_LOADED', InitDominosCallback)
     end
@@ -56,7 +56,7 @@ local function InitLABCallback(lib)
     end
 end
 
-local function InitLAB()
+function LBA.BarIntegrations:InitLAB()
     for name, lib in LibStub:IterateLibraries() do
         if name:match('^LibActionButton-1.0') then
             InitLABCallback(lib)
@@ -69,7 +69,7 @@ end
 -- Init ------------------------------------------------------------------------
 
 function LBA.BarIntegrations:Initialize()
-    InitBlizzard()
-    InitDominos()
-    InitLAB()
+    self:InitBlizzard()
+    self:InitDominos()
+    self:InitLAB()
 end
