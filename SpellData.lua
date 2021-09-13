@@ -72,25 +72,6 @@ LBA.TotemOrGuardianModels = {
     [ 237577] = GetSpellInfo(51533),    -- Feral Spirit (Shaman)
 }
 
--- Just don't show these names at all. Probably only ability spell IDs will
--- work here because they are the only ones GetSpellInfo() is guaranteed to
--- return for straight away.
-
-LBA.DenySpellIDs = {
-    -- Monk
-    152175,                             -- Whirling Dragon Punch (Monk)
-}
-
-do
-    LBA.DenySpells = { }
-    for _, id in ipairs(LBA.DenySpellIDs) do
-        local name = GetSpellInfo(id)
-        if name then
-            LBA.DenySpells[name] = true
-        end
-    end
-end
-
 --@debug
 _G.LBA = LBA
 --@end-debug

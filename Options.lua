@@ -24,3 +24,7 @@ local defaults = {
 function LBA.Options:Initialize()
     self.db = LibStub("AceDB-3.0"):New("LiteButtonAurasDB", defaults, true)
 end
+
+function LBA.Options:IsDenied(spellID)
+    return spellID and self.db.profile.denySpells[spellID]
+end

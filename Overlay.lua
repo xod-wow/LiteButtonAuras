@@ -108,7 +108,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
     local show = false
     local state = LBA.state
 
-    if self.name and not LBA.DenySpells[self.name] then
+    if self.name and not LBA.Options:IsDenied(self.spellID) then
         if self:CanInterrupt() or self:CanSoothe() then
             self:ShowSuggestion()
             show = true
