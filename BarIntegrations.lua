@@ -9,6 +9,14 @@ local _, LBA = ...
 
 LBA.BarIntegrations = {}
 
+-- Generic ---------------------------------------------------------------------
+
+local function InitGenericButton(actionButton)
+    local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
+    overlay:Hook(actionButton, 'Update')
+end
+
+
 -- Blizzard --------------------------------------------------------------------
 
 -- The OverrideActionButtons have the same action (ID) as the main buttons and
@@ -17,9 +25,7 @@ LBA.BarIntegrations = {}
 local function InitBlizzard()
     for _, actionButton in pairs(ActionBarButtonEventsFrame.frames) do
         if actionButton:GetName():sub(1,8) ~= 'Override' then
-            local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
-            overlay:Hook(actionButton, 'UpdateAction')
-            overlay:ScanAction()
+            InitGenericButton(actionButton)
         end
     end
 end
@@ -27,25 +33,43 @@ end
 
 -- Dominos ---------------------------------------------------------------------
 
-local function InitDominos()
+local function InitDominosCallback()
     for _, actionButton in pairs(Dominos.ActionButtons) do
-        local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
-        overlay:Hook(actionButton, 'UpdateAction')
-        overlay:ScanAction()
+        InitGenericButton(actionButton)
     end
 end
 
 local function InitDominos()
     if Dominos then
-        Dominos.RegisterCallback(self, 'LAYOUT_LOADED', InitDominos)
+        Dominos.RegisterCallback(self, 'LAYOUT_LOADED', InitDominosCallback)
     end
 end
 
+
+-- LibActionButton-1.0 and derivatives -----------------------------------------
+
+-- Covers ElvUI, Bartender. TukUI reuses the Blizzard buttons
+
+local function InitLABCallback(lib)
+    for actionButton in lib:GetAllButtons() do
+        InitGenericButton(actionButton)
+    end
+end
+
+local function InitLAB()
+    for name, lib in LibStub:IterateLibraries() do
+        if name:match('^LibActionButton-1.0') then
+            InitLABCallback(lib)
+            hooksecurefunc(lib, 'CreateButton',
+                function () InitLABCallback(lib) end)
+        end
+    end
+end
 
 -- Init ------------------------------------------------------------------------
 
 function LBA.BarIntegrations:Initialize()
     InitBlizzard()
     InitDominos()
+    InitLAB()
 end
-

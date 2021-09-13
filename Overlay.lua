@@ -17,37 +17,120 @@ end
 
 function LiteButtonAurasOverlayMixin:Hook(frame, method)
     if not self.isHooked then
-        hooksecurefunc(frame, method, function () self:ScanAction() end)
+        hooksecurefunc(frame, method, function () self:Update() end)
         self.isHooked = true
     end
 end
 
-function LiteButtonAurasOverlayMixin:ScanAction()
-    local actionButton = self:GetParent()
-    self.action = actionButton.action
-    self.name = nil
-    self.isInterrupt = nil
-    
-    local type, id, subType = GetActionInfo(actionButton.action)
+-- This could be optimized (?) slightly be checking if type, id, subType
+-- are all the same as before and doing nothing
+
+function LiteButtonAurasOverlayMixin:SetUpAction()
+    self.action = self:GetParent().action
+
+    local type, id, subType = GetActionInfo(self.action)
     if type == 'spell' then
         self.name = GetSpellInfo(id)
-        self.isInterrupt = LBA.Interrupts[id]
-        self.friendlyDispels = LBA.FriendlyDispels[id]
-        self.hostileDispels = LBA.HostileDispels[id]
-        self.isSoothe = LBA.Soothes[id]
-    elseif type == 'macro' then
+        self.spellID = id
+        return
+    end
+
+    if type == 'item' then
+        self.spellID = GetItemSpell(id)
+        self.name = GetSpellInfo(self.spellID)
+        return
+    end
+
+    if type == 'macro' then
         local itemID = GetMacroItem(id)
-        local spellID = GetMacroSpell(id)
         if itemID then
-            self.name = GetItemSpell(itemID) or GetItemInfo(itemID)
-        elseif spellID then
-            self.name = GetSpellInfo(spellID)
-            self.isInterrupt = LBA.Interrupts[spellID]
-            self.friendlyDispels = LBA.FriendlyDispels[spellID]
-            self.hostileDispels = LBA.HostileDispels[spellID]
-            self.isSoothe = LBA.Soothes[spellID]
+            self.spellID = GetItemSpell(itemID)
+            self.name = GetSpellInfo(self.spellID) or GetItemInfo(itemID)
+            return
+        else
+            self.spellID = GetMacroSpell(id)
+            self.name = GetSpellInfo(self.spellID)
+            return
         end
     end
+
+    self.name = nil
+end
+
+function LiteButtonAurasOverlayMixin:TryShowDispel()
+    if not self.spellID then
+        return
+    end
+
+    local dispels
+    if UnitIsFriend('player', 'target') then
+        dispels = LBA.FriendlyDispels[self.spellID]
+    elseif UnitIsEnemy('player', 'target') then
+        dispels = LBA.HostileDispels[self.spellID]
+    end
+    if not dispels then
+        return
+    end
+
+    for k in pairs(dispels) do
+        for _, info in pairs(LBA.state.targetBuffs) do
+            if info[4] == k then
+                self:ShowDispel(info)
+                return true
+            end
+        end
+    end
+end
+
+function LiteButtonAurasOverlayMixin:CanInterrupt()
+    if self.spellID and LBA.Interrupts[self.spellID] then
+        return LBA.state.targetInterrupt
+    end
+end
+
+function LiteButtonAurasOverlayMixin:CanSoothe()
+    if self.spellID and LBA.Soothes[self.spellID] then
+        for _, info in pairs(LBA.state.targetBuffs) do
+            if info[8] and info[4] == "" then
+                return true
+            end
+        end
+    end
+end
+
+function LiteButtonAurasOverlayMixin:Update(stateOnly)
+    -- Even though the action might be the same what we do could have
+    -- changed due to the dynamic nature of macros and some spells.
+    if not stateOnly then
+        self:SetUpAction()
+    end
+
+    local show = false
+    local state = LBA.state
+
+    if self.name and not LBA.DenySpells[self.name] then
+        if self:CanInterrupt() or self:CanSoothe() then
+            self:ShowSuggestion()
+            show = true
+        else
+            self:HideSuggestion()
+        end
+        if state.playerBuffs[self.name] then
+            self:ShowBuff(state.playerBuffs[self.name])
+            show = true
+        elseif state.playerTotems[self.name] then
+            self:ShowTotem(state.playerTotems[self.name])
+            show = true
+        elseif state.targetDebuffs[self.name] then
+            self:ShowDebuff(state.targetDebuffs[self.name])
+            show = true
+        elseif self:TryShowDispel(self) then
+            show = true
+        else
+            self:HideAura()
+        end
+    end
+    self:SetShown(show)
 end
 
 local function DurationAbbrev(duration)
@@ -65,12 +148,17 @@ local function DurationAbbrev(duration)
 end
 
 local function DurationRGB(duration)
+    -- TODO: Blend
+
     if duration >= 2 then
         return 1, 1, 1
     else
         return RED_FONT_COLOR:GetRGB()
     end
 end
+
+-- BuffFrame does it this way, SetFormattedText on every frame. If its
+-- good enough for them it's good enough for me.
 
 function LiteButtonAurasOverlayMixin:UpdateDuration()
     if self.expireTime then
@@ -84,6 +172,13 @@ function LiteButtonAurasOverlayMixin:UpdateDuration()
     else
         self.Duration:Hide()
     end
+end
+
+function LiteButtonAurasOverlayMixin:ShowTotem(expireTime)
+    self.expireTime = expireTime
+    self.Glow:SetVertexColor(0.0, 1.0, 0.0, 0.7)
+    self.Glow:Show()
+    self:SetScript('OnUpdate', self.UpdateDuration)
 end
 
 -- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ...
@@ -117,23 +212,16 @@ function LiteButtonAurasOverlayMixin:ShowDebuff(info)
     self:ShowAura(info)
 end
 
-function LiteButtonAurasOverlayMixin:ShowSuggestion()
-    ActionButton_ShowOverlayGlow(self)
-end
-
-function LiteButtonAurasOverlayMixin:HideSuggestion()
-    ActionButton_HideOverlayGlow(self)
-end
-
 function LiteButtonAurasOverlayMixin:ShowDispel(info)
     local color = DebuffTypeColor[info[4] or "none"]
     self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
     self:ShowAura(info)
 end
 
-function LiteButtonAurasOverlayMixin:ShowTotem(expireTime)
-    self.expireTime = expireTime
-    self.Glow:SetVertexColor(0.0, 1.0, 0.0, 0.7)
-    self.Glow:Show()
-    self:SetScript('OnUpdate', self.UpdateDuration)
+function LiteButtonAurasOverlayMixin:ShowSuggestion()
+    ActionButton_ShowOverlayGlow(self)
+end
+
+function LiteButtonAurasOverlayMixin:HideSuggestion()
+    ActionButton_HideOverlayGlow(self)
 end

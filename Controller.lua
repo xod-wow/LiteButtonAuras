@@ -7,6 +7,12 @@
 
 local _, LBA = ...
 
+LBA.state = {
+    playerBuffs = {},
+    playerTotems = {},
+    targetDebuffs = {},
+    targetBuffs = {},
+}
 
 --[[------------------------------------------------------------------------]]--
 
@@ -15,16 +21,10 @@ LiteButtonAurasControllerMixin = {}
 function LiteButtonAurasControllerMixin:OnLoad()
     self.frames = {}
     self.framesByAction = {}
-    self.playerBuffs = {}
-    self.playerTotems = {}
-    self.targetDebuffs = {}
-    self.targetBuffs = {}
 
     LBA.Options:Initialize()
     LBA.BarIntegrations:Initialize()
 
-    self:RegisterEvent('PLAYER_ENTERING_WORLD')
-    self:RegisterEvent('ACTIONBAR_SLOT_CHANGED')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
     self:RegisterEvent('UNIT_AURA')
     self:RegisterEvent('PLAYER_TOTEM_UPDATE')
@@ -46,57 +46,53 @@ function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
         local overlay = CreateFrame('Frame', name, actionButton, "LiteButtonAurasOverlayTemplate")
         self.frames[actionButton] = overlay
         self.framesByAction[actionButton.action] = overlay
-        hooksecurefunc(actionButton, 'UpdateAction', function () overlay:ScanAction() end)
-        overlay:ScanAction()
     end
     return self.frames[actionButton]
 end
 
-function LiteButtonAurasControllerMixin:RescanAllOverlays()
-    for _, overlay in pairs(self.frames) do
-        overlay:ScanAction()
-    end
-end
 
 -- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ... = UnitAura(unit, index, filter)
 
 
 function LiteButtonAurasControllerMixin:UpdatePlayerBuffs()
-    table.wipe(self.playerBuffs)
+    table.wipe(LBA.state.playerBuffs)
     AuraUtil.ForEachAura('player', 'HELPFUL PLAYER', nil,
         function (name, ...)
-            self.playerBuffs[name] = { name, ... }
+            LBA.state.playerBuffs[name] = { name, ... }
         end)
     AuraUtil.ForEachAura('player', 'HELPFUL RAID', nil,
         function (name, ...)
-            self.playerBuffs[name] = { name, ... }
+            LBA.state.playerBuffs[name] = { name, ... }
         end)
 end
 
 function LiteButtonAurasControllerMixin:UpdatePlayerTotems()
-    table.wipe(self.playerTotems)
+    table.wipe(LBA.state.playerTotems)
     for i = 1, MAX_TOTEMS do
         local exists, name, startTime, duration, model = GetTotemInfo(i)
         if exists then
             name = LBA.TotemOrGuardianModels[model] or name
-            self.playerTotems[name] = startTime + duration
+            LBA.state.playerTotems[name] = startTime + duration
         end
     end
 end
 
 function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
-    table.wipe(self.targetDebuffs)
+    table.wipe(LBA.state.targetDebuffs)
     AuraUtil.ForEachAura('target', 'HARMFUL PLAYER', nil,
         function (name, ...)
-            self.targetDebuffs[name] = { name, ... }
+            LBA.state.targetDebuffs[name] = { name, ... }
         end)
 end
 
+-- The expectation for users of targetBuffs is that there are VERY few
+-- of them and that looping over them is OK because it'll be fast.
+
 function LiteButtonAurasControllerMixin:UpdateTargetBuffs()
-    table.wipe(self.targetBuffs)
+    table.wipe(LBA.state.targetBuffs)
     AuraUtil.ForEachAura('target', 'HELPFUL', nil,
         function (name, ...)
-            self.targetBuffs[name] = { name, ... }
+            LBA.state.targetBuffs[name] = { name, ... }
         end)
 end
 
@@ -105,122 +101,56 @@ function LiteButtonAurasControllerMixin:UpdateTargetCast()
 
     name, _, _, _, endTime, _, _, cantInterrupt = UnitCastingInfo('target')
     if name and not cantInterrupt then
-        self.targetInterrupt = endTime / 1000
+        LBA.state.targetInterrupt = endTime / 1000
         return
     end
 
     name, _, _, _, endTime, _, cantInterrupt = UnitChannelInfo('target')
     if name and not cantInterrupt then
-        self.targetInterrupt = endTime / 1000
+        LBA.state.targetInterrupt = endTime / 1000
         return
     end
 
-    self.targetInterrupt = nil
+    LBA.state.targetInterrupt = nil
 end
 
--- The expectation for users of targetBuffs is that there are VERY few
--- of them and that looping over them is OK because it'll be fast.
-
-function LiteButtonAurasControllerMixin:TryShowDispel(overlay)
-    local dispels
-    if UnitIsFriend('player', 'target') then
-        dispels = overlay.friendlyDispels
-    elseif UnitIsEnemy('player', 'target') then
-        dispels = overlay.hostileDispels
-    end
-    if not dispels then
-        return
-    end
-
-    for k in pairs(dispels) do
-        for _, info in pairs(self.targetBuffs) do
-            if info[4] == k then
-                overlay:ShowDispel(info)
-                return true
-            end
-        end
-    end
-end
-
-function LiteButtonAurasControllerMixin:CanSoothe(overlay)
-    for _, info in pairs(self.targetBuffs) do
-        if info[8] and info[4] == "" then
-            return true
-        end
-    end
-end
-
-function LiteButtonAurasControllerMixin:UpdateOverlays()
-    for actionButton, overlay in pairs(self.frames) do
-        local show = false
-        if overlay.name and not LBA.DenySpells[overlay.name] then
-            if overlay.isInterrupt and self.targetInterrupt then
-                overlay:ShowSuggestion()
-                show = true
-            elseif overlay.isSoothe and self:CanSoothe(overlay) then
-                overlay:ShowSuggestion()
-                show = true
-            else
-                overlay:HideSuggestion()
-            end
-            if self.playerBuffs[overlay.name] then
-                overlay:ShowBuff(self.playerBuffs[overlay.name])
-                show = true
-            elseif self.playerTotems[overlay.name] then
-                overlay:ShowTotem(self.playerTotems[overlay.name])
-                show = true
-            elseif self.targetDebuffs[overlay.name] then
-                overlay:ShowDebuff(self.targetDebuffs[overlay.name])
-                show = true
-            elseif self:TryShowDispel(overlay) then
-                show = true
-            else
-                overlay:HideAura()
-            end
-        end
-        overlay:SetShown(show)
+function LiteButtonAurasControllerMixin:UpdateAllOverlays(stateOnly)
+    for _, overlay in pairs(self.frames) do
+        overlay:Update(stateOnly)
     end
 end
 
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     if event == 'PLAYER_ENTERING_WORLD' then
-        self:RescanAllOverlays()
         self:UpdateTargetBuffs()
         self:UpdateTargetDebuffs()
         self:UpdateTargetCast()
         self:UpdatePlayerBuffs()
         self:UpdatePlayerTotems()
-        self:UpdateOverlays()
-    elseif event == 'ACTIONBAR_SLOT_CHANGED' then
-        local action = ...
-        local overlay = self.framesByAction[action]
-        if overlay then
-            overlay:ScanAction()
-            self:UpdateOverlays()
-        end
+        self:UpdateAllOverlays()
     elseif event == 'PLAYER_TARGET_CHANGED' then
         self:UpdateTargetBuffs()
         self:UpdateTargetDebuffs()
         self:UpdateTargetCast()
-        self:UpdateOverlays()
+        self:UpdateAllOverlays()
     elseif event == 'UNIT_AURA' then
         local unit = ...
         if unit == 'player' then
             self:UpdatePlayerBuffs()
-            self:UpdateOverlays()
+            self:UpdateAllOverlays()
         elseif unit == 'target' then
             self:UpdateTargetBuffs()
             self:UpdateTargetDebuffs()
-            self:UpdateOverlays()
+            self:UpdateAllOverlays()
         end
     elseif event == 'PLAYER_TOTEM_UPDATE' then
         self:UpdatePlayerTotems()
-        self:UpdateOverlays()
+        self:UpdateAllOverlays()
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
         local unit = ...
         if unit == 'target' then
             self:UpdateTargetCast()
-            self:UpdateOverlays()
+            self:UpdateAllOverlays()
         end
     end
 end
