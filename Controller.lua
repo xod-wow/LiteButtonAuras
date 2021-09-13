@@ -20,11 +20,8 @@ function LiteButtonAurasControllerMixin:OnLoad()
     self.targetDebuffs = {}
     self.targetBuffs = {}
 
-    self:InitBlizzard()
-
-    if Dominos then
-        Dominos.RegisterCallback(self, 'LAYOUT_LOADED', 'InitDominos')
-    end
+    LBA.Options:Initialize()
+    LBA.BarIntegrations:Initialize()
 
     self:RegisterEvent('PLAYER_ENTERING_WORLD')
     self:RegisterEvent('ACTIONBAR_SLOT_CHANGED')
@@ -43,25 +40,6 @@ function LiteButtonAurasControllerMixin:OnLoad()
     self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
 end
 
--- The OverrideActionButtons have the same actionID as the main buttons and
--- mess up framesByAction (as well as we don't want to handle them)
-
-function LiteButtonAurasControllerMixin:InitBlizzard()
-    for _, actionButton in pairs(ActionBarButtonEventsFrame.frames) do
-        if actionButton:GetName():sub(1,8) ~= 'Override' then
-            local overlay = self:CreateOverlay(actionButton)
-            overlay:ScanAction()
-        end
-    end
-end
-
-function LiteButtonAurasControllerMixin:InitDominos()
-    for _, actionButton in pairs(Dominos.ActionButtons) do
-        local overlay = self:CreateOverlay(actionButton)
-        overlay:ScanAction()
-    end
-end
-
 function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
     if not self.frames[actionButton] then
         local name = actionButton:GetName() .. "LiteButtonAurasOverlay"
@@ -69,8 +47,15 @@ function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
         self.frames[actionButton] = overlay
         self.framesByAction[actionButton.action] = overlay
         hooksecurefunc(actionButton, 'UpdateAction', function () overlay:ScanAction() end)
+        overlay:ScanAction()
     end
     return self.frames[actionButton]
+end
+
+function LiteButtonAurasControllerMixin:RescanAllOverlays()
+    for _, overlay in pairs(self.frames) do
+        overlay:ScanAction()
+    end
 end
 
 -- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ... = UnitAura(unit, index, filter)
@@ -199,6 +184,7 @@ end
 
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     if event == 'PLAYER_ENTERING_WORLD' then
+        self:RescanAllOverlays()
         self:UpdateTargetBuffs()
         self:UpdateTargetDebuffs()
         self:UpdateTargetCast()

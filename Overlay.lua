@@ -15,6 +15,13 @@ function LiteButtonAurasOverlayMixin:OnLoad()
     self:SetFrameLevel(parent.cooldown:GetFrameLevel() + 1)
 end
 
+function LiteButtonAurasOverlayMixin:Hook(frame, method)
+    if not self.isHooked then
+        hooksecurefunc(frame, method, function () self:ScanAction() end)
+        self.isHooked = true
+    end
+end
+
 function LiteButtonAurasOverlayMixin:ScanAction()
     local actionButton = self:GetParent()
     self.action = actionButton.action
