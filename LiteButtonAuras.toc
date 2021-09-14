@@ -9,6 +9,7 @@
 Libs\embeds.xml
 
 SpellData.lua
+ColorGradient.lua
 BarIntegrations.lua
 Options.lua
 Overlay.xml

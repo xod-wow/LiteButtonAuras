@@ -147,16 +147,6 @@ local function DurationAbbrev(duration)
     end
 end
 
-local function DurationRGB(duration)
-    -- TODO: Blend
-
-    if duration >= 2 then
-        return 1, 1, 1
-    else
-        return RED_FONT_COLOR:GetRGB()
-    end
-end
-
 -- BuffFrame does it this way, SetFormattedText on every frame. If its
 -- good enough for them it's good enough for me.
 
@@ -167,7 +157,7 @@ function LiteButtonAurasOverlayMixin:UpdateDuration()
             duration = duration / self.timeMod
         end
         self.Duration:SetFormattedText(DurationAbbrev(duration))
-        self.Duration:SetTextColor(DurationRGB(duration))
+        self.Duration:SetTextColor(LBA.DurationRGB(duration))
         self.Duration:Show()
     else
         self.Duration:Hide()
