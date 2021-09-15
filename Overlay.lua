@@ -121,7 +121,8 @@ end
 
 function LiteButtonAurasOverlayMixin:SetAsAura(info)
     -- Anything that's too short is just annoying
-    if info[5] and info[5] < LBA.db.profile.minAuraDuration then
+    local duration = info[5]
+    if duration > 0 and duration < LBA.db.profile.minAuraDuration then
         return
     end
     self.displayGlow = true
