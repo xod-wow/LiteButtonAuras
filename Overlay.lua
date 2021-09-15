@@ -238,6 +238,9 @@ local function TimerAbbrev(duration)
     elseif duration >= 3 then
         return "%d", math.ceil(duration)
     else
+        -- printf uses round (not available in lua) so do our own
+        -- ceil and avoid a discontinuity at the break
+        duration = math.ceil(duration*10)/10
         return "%.1f", duration
     end
 end
