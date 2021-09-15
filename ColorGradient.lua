@@ -88,7 +88,7 @@ local function interpolateRgb(perc, r1, g1, b1, r2, g2, b2)
     return hlsToRgb(h%1, l, s)
 end
 
-function LBA.DurationRGB(duration)
+function LBA.TimerRGB(duration)
     if duration <= 3 then
         return interpolateRgb(duration/3, 1, 0, 0, 1, 1, 0)
     elseif duration <= 10 then

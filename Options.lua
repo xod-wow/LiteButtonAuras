@@ -14,17 +14,22 @@ local defaults = {
     },
     profile = {
         denySpells = {
-            [152175] = true,            -- Whirling Dragon Punch (Monk)
-        }
+            [152175]    = true, -- Whirling Dragon Punch (Monk)
+        },
+        color = {
+            buff    = { r=0.00, g=1.00, b=0.00 },
+            debuff  = { r=1.00, g=0.00, b=0.00 },
+            enrage  = { r=1.00, g=0.65, b=0.00 },
+        },
     },
     char = {
     },
 }
 
 function LBA.Options:Initialize()
-    self.db = LibStub("AceDB-3.0"):New("LiteButtonAurasDB", defaults, true)
+    LBA.db = LibStub("AceDB-3.0"):New("LiteButtonAurasDB", defaults, true)
 end
 
 function LBA.Options:IsDenied(spellID)
-    return spellID and self.db.profile.denySpells[spellID]
+    return spellID and LBA.db.profile.denySpells[spellID]
 end

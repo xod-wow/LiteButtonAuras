@@ -11,7 +11,7 @@
         <Texture parentKey="Glow" file="Interface\AddOns\LiteButtonAuras\Textures\Overlay" setAllPoints="true" />
       </Layer>
       <Layer level="OVERLAY">
-        <FontString parentKey="Duration" inherits="NumberFontNormal" justifyH="LEFT">
+        <FontString parentKey="Timer" inherits="NumberFontNormal" justifyH="LEFT">
           <Anchors>
             <Anchor point="BOTTOMLEFT" x="3" y="2" />
           </Anchors>

@@ -57,7 +57,137 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
     self.name = nil
 end
 
-function LiteButtonAurasOverlayMixin:TryShowDispel()
+function LiteButtonAurasOverlayMixin:Update(stateOnly)
+    -- Even though the action might be the same what we do could have
+    -- changed due to the dynamic nature of macros and some spells.
+    if not stateOnly then
+        self:SetUpAction()
+    end
+
+    local show = false
+    local state = LBA.state
+
+    self.expireTime = nil
+    self.displayGlow = nil
+    self.displaySuggestion = nil
+    self.displayTimerColor = nil
+
+    if self.name and not LBA.Options:IsDenied(self.spellID) then
+        if self:TrySetAsSoothe() then
+            show = true
+        elseif self:TrySetAsInterrupt() then
+            show = true
+        end
+        if state.playerTotems[self.name] then
+            self:SetAsTotem(state.playerTotems[self.name])
+            show = true
+        elseif state.playerBuffs[self.name] then
+            self:SetAsBuff(state.playerBuffs[self.name])
+            show = true
+        elseif state.targetDebuffs[self.name] then
+            self:SetAsDebuff(state.targetDebuffs[self.name])
+            show = true
+        elseif self:TrySetAsDispel(self) then
+            show = true
+        end
+    end
+
+    self:ShowGlow(self.displayGlow)
+    self:ShowTimer(self.expireTime ~= nil)
+    self:ShowSuggestion(self.displaySuggestion)
+    self:SetShown(show)
+end
+
+
+-- Aura Config -----------------------------------------------------------------
+
+-- [ 1] name,                    
+-- [ 2] icon,
+-- [ 3] count,
+-- [ 4] debuffType,
+-- [ 5] duration,
+-- [ 6] expirationTime,
+-- [ 7] source,
+-- [ 8] isStealable,
+-- [ 9] nameplateShowPersonal,
+-- [10] spellId,
+-- [11] canApplyAura,
+-- [12] isBossDebuff,
+-- [13] castByPlayer,
+-- [14] nameplateShowAll,
+-- [15] timeMod,
+--      ...
+--  = UnitAura(unit, index, filter)
+
+function LiteButtonAurasOverlayMixin:SetAsAura(info)
+    self.displayGlow = true
+    if info[6] and info[6] ~= 0 and info[5] > 1.0 then
+        self.expireTime = info[6]
+        self.timeMod = info[15]
+        self.displayTimerColor = true
+    end
+end
+
+function LiteButtonAurasOverlayMixin:SetAsBuff(info)
+    local color = LBA.db.profile.color.buff
+    self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
+    self:SetAsAura(info)
+end
+
+function LiteButtonAurasOverlayMixin:SetAsDebuff(info)
+    local color = LBA.db.profile.color.debuff
+    self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
+    self:SetAsAura(info)
+end
+
+
+-- Totem Config ----------------------------------------------------------------
+
+function LiteButtonAurasOverlayMixin:SetAsTotem(expireTime)
+    local color = LBA.db.profile.color.buff
+    self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
+    self.expireTime, self.modTime = expireTime, nil
+    self.displayGlow = true
+    self.displayTimerColor = true
+end
+
+
+-- Interrupt Config ------------------------------------------------------------
+
+function LiteButtonAurasOverlayMixin:TrySetAsInterrupt()
+    if LBA.state.targetInterrupt then
+        if self.spellID and LBA.Interrupts[self.spellID] then
+            self.expireTime = LBA.state.targetInterrupt
+            self.displaySuggestion = true
+            return true
+        end
+    end
+end
+
+-- Soothe Config ---------------------------------------------------------------
+
+function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
+    if self.spellID and LBA.Soothes[self.spellID] then
+        for _, info in pairs(LBA.state.targetBuffs) do
+            if info[8] and info[4] == "" then
+                local color = LBA.db.profile.color.enrage
+                self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
+                self:SetAsAura(info)
+                return true
+            end
+        end
+    end
+end
+
+-- Dispel Config ---------------------------------------------------------------
+
+function LiteButtonAurasOverlayMixin:SetAsDispel(info)
+    local color = DebuffTypeColor[info[4] or "none"]
+    self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
+    self:SetAsAura(info)
+end
+
+function LiteButtonAurasOverlayMixin:TrySetAsDispel()
     if not self.spellID then
         return
     end
@@ -75,66 +205,32 @@ function LiteButtonAurasOverlayMixin:TryShowDispel()
     for k in pairs(dispels) do
         for _, info in pairs(LBA.state.targetBuffs) do
             if info[4] == k then
-                self:ShowDispel(info)
+                self:SetAsDispel(info)
                 return true
             end
         end
     end
 end
 
-function LiteButtonAurasOverlayMixin:TryShowInterrupt()
-    if self.spellID and LBA.Interrupts[self.spellID] then
-        self:ShowSuggestion()
-        return true
+-- Glow Display ----------------------------------------------------------------
+
+function LiteButtonAurasOverlayMixin:ShowGlow(isShown)
+    self.Glow:SetShown(isShown)
+end
+
+-- Suggestion Display-----------------------------------------------------------
+
+function LiteButtonAurasOverlayMixin:ShowSuggestion(isShown)
+    if isShown then
+        ActionButton_ShowOverlayGlow(self)
+    else
+        ActionButton_HideOverlayGlow(self)
     end
 end
 
-function LiteButtonAurasOverlayMixin:TryShowSoothe()
-    if self.spellID and LBA.Soothes[self.spellID] then
-        for _, info in pairs(LBA.state.targetBuffs) do
-            if info[8] and info[4] == "" then
-                self:ShowSuggestion()
-                return true
-            end
-        end
-    end
-end
+-- Timer Display ---------------------------------------------------------------
 
-function LiteButtonAurasOverlayMixin:Update(stateOnly)
-    -- Even though the action might be the same what we do could have
-    -- changed due to the dynamic nature of macros and some spells.
-    if not stateOnly then
-        self:SetUpAction()
-    end
-
-    local show = false
-    local state = LBA.state
-
-    if self.name and not LBA.Options:IsDenied(self.spellID) then
-        if self:TryShowSoothe() or self:TryShowInterrupt() then
-            show = true
-        else
-            self:HideSuggestion()
-        end
-        if state.playerBuffs[self.name] then
-            self:ShowBuff(state.playerBuffs[self.name])
-            show = true
-        elseif state.playerTotems[self.name] then
-            self:ShowTotem(state.playerTotems[self.name])
-            show = true
-        elseif state.targetDebuffs[self.name] then
-            self:ShowDebuff(state.targetDebuffs[self.name])
-            show = true
-        elseif self:TryShowDispel(self) then
-            show = true
-        else
-            self:HideAura()
-        end
-    end
-    self:SetShown(show)
-end
-
-local function DurationAbbrev(duration)
+local function TimerAbbrev(duration)
     if duration >= 86400 then
         return "%dd", math.ceil(duration/86400)
     elseif duration >= 3600 then
@@ -151,68 +247,30 @@ end
 -- BuffFrame does it this way, SetFormattedText on every frame. If its
 -- good enough for them it's good enough for me.
 
-function LiteButtonAurasOverlayMixin:UpdateDuration()
-    if self.expireTime then
-        local duration = self.expireTime - GetTime()
-        if self.timeMod and self.timeMod > 0 then
-            duration = duration / self.timeMod
+function LiteButtonAurasOverlayMixin:UpdateTimer()
+    local duration = self.expireTime - GetTime()
+    if self.timeMod and self.timeMod > 0 then
+        duration = duration / self.timeMod
+    end
+    if duration >= 0 then
+        self.Timer:SetFormattedText(TimerAbbrev(duration))
+        if self.displayTimerColor then
+            self.Timer:SetTextColor(LBA.TimerRGB(duration))
+        else
+            self.Timer:SetTextColor(1, 1, 1)
         end
-        self.Duration:SetFormattedText(DurationAbbrev(duration))
-        self.Duration:SetTextColor(LBA.DurationRGB(duration))
-        self.Duration:Show()
     else
-        self.Duration:Hide()
+        self.Timer:Hide()
+        self:SetScript('OnUpdate', nil)
     end
 end
 
-function LiteButtonAurasOverlayMixin:ShowTotem(expireTime)
-    self.expireTime = expireTime
-    self.Glow:SetVertexColor(0.0, 1.0, 0.0, 0.7)
-    self.Glow:Show()
-    self:SetScript('OnUpdate', self.UpdateDuration)
-end
-
--- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ...
-
-function LiteButtonAurasOverlayMixin:ShowAura(info)
-    if info[6] and info[6] ~= 0 then
-        self.expireTime = info[6]
-        self.timeMod = info[15]
-        self:SetScript('OnUpdate', self.UpdateDuration)
+function LiteButtonAurasOverlayMixin:ShowTimer(isShown)
+    if isShown then
+        self:SetScript('OnUpdate', self.UpdateTimer)
+        self.Timer:Show()
     else
-        self.expireTime = nil
-        self.timeMod = nil
+        self:SetScript('OnUpdate', nil)
+        self.Timer:Hide()
     end
-    self.Glow:Show()
-end
-
-function LiteButtonAurasOverlayMixin:HideAura()
-    self.expireTime = nil
-    self.timeMod = nil
-    self.Glow:Hide()
-    self:SetScript('OnUpdate', nil)
-end
-
-function LiteButtonAurasOverlayMixin:ShowBuff(info)
-    self.Glow:SetVertexColor(0.0, 1.0, 0.0, 0.7)
-    self:ShowAura(info)
-end
-
-function LiteButtonAurasOverlayMixin:ShowDebuff(info)
-    self.Glow:SetVertexColor(1.0, 0.0, 0.0, 0.7)
-    self:ShowAura(info)
-end
-
-function LiteButtonAurasOverlayMixin:ShowDispel(info)
-    local color = DebuffTypeColor[info[4] or "none"]
-    self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
-    self:ShowAura(info)
-end
-
-function LiteButtonAurasOverlayMixin:ShowSuggestion()
-    ActionButton_ShowOverlayGlow(self)
-end
-
-function LiteButtonAurasOverlayMixin:HideSuggestion()
-    ActionButton_HideOverlayGlow(self)
 end
