@@ -82,16 +82,18 @@ function LiteButtonAurasOverlayMixin:TryShowDispel()
     end
 end
 
-function LiteButtonAurasOverlayMixin:CanInterrupt()
+function LiteButtonAurasOverlayMixin:TryShowInterrupt()
     if self.spellID and LBA.Interrupts[self.spellID] then
-        return LBA.state.targetInterrupt
+        self:ShowSuggestion()
+        return true
     end
 end
 
-function LiteButtonAurasOverlayMixin:CanSoothe()
+function LiteButtonAurasOverlayMixin:TryShowSoothe()
     if self.spellID and LBA.Soothes[self.spellID] then
         for _, info in pairs(LBA.state.targetBuffs) do
             if info[8] and info[4] == "" then
+                self:ShowSuggestion()
                 return true
             end
         end
@@ -109,8 +111,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
     local state = LBA.state
 
     if self.name and not LBA.Options:IsDenied(self.spellID) then
-        if self:CanInterrupt() or self:CanSoothe() then
-            self:ShowSuggestion()
+        if self:TryShowSoothe() or self:TryShowInterrupt() then
             show = true
         else
             self:HideSuggestion()
