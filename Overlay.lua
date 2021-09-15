@@ -197,21 +197,14 @@ function LiteButtonAurasOverlayMixin:TrySetAsDispel()
         return
     end
 
-    local dispels
-    if UnitIsFriend('player', 'target') then
-        dispels = LBA.FriendlyDispels[self.spellID]
-    elseif UnitIsEnemy('player', 'target') then
-        dispels = LBA.HostileDispels[self.spellID]
-    end
-    if not dispels then
-        return
-    end
-
-    for k in pairs(dispels) do
-        for _, info in pairs(LBA.state.targetBuffs) do
-            if info[4] == k then
-                self:SetAsDispel(info)
-                return true
+    local dispels = LBA.HostileDispels[self.spellID]
+    if dispels then
+        for k in pairs(dispels) do
+            for _, info in pairs(LBA.state.targetBuffs) do
+                if info[4] == k then
+                    self:SetAsDispel(info)
+                    return true
+                end
             end
         end
     end
