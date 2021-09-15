@@ -120,8 +120,12 @@ end
 --  = UnitAura(unit, index, filter)
 
 function LiteButtonAurasOverlayMixin:SetAsAura(info)
+    -- Anything that's too short is just annoying
+    if info[5] and info[5] < LBA.db.profile.minAuraDuration then
+        return
+    end
     self.displayGlow = true
-    if info[6] and info[6] ~= 0 and info[5] > 1.0 then
+    if info[6] and info[6] ~= 0 then
         self.expireTime = info[6]
         self.timeMod = info[15]
         self.displayTimerColor = true
