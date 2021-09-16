@@ -159,12 +159,23 @@ end
 
 -- Interrupt Config ------------------------------------------------------------
 
+-- Assuming no interrupt spells are of the "enabled" type
+-- https://wowpedia.fandom.com/wiki/API_GetSpellCooldown
+
+local function LiteButtonAurasOverlayMixin:ReadyBefore(endTime)
+    local start, duration = GetSpellCooldown(self.spellID)
+    return start + duration < endTime
+end
+
 function LiteButtonAurasOverlayMixin:TrySetAsInterrupt()
     if LBA.state.targetInterrupt then
         if self.spellID and LBA.Interrupts[self.spellID] then
-            self.expireTime = LBA.state.targetInterrupt
-            self.displaySuggestion = true
-            return true
+            local castEnds = LBA.state.targetInterrupt
+            if self:ReadyBefore(castEnds) then
+                self.expireTime = castEnds
+                self.displaySuggestion = true
+                return true
+            end
         end
     end
 end
