@@ -23,6 +23,7 @@ function LiteButtonAurasControllerMixin:OnLoad()
 
     LBA.Options:Initialize()
     LBA.BarIntegrations:Initialize()
+    LBA.SetupSlashCommand()
 
     self:RegisterEvent('UNIT_AURA')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')

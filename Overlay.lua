@@ -129,7 +129,7 @@ function LiteButtonAurasOverlayMixin:SetAsAura(info)
     if info[6] and info[6] ~= 0 then
         self.expireTime = info[6]
         self.timeMod = info[15]
-        self.displayTimerColor = true
+        self.displayTimerColor = LBA.db.profile.colorTimers
     end
 end
 
@@ -153,7 +153,7 @@ function LiteButtonAurasOverlayMixin:SetAsTotem(expireTime)
     self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
     self.expireTime, self.modTime = expireTime, nil
     self.displayGlow = true
-    self.displayTimerColor = true
+    self.displayTimerColor = LBA.db.profile.colorTimers
 end
 
 

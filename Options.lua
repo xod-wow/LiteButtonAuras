@@ -21,7 +21,8 @@ local defaults = {
             debuff  = { r=1.00, g=0.00, b=0.00 },
             enrage  = { r=1.00, g=0.65, b=0.00 },
         },
-        minAuraDuration = 1.5
+        minAuraDuration = 1.5,
+        colorTimers = true,
     },
     char = {
     },

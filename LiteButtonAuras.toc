@@ -11,6 +11,7 @@ Libs\embeds.xml
 SpellData.lua
 ColorGradient.lua
 BarIntegrations.lua
+SlashCommand.lua
 Options.lua
 Overlay.xml
 Controller.xml
