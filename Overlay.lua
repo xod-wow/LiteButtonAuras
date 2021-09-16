@@ -162,7 +162,7 @@ end
 -- Assuming no interrupt spells are of the "enabled" type
 -- https://wowpedia.fandom.com/wiki/API_GetSpellCooldown
 
-local function LiteButtonAurasOverlayMixin:ReadyBefore(endTime)
+function LiteButtonAurasOverlayMixin:ReadyBefore(endTime)
     local start, duration = GetSpellCooldown(self.spellID)
     return start + duration < endTime
 end
