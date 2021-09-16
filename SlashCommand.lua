@@ -33,11 +33,13 @@ end
 local function PrintUsage()
     printf(GAMEMENU_HELP .. ":")
     printf("  /lba colortimers on|off")
+    printf("  /lba decimaltimers on|off")
 end
 
 local function PrintOptions()
     printf(SETTINGS .. ':')
     printf("  colortimers = " .. TrueStr(LBA.db.profile.colorTimers))
+    printf("  decimaltimers = " .. TrueStr(LBA.db.profile.decimalTimers))
 end
 
 local function SlashCommand(argstr)
@@ -46,8 +48,10 @@ local function SlashCommand(argstr)
 
     if cmd == '' then
         PrintOptions()
-    elseif cmd == 'colortimers' and #args == 1 then
+    elseif cmd:lower() == 'colortimers' and #args == 1 then
         LBA.db.profile.colorTimers = IsTrue(arg1)
+    elseif cmd:lower() == 'decimaltimers' and #args == 1 then
+        LBA.db.profile.decimalTimers = IsTrue(arg1)
     else
         PrintUsage()
     end

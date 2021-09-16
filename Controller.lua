@@ -69,8 +69,10 @@ function LiteButtonAurasControllerMixin:UpdatePlayerTotems()
     table.wipe(LBA.state.playerTotems)
     for i = 1, MAX_TOTEMS do
         local exists, name, startTime, duration, model = GetTotemInfo(i)
-        if exists then
-            name = LBA.TotemOrGuardianModels[model] or name
+        if exists and name then
+            if model then
+                name = LBA.TotemOrGuardianModels[model] or name
+            end
             LBA.state.playerTotems[name] = startTime + duration
         end
     end

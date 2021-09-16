@@ -246,7 +246,7 @@ local function TimerAbbrev(duration)
         return "%dh", math.ceil(duration/3600)
     elseif duration >= 60 then
         return "%dm", math.ceil(duration/60)
-    elseif duration >= 3 then
+    elseif duration >= 3 or not LBA.db.profile.decimalTimers then
         return "%d", math.ceil(duration)
     else
         -- printf uses round (not available in lua) so do our own
