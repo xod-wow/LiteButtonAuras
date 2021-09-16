@@ -36,7 +36,7 @@ local function PrintUsage()
 end
 
 local function PrintOptions()
-    printf(OPTIONS .. ':')
+    printf(SETTINGS .. ':')
     printf("  colortimers = " .. TrueStr(LBA.db.profile.colorTimers))
 end
 
