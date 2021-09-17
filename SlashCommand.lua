@@ -49,9 +49,9 @@ local function SlashCommand(argstr)
     if cmd == '' then
         PrintOptions()
     elseif cmd:lower() == 'colortimers' and #args == 1 then
-        LBA.db.profile.colorTimers = IsTrue(arg1)
+        LBA.db.profile.colorTimers = IsTrue(args[1])
     elseif cmd:lower() == 'decimaltimers' and #args == 1 then
-        LBA.db.profile.decimalTimers = IsTrue(arg1)
+        LBA.db.profile.decimalTimers = IsTrue(args[1])
     else
         PrintUsage()
     end

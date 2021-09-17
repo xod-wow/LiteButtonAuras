@@ -20,7 +20,10 @@ LiteButtonAurasControllerMixin = {}
 
 function LiteButtonAurasControllerMixin:OnLoad()
     self.overlayFrames = {}
+    self:RegisterEvent('ADDON_LOADED')
+end
 
+function LiteButtonAurasControllerMixin:Initialize()
     LBA.Options:Initialize()
     LBA.BarIntegrations:Initialize()
     LBA.SetupSlashCommand()
@@ -127,7 +130,10 @@ function LiteButtonAurasControllerMixin:UpdateAllOverlays(stateOnly)
 end
 
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
-    if event == 'PLAYER_ENTERING_WORLD' then
+    if event == 'ADDON_LOADED' then
+        self:Initialize()
+        self:UnregisterEvent('ADDON_LOADED')
+    elseif event == 'PLAYER_ENTERING_WORLD' then
         self:UpdateTargetBuffs()
         self:UpdateTargetDebuffs()
         self:UpdateTargetCast()
