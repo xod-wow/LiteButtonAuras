@@ -87,29 +87,34 @@ function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
 end
 
 -- The expectation for users of targetBuffs is that there are VERY few
--- of them and that looping over them is OK because it'll be fast.
+-- of them and that looping over them is OK because it'll be fast. Only
+-- collect enemy buffs, since we don't support friendly dispels.
 
 function LiteButtonAurasControllerMixin:UpdateTargetBuffs()
     table.wipe(LBA.state.targetBuffs)
-    AuraUtil.ForEachAura('target', 'HELPFUL', nil,
-        function (name, ...)
-            LBA.state.targetBuffs[name] = { name, ... }
-        end)
+    if UnitCanAttack('player', 'target') then
+        AuraUtil.ForEachAura('target', 'HELPFUL', nil,
+            function (name, ...)
+                LBA.state.targetBuffs[name] = { name, ... }
+            end)
+    end
 end
 
 function LiteButtonAurasControllerMixin:UpdateTargetCast()
     local name, endTime, cantInterrupt, _
 
-    name, _, _, _, endTime, _, _, cantInterrupt = UnitCastingInfo('target')
-    if name and not cantInterrupt then
-        LBA.state.targetInterrupt = endTime / 1000
-        return
-    end
+    if UnitCanAttack('player', 'target') then
+        name, _, _, _, endTime, _, _, cantInterrupt = UnitCastingInfo('target')
+        if name and not cantInterrupt then
+            LBA.state.targetInterrupt = endTime / 1000
+            return
+        end
 
-    name, _, _, _, endTime, _, cantInterrupt = UnitChannelInfo('target')
-    if name and not cantInterrupt then
-        LBA.state.targetInterrupt = endTime / 1000
-        return
+        name, _, _, _, endTime, _, cantInterrupt = UnitChannelInfo('target')
+        if name and not cantInterrupt then
+            LBA.state.targetInterrupt = endTime / 1000
+            return
+        end
     end
 
     LBA.state.targetInterrupt = nil
