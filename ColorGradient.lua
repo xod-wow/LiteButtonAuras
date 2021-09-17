@@ -13,7 +13,7 @@ local _, LBA = ...
 
 LBA = LBA or {}
 
-local min, max, abs = math.min, math.max, math.abs
+local min, max = math.min, math.max
 
 local function hueToV(m1, m2, hue)
     hue = hue % 1
