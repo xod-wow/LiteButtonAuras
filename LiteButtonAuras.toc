@@ -3,7 +3,7 @@
 ## Version: @project-version@
 ## Author: Xodiv-Nagrand
 ## Email: mib@post.com
-## OptionalDependencies: LibDebug, Dominos
+## OptionalDeps: Bartender4, Dominos, ElvUI
 ## SavedVariables: LiteButtonAurasDB
 
 Libs\embeds.xml
