@@ -67,10 +67,7 @@ local function rgbToHls(r, g, b)
     return (h/6) % 1, l, s
 end
 
-local function interpolateRgb(perc, r1, g1, b1, r2, g2, b2)
-    local h1, l1, s1 = rgbToHls(r1, g1, b1)
-    local h2, l2, s2 = rgbToHls(r2, g2, b2)
-
+local function interpolateHls(perc, h1, l1, s1, h2, l2, s2)
     -- L and S are linear interpolated
     local l = l1 + (l2-l1) * perc
     local s = s1 + (s2-s1) * perc
@@ -85,14 +82,38 @@ local function interpolateRgb(perc, r1, g1, b1, r2, g2, b2)
     end
 
     h = (h1 + dh*perc) % 1
-    return hlsToRgb(h%1, l, s)
+    return h, l, s
 end
+
+-- Colors in HLS so we don't have to do the math to unnecessarily convert
+-- them every frame.
+
+local Red = { rgbToHls(1, 0, 0) }
+local Yellow = { rgbToHls(1, 1, 0) }
+local White = { rgbToHls(1, 1, 1) }
+
+-- In theory this could be memoized for the values < 10s because they are
+-- truncated to 0.1 of a second before this is called. But I don't know
+-- enough about math.ceil to know if that's safe, and I'm guaranteed to
+-- forget that at some point and blow out memory infinitely.
 
 function LBA.TimerRGB(duration)
     if duration <= 3 then
-        return interpolateRgb(duration/3, 1, 0, 0, 1, 1, 0)
+        return rgbToHls(
+            interpolateHls(
+                duration/3
+                Red[1], Red[2], Red[3],
+                Yellow[1], Yellow[2], Yellow[3]
+            )
+        )
     elseif duration <= 10 then
-        return interpolateRgb((duration-3)/7, 1, 1, 0, 1, 1, 1)
+        return rgbToHls(
+            interpolateHls(
+                (duration-3)/7,
+                Yellow[1], Yellow[2], Yellow[3],
+                White[1], White[2], White[3]
+            )
+        )
     else
         return 1, 1, 1
     end
