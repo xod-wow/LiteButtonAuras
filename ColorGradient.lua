@@ -99,15 +99,15 @@ local White = { rgbToHls(1, 1, 1) }
 
 function LBA.TimerRGB(duration)
     if duration <= 3 then
-        return rgbToHls(
+        return hlsToRgb(
             interpolateHls(
-                duration/3
+                duration/3,
                 Red[1], Red[2], Red[3],
                 Yellow[1], Yellow[2], Yellow[3]
             )
         )
     elseif duration <= 10 then
-        return rgbToHls(
+        return hlsToRgb(
             interpolateHls(
                 (duration-3)/7,
                 Yellow[1], Yellow[2], Yellow[3],
