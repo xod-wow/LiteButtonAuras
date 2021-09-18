@@ -3,9 +3,17 @@
     LiteButtonAuras
     Copyright 2021 Mike "Xodiv" Battersby
 
-    I took the idea for the HLS gradients from AdiButtonAuras. I still don't
-    know if this is worth all this processing, OR if this is fast enough to
-    run every frame.
+    I took the idea for the HLS gradients from AdiButtonAuras. The code
+    is adapated from the python colorsys module but you can find the same
+    algorithm on StackOverflow.
+
+    Benchmarking this looks like LBA.TimerRGB takes about 0.5ns to run
+    when the timer is >10s, and 1ns to run when it has to interpolate.
+    At 100fps this is 100ns per second which seems fine to me.
+
+    That's just the color calcuating though, whether or not its a good idea
+    to run run SetFormattedText and SetTextColor every frame is different
+    matter. BuffFrame does it though, so I do too!
 
 ----------------------------------------------------------------------------]]--
 

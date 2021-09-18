@@ -49,6 +49,8 @@ function LBA.SetOption(option, value, key)
     end
     if type(defaults[key][option]) == 'boolean' then
         LBA.db[key][option] = IsTrue(value)
+    elseif type(defaults[key][option]) == 'number' then
+        LBA.db[key][option] = tonumber(value)
     else
         LBA.db[key][option] = value
     end
