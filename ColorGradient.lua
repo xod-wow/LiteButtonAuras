@@ -85,12 +85,13 @@ local function interpolateHls(perc, h1, l1, s1, h2, l2, s2)
     return h, l, s
 end
 
--- Colors in HLS so we don't have to do the math to unnecessarily convert
--- them every frame.
+-- Colors in HLS so we don't have to do the math to convert them every frame.
+-- These are brighter than the pure rgb because the 1,0,0 red is too hard to
+-- see.
 
-local Red = { rgbToHls(1, 0, 0) }
-local Yellow = { rgbToHls(1, 1, 0) }
-local White = { rgbToHls(1, 1, 1) }
+local Red = { 0, 0.75, 1 }
+local Yellow = { 1/6, 0.75, 1 }
+local White = { 0, 1, 0 }
 
 -- In theory this could be memoized for the values < 10s because they are
 -- truncated to 0.1 of a second before this is called. But I don't know
