@@ -7,8 +7,6 @@
 
 local _, LBA = ...
 
-LBA.Options = {}
-
 local defaults = {
     global = {
     },
@@ -24,15 +22,35 @@ local defaults = {
         minAuraDuration = 1.5,
         colorTimers = true,
         decimalTimers = true,
+        font = 'NumberFontNormal',
     },
     char = {
     },
 }
 
-function LBA.Options:Initialize()
+local function IsTrue(x)
+    if x == nil or x == false or x == "0" or x == "off" or x == "false" then
+        return false
+    else
+        return true
+    end
+end
+
+
+function LBA.InitializeOptions()
     LBA.db = LibStub("AceDB-3.0"):New("LiteButtonAurasDB", defaults, true)
 end
 
-function LBA.Options:IsDenied(spellID)
-    return spellID and LBA.db.profile.denySpells[spellID]
+function LBA.SetOption(option, value, key)
+    key = key or "profile"
+    if not defaults[key] then return end
+    if value == "default" or value == DEFAULT:lower() or value == nil then
+        value = defaults[key][option]
+    end
+    if type(defaults[key][option]) == 'boolean' then
+        LBA.db[key][option] = IsTrue(value)
+    else
+        LBA.db[key][option] = value
+    end
+    LBA.db.callbacks:Fire("OnModified")
 end

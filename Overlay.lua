@@ -13,6 +13,18 @@ function LiteButtonAurasOverlayMixin:OnLoad()
     -- Bump it so it's on top of the cooldown frame
     local parent = self:GetParent()
     self:SetFrameLevel(parent.cooldown:GetFrameLevel() + 1)
+    self:Style()
+end
+
+function LiteButtonAurasOverlayMixin:Style()
+    local font = LBA.db.profile.font
+    if type(font) == 'string' and _G[font] and _G[font].GetFont then
+        self.Timer:SetFont(_G[font]:GetFont())
+    elseif type(font) == 'table' then
+        self.Timer:SetFont(unpack(font))
+    else
+        self.Timer:SetFont(NumberFontNormal:GetFont())
+    end
 end
 
 function LiteButtonAurasOverlayMixin:Hook(frame, method)
@@ -57,6 +69,10 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
     self.name = nil
 end
 
+local function IsDeniedSpell(spellID)
+    return spellID and LBA.db.profile.denySpells[spellID]
+end
+
 function LiteButtonAurasOverlayMixin:Update(stateOnly)
     -- Even though the action might be the same what we do could have
     -- changed due to the dynamic nature of macros and some spells.
@@ -72,7 +88,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
     self.displaySuggestion = nil
     self.displayTimerColor = nil
 
-    if self.name and not LBA.Options:IsDenied(self.spellID) then
+    if self.name and not IsDeniedSpell(self.spellID) then
         if self:TrySetAsSoothe() then
             show = true
         elseif self:TrySetAsInterrupt() then

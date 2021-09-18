@@ -24,9 +24,9 @@ function LiteButtonAurasControllerMixin:OnLoad()
 end
 
 function LiteButtonAurasControllerMixin:Initialize()
-    LBA.Options:Initialize()
-    LBA.BarIntegrations:Initialize()
+    LBA.InitializeOptions()
     LBA.SetupSlashCommand()
+    LBA.BarIntegrations:Initialize()
 
     self:RegisterEvent('UNIT_AURA')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
@@ -41,6 +41,8 @@ function LiteButtonAurasControllerMixin:Initialize()
     self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START')
     self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP')
     self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
+
+    LBA.db.RegisterCallback(self, 'OnModified', 'StyleAllOverlays')
 end
 
 function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
@@ -52,6 +54,17 @@ function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
     return self.overlayFrames[actionButton]
 end
 
+function LiteButtonAurasControllerMixin:UpdateAllOverlays(stateOnly)
+    for _, overlay in pairs(self.overlayFrames) do
+        overlay:Update(stateOnly)
+    end
+end
+
+function LiteButtonAurasControllerMixin:StyleAllOverlays()
+    for _, overlay in pairs(self.overlayFrames) do
+        overlay:Style()
+    end
+end
 
 -- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ... = UnitAura(unit, index, filter)
 
@@ -121,12 +134,6 @@ function LiteButtonAurasControllerMixin:UpdateTargetCast()
     end
 
     LBA.state.targetInterrupt = nil
-end
-
-function LiteButtonAurasControllerMixin:UpdateAllOverlays(stateOnly)
-    for _, overlay in pairs(self.overlayFrames) do
-        overlay:Update(stateOnly)
-    end
 end
 
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
