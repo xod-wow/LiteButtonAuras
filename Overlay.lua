@@ -77,8 +77,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             show = true
         elseif self:TrySetAsInterrupt() then
             show = true
-        end
-        if state.playerTotems[self.name] then
+        elseif state.playerTotems[self.name] then
             self:SetAsTotem(state.playerTotems[self.name])
             show = true
         elseif state.playerBuffs[self.name] then
