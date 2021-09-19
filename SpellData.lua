@@ -36,11 +36,13 @@ LBA.Soothes = {
 }
 
 LBA.HostileDispels = {
-    [205604] = { Magic = true },    -- Reverse Magic (Demon Hunter)
     [278326] = { Magic = true },    -- Consume Magic (Demon Hunter)
     [ 19801] = { Magic = true },    -- Tranquilizing Shot (Hunter)
     [ 30449] = { Magic = true },    -- Spellsteal (Mage)
     [   528] = { Magic = true },    -- Dispel Magic (Priest)
+    [ 32375] = { Magic = true },    -- Mass Dispel (Priest)
+    [   370] = { Magic = true },    -- Purge (Shaman)
+    [ 19505] = { Magic = true },    -- Devour Magic (Warlock)
     [ 25046] = { Magic = true },    -- Arcane Torrent (Blood Elf Rogue)
     [ 28730] = { Magic = true },    -- Arcane Torrent (Blood Elf Mage/Warlock)
     [ 50613] = { Magic = true },    -- Arcane Torrent (Blood Elf Death Knight)
