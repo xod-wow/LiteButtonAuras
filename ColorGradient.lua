@@ -127,3 +127,9 @@ function LBA.TimerRGB(duration)
         return 1, 1, 1
     end
 end
+
+--@debug@
+LBA.interpolateHls = interpolateHls
+LBA.rgbToHls = rgbToHls
+LBA.hlsToRgb = hlsToRgb
+--@end-debug@
