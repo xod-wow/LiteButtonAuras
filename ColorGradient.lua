@@ -89,7 +89,7 @@ local function interpolateHls(perc, h1, l1, s1, h2, l2, s2)
         dh = dh - 1
     end
 
-    h = (h1 + dh*perc) % 1
+    local h = (h1 + dh*perc) % 1
     return h, l, s
 end
 
