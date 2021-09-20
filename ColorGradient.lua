@@ -8,8 +8,8 @@
     algorithm on StackOverflow.
 
     Benchmarking this looks like LBA.TimerRGB takes about 0.5ns to run
-    when the timer is >10s, and 1ns to run when it has to interpolate.
-    At 100fps this is 100ns per second which seems fine to me.
+    when the timer is >10s, and 2ns to run when it has to interpolate.
+    At 100fps this is 200ns per second which seems fine to me.
 
     That's just the color calcuating though, whether or not its a good idea
     to run run SetFormattedText and SetTextColor every frame is different

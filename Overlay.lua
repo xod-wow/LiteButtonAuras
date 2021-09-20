@@ -298,6 +298,14 @@ end
 
 -- BuffFrame does it this way, SetFormattedText on every frame. If its
 -- good enough for them it's good enough for me.
+--
+-- /console scriptprofile 1
+-- /reload
+--
+-- UpdateAddOnCPUUsage()
+-- t,n = GetFunctionCPUUsage(LiteButtonAurasOverlayMixin.UpdateTimer, true)
+-- print(t*1000/n) -> ~14 ns
+--
 
 function LiteButtonAurasOverlayMixin:UpdateTimer()
     local duration = self.expireTime - GetTime()
