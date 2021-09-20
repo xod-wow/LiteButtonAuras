@@ -63,6 +63,7 @@ end
 function LiteButtonAurasControllerMixin:StyleAllOverlays()
     for _, overlay in pairs(self.overlayFrames) do
         overlay:Style()
+        overlay:Update()
     end
 end
 

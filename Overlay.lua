@@ -20,10 +20,13 @@ function LiteButtonAurasOverlayMixin:Style()
     local font = LBA.db.profile.font
     if type(font) == 'string' and _G[font] and _G[font].GetFont then
         self.Timer:SetFont(_G[font]:GetFont())
+        self.Count:SetFont(_G[font]:GetFont())
     elseif type(font) == 'table' then
         self.Timer:SetFont(unpack(font))
+        self.Count:SetFont(unpack(font))
     else
         self.Timer:SetFont(NumberFontNormal:GetFont())
+        self.Count:SetFont(NumberFontNormal:GetFont())
     end
 end
 
@@ -84,6 +87,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
     local state = LBA.state
 
     self.expireTime = nil
+    self.stackCount = nil
     self.displayGlow = nil
     self.displaySuggestion = nil
     self.displayTimerColor = nil
@@ -109,6 +113,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
 
     self:ShowGlow(self.displayGlow)
     self:ShowTimer(self.expireTime ~= nil)
+    self:ShowStacks(self.stackCount ~= nil)
     self:ShowSuggestion(self.displaySuggestion)
     self:SetShown(show)
 end
@@ -145,6 +150,9 @@ function LiteButtonAurasOverlayMixin:SetAsAura(info)
         self.expireTime = info[6]
         self.timeMod = info[15]
         self.displayTimerColor = LBA.db.profile.colorTimers
+    end
+    if info[3] and info[3] > 1 and LBA.db.profile.stacks then
+        self.stackCount = info[3]
     end
 end
 
@@ -256,6 +264,16 @@ function LiteButtonAurasOverlayMixin:ShowSuggestion(isShown)
         ActionButton_HideOverlayGlow(self)
     end
 end
+
+-- Count Display ---------------------------------------------------------------
+
+function LiteButtonAurasOverlayMixin:ShowStacks(isShown)
+    if isShown then
+        self.Count:SetText(self.stackCount)
+    end
+    self.Count:SetShown(isShown)
+end
+
 
 -- Timer Display ---------------------------------------------------------------
 

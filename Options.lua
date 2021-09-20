@@ -22,6 +22,7 @@ local defaults = {
         minAuraDuration = 1.5,
         colorTimers = true,
         decimalTimers = true,
+        stacks = false,
         font = 'NumberFontNormal',
     },
     char = {
