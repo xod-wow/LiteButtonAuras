@@ -159,12 +159,14 @@ end
 function LiteButtonAurasOverlayMixin:SetAsBuff(info)
     local color = LBA.db.profile.color.buff
     self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
+    self.Count:SetTextColor(color.r, color.g, color.b, 1.0)
     self:SetAsAura(info)
 end
 
 function LiteButtonAurasOverlayMixin:SetAsDebuff(info)
     local color = LBA.db.profile.color.debuff
     self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
+    self.Count:SetTextColor(color.r, color.g, color.b, 1.0)
     self:SetAsAura(info)
 end
 
@@ -205,13 +207,18 @@ end
 
 -- Soothe Config ---------------------------------------------------------------
 
+function LiteButtonAurasOverlayMixin:SetAsSoothe(info)
+    local color = LBA.db.profile.color.enrage
+    self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
+    self.Count:SetTextColor(color.r, color.g, color.b, 1.0)
+    self:SetAsAura(info)
+end
+
 function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
     if self.spellID and LBA.Soothes[self.spellID] then
         for _, info in pairs(LBA.state.targetBuffs) do
             if info[8] and info[4] == "" then
-                local color = LBA.db.profile.color.enrage
-                self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
-                self:SetAsAura(info)
+                self:SetAsSoothe(info)
                 return true
             end
         end
@@ -223,6 +230,7 @@ end
 function LiteButtonAurasOverlayMixin:SetAsDispel(info)
     local color = DebuffTypeColor[info[4] or "none"]
     self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
+    self.Count:SetTextColor(color.r, color.g, color.b, 1.0)
     self:SetAsAura(info)
 end
 

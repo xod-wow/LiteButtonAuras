@@ -17,7 +17,7 @@ local defaults = {
         color = {
             buff    = { r=0.00, g=1.00, b=0.00 },
             debuff  = { r=1.00, g=0.00, b=0.00 },
-            enrage  = { r=1.00, g=0.50, b=0.00 },
+            enrage  = { r=1.00, g=0.25, b=0.00 },
         },
         minAuraDuration = 1.5,
         colorTimers = true,

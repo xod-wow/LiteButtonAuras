@@ -17,7 +17,6 @@
           </Anchors>
         </FontString>
         <FontString parentKey="Count" inherits="NumberFontNormal" justifyH="LEFT">
-          <Color r="0.5" g="0.8" b="1.0" />
           <Anchors>
             <Anchor point="TOPLEFT" x="3" y="-2" />
           </Anchors>
