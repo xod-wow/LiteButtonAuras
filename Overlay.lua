@@ -228,7 +228,7 @@ end
 -- Dispel Config ---------------------------------------------------------------
 
 function LiteButtonAurasOverlayMixin:SetAsDispel(info)
-    local color = DebuffTypeColor[info[4] or "none"]
+    local color = DebuffTypeColor[info[4] or ""]
     self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
     self.Count:SetTextColor(color.r, color.g, color.b, 1.0)
     self:SetAsAura(info)
