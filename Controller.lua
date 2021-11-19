@@ -54,6 +54,10 @@ function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
     return self.overlayFrames[actionButton]
 end
 
+function LiteButtonAurasControllerMixin:GetOverlay(actionButton)
+    return self.overlayFrames[actionButton]
+end
+
 function LiteButtonAurasControllerMixin:UpdateAllOverlays(stateOnly)
     for _, overlay in pairs(self.overlayFrames) do
         overlay:Update(stateOnly)

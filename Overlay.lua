@@ -41,9 +41,9 @@ end
 -- are all the same as before and doing nothing
 
 function LiteButtonAurasOverlayMixin:SetUpAction()
-    self.action = self:GetParent().action
+    local action = self:GetAction()
 
-    local type, id, subType = GetActionInfo(self.action)
+    local type, id, subType = GetActionInfo(action)
     if type == 'spell' then
         self.name = GetSpellInfo(id)
         self.spellID = id
