@@ -14,6 +14,20 @@ LBA.state = {
     targetBuffs = {},
 }
 
+LBA.auraMapByName = {}
+
+function LBA.UpdateAuraMap()
+    LBA.auraMapByName = table.wipe(LBA.auraMapByName)
+
+    for fromID, fromTable in pairs(LBA.db.profile.auraMap) do
+        local fromName = GetSpellInfo(fromID)
+        LBA.auraMapByName[fromName] = {}
+        for i, toID in ipairs(fromTable) do
+            LBA.auraMapByName[fromName][i] = GetSpellInfo(toID)
+        end
+    end
+end
+
 --[[------------------------------------------------------------------------]]--
 
 LiteButtonAurasControllerMixin = {}
@@ -27,6 +41,8 @@ function LiteButtonAurasControllerMixin:Initialize()
     LBA.InitializeOptions()
     LBA.SetupSlashCommand()
     LBA.BarIntegrations:Initialize()
+    LBA.UpdateAuraMap()
+
 
     self:RegisterEvent('UNIT_AURA')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
@@ -73,16 +89,24 @@ end
 
 -- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ... = UnitAura(unit, index, filter)
 
+local function UpdateTableAura(t, name, ...)
+    t[name] = { name, ... }
+    if LBA.auraMapByName[name] then
+        for _, toName in ipairs(LBA.auraMapByName[name]) do
+            t[toName] = { name, ... }
+        end
+    end
+end
 
 function LiteButtonAurasControllerMixin:UpdatePlayerBuffs()
     table.wipe(LBA.state.playerBuffs)
     AuraUtil.ForEachAura('player', 'HELPFUL PLAYER', nil,
         function (name, ...)
-            LBA.state.playerBuffs[name] = { name, ... }
+            UpdateTableAura(LBA.state.playerBuffs, name, ...)
         end)
     AuraUtil.ForEachAura('player', 'HELPFUL RAID', nil,
         function (name, ...)
-            LBA.state.playerBuffs[name] = { name, ... }
+            UpdateTableAura(LBA.state.playerBuffs, name, ...)
         end)
 end
 
@@ -103,7 +127,7 @@ function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
     table.wipe(LBA.state.targetDebuffs)
     AuraUtil.ForEachAura('target', 'HARMFUL PLAYER', nil,
         function (name, ...)
-            LBA.state.targetDebuffs[name] = { name, ... }
+            UpdateTableAura(LBA.state.targetDebuffs, name, ...)
         end)
 end
 

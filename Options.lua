@@ -12,7 +12,23 @@ local defaults = {
     },
     profile = {
         denySpells = {
+            [116]       = true, -- Frostbolt (Mage)
             [152175]    = true, -- Whirling Dragon Punch (Monk)
+        },
+        auraMap = {
+            [224509] = {        -- Frailty
+                73572,          --   Spirit Bomb
+            },
+            [191587] = {        -- Virulent Plague
+                77575,          --   Outbreak
+                115989,         --   Unholy Blight
+            },
+            [55005] = {         -- Frost Fever
+                49184,          --   Howling Blast
+            },
+            [55078] = {         -- Blood Plague
+                50842,          --   Blood Boil
+            },
         },
         color = {
             buff    = { r=0.00, g=1.00, b=0.00 },
