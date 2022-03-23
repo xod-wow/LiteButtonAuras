@@ -131,14 +131,16 @@ function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
         end)
 end
 
--- The expectation for users of targetBuffs is that there are VERY few
--- of them and that looping over them is OK because it'll be fast. Only
--- collect enemy buffs, since we don't support friendly dispels.
-
 function LiteButtonAurasControllerMixin:UpdateTargetBuffs()
     table.wipe(LBA.state.targetBuffs)
     if UnitCanAttack('player', 'target') then
+        -- Hostile target buffs are only for dispels
         AuraUtil.ForEachAura('target', 'HELPFUL', nil,
+            function (name, ...)
+                LBA.state.targetBuffs[name] = { name, ... }
+            end)
+    else
+        AuraUtil.ForEachAura('target', 'HELPFUL PLAYER', nil,
             function (name, ...)
                 LBA.state.targetBuffs[name] = { name, ... }
             end)
