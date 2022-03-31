@@ -237,13 +237,12 @@ function LiteButtonAurasOverlayMixin:SetAsDispel(info)
     self:SetAsAura(info)
 end
 
--- Note: Relying on targetBuffs not including friendly units here, otherwise
--- this needs a UnitCanAttack('player', 'target'). But not gathering them in
--- the first place is WAY more efficient since players are likely to have
--- a lot of HELPFUL auras.
-
 function LiteButtonAurasOverlayMixin:TrySetAsDispel()
     if not self.spellID then
+        return
+    end
+
+    if UnitCanAssist('player', 'target') then
         return
     end
 

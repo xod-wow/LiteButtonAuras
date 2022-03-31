@@ -17,18 +17,21 @@ local defaults = {
         },
         auraMap = {
             [224509] = {        -- Frailty
-                73572,          --   Spirit Bomb
+                73572,          --  Spirit Bomb
             },
             [191587] = {        -- Virulent Plague
-                77575,          --   Outbreak
-                115989,         --   Unholy Blight
+                77575,          --  Outbreak
+                115989,         --  Unholy Blight
             },
             [55005] = {         -- Frost Fever
-                49184,          --   Howling Blast
+                49184,          --  Howling Blast
             },
             [55078] = {         -- Blood Plague
-                50842,          --   Blood Boil
+                50842,          --  Blood Boil
             },
+            [340459] = {        -- Maraad's Dying Breath
+                183998,         --  Light of the Martyr
+            }
         },
         color = {
             buff    = { r=0.00, g=1.00, b=0.00 },
