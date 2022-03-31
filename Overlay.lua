@@ -7,6 +7,9 @@
 
 local _, LBA = ...
 
+
+local LibBG = LibStub("LibButtonGlow-1.0")
+
 LiteButtonAurasOverlayMixin = {}
 
 function LiteButtonAurasOverlayMixin:OnLoad()
@@ -267,9 +270,9 @@ end
 
 function LiteButtonAurasOverlayMixin:ShowSuggestion(isShown)
     if isShown then
-        ActionButton_ShowOverlayGlow(self)
+        LibBG.ShowOverlayGlow(self)
     else
-        ActionButton_HideOverlayGlow(self)
+        LibBG.HideOverlayGlow(self)
     end
 end
 
