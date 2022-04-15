@@ -33,13 +33,6 @@ function LiteButtonAurasOverlayMixin:Style()
     end
 end
 
-function LiteButtonAurasOverlayMixin:Hook(frame, method)
-    if not self.isHooked then
-        hooksecurefunc(frame, method, function () self:Update() end)
-        self.isHooked = true
-    end
-end
-
 -- This could be optimized (?) slightly be checking if type, id, subType
 -- are all the same as before and doing nothing
 
@@ -114,7 +107,8 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
         end
     end
 
-    self:ShowGlow(self.displayGlow)
+    local alreadyOverlayed = self.spellID and IsSpellOverlayed(self.spellID)
+    self:ShowGlow(self.displayGlow and not alreadyOverlayed)
     self:ShowTimer(self.expireTime ~= nil)
     self:ShowStacks(self.stackCount ~= nil)
     self:ShowSuggestion(self.displaySuggestion)
