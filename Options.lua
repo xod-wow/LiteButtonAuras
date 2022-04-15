@@ -31,7 +31,17 @@ local defaults = {
             },
             [340459] = {        -- Maraad's Dying Breath
                 183998,         --  Light of the Martyr
-            }
+            },
+            [228287] = {        -- Mark of the Crane
+                100780,         --  Tiger Palm
+            },
+            [116645] = {        -- Teachings of the Monastery
+                100780,         --  Tiger Palm
+                -- 100784,         --  Blackout Kick
+            },
+            [138279] = {        -- Victorious
+                34428,          --  Victory Rush
+            },
         },
         color = {
             buff    = { r=0.00, g=1.00, b=0.00 },
