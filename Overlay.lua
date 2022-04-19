@@ -212,12 +212,14 @@ function LiteButtonAurasOverlayMixin:SetAsSoothe(info)
 end
 
 function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
-    if self.spellID and LBA.Soothes[self.spellID] then
-        for _, info in pairs(LBA.state.targetBuffs) do
-            if info[8] and info[4] == "" then
-                self:SetAsSoothe(info)
-                return true
-            end
+    if not self.spellID or not LBA.Soothes[self.spellID] then return end
+    if UnitCanAssist('player', 'target') then return end
+
+    for _, info in pairs(LBA.state.targetBuffs) do
+        if info[8] and info[4] == "" and self:ReadyBefore(info[6]) then
+            self.expireTime = info[6]
+            self.displaySuggestion = true
+            return true
         end
     end
 end
