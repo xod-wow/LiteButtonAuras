@@ -101,12 +101,12 @@ end
 function LiteButtonAurasControllerMixin:UpdatePlayerBuffs()
     table.wipe(LBA.state.playerBuffs)
     AuraUtil.ForEachAura('player', 'HELPFUL PLAYER', nil,
-        function (name, ...)
-            UpdateTableAura(LBA.state.playerBuffs, name, ...)
+        function (...)
+            UpdateTableAura(LBA.state.playerBuffs, ...)
         end)
     AuraUtil.ForEachAura('player', 'HELPFUL RAID', nil,
-        function (name, ...)
-            UpdateTableAura(LBA.state.playerBuffs, name, ...)
+        function (...)
+            UpdateTableAura(LBA.state.playerBuffs, ...)
         end)
 end
 
@@ -126,8 +126,8 @@ end
 function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
     table.wipe(LBA.state.targetDebuffs)
     AuraUtil.ForEachAura('target', 'HARMFUL PLAYER', nil,
-        function (name, ...)
-            UpdateTableAura(LBA.state.targetDebuffs, name, ...)
+        function (...)
+            UpdateTableAura(LBA.state.targetDebuffs, ...)
         end)
 end
 

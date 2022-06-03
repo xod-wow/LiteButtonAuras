@@ -73,7 +73,7 @@ local function IsDeniedSpell(spellID)
 end
 
 function LiteButtonAurasOverlayMixin:Update(stateOnly)
-    -- Even though the action might be the same what we do could have
+    -- Even though the action might be the same, what it contains could have
     -- changed due to the dynamic nature of macros and some spells.
     if not stateOnly then
         self:SetUpAction()
