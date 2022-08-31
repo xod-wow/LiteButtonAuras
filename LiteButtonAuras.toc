@@ -5,6 +5,7 @@
 ## Email: mib@post.com
 ## OptionalDeps: Bartender4, Dominos, ElvUI
 ## SavedVariables: LiteButtonAurasDB
+## X-Curse-Project-ID: 526431
 
 Libs\embeds.xml
 
