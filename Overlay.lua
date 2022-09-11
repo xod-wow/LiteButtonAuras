@@ -213,7 +213,7 @@ end
 
 function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
     if not self.spellID or not LBA.Soothes[self.spellID] then return end
-    if UnitCanAssist('player', 'target') then return end
+    if UnitIsFriend('player', 'target') then return end
 
     for _, info in pairs(LBA.state.targetBuffs) do
         if info[8] and info[4] == "" and self:ReadyBefore(info[6]) then
@@ -238,7 +238,7 @@ function LiteButtonAurasOverlayMixin:TrySetAsDispel()
         return
     end
 
-    if UnitCanAssist('player', 'target') then
+    if UnitIsFriend('player', 'target') then
         return
     end
 
