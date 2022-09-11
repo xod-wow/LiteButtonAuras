@@ -24,13 +24,38 @@ local function GenericInitButton(actionButton)
     end
 end
 
+-- Blizzard Classic ------------------------------------------------------------
 
--- Blizzard --------------------------------------------------------------------
+-- Classic doesn't have an 'Update' method on the ActionButtons to hook
+-- so we have to hook the global function ActionButton_Update
+
+local function ClassicButtonUpdate(actionButton)
+    local overlay = LiteButtonAurasController:GetOverlay(actionButton)
+    if overlay then overlay:Update() end
+end
+
+local function ClassicInitButton(actionButton)
+    local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
+    overlay.GetAction = GenericGetAction
+end
+
+function LBA.BarIntegrations:ClassicInit()
+    if WOW_PROJECT_ID == 1 then return end
+    for _, actionButton in pairs(ActionBarButtonEventsFrame.frames) do
+        if actionButton:GetName():sub(1,8) ~= 'Override' then
+            ClassicInitButton(actionButton)
+        end
+    end
+    hooksecurefunc('ActionButton_Update', ClassicButtonUpdate)
+end
+
+-- Blizzard Retail -------------------------------------------------------------
 
 -- The OverrideActionButtons have the same action (ID) as the main buttons and
 -- mess up framesByAction (as well as we don't want to handle them)
 
-function LBA.BarIntegrations:BlizzardInit()
+function LBA.BarIntegrations:RetailInit()
+    if WOW_PROJECT_ID ~= 1 then return end
     for _, actionButton in pairs(ActionBarButtonEventsFrame.frames) do
         if actionButton:GetName():sub(1,8) ~= 'Override' then
             GenericInitButton(actionButton)
@@ -98,7 +123,8 @@ end
 -- Init ------------------------------------------------------------------------
 
 function LBA.BarIntegrations:Initialize()
-    self:BlizzardInit()
+    self:RetailInit()
+    self:ClassicInit()
     self:DominosInit()
     self:LABInit()
 end

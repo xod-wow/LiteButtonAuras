@@ -107,7 +107,13 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
         end
     end
 
-    local alreadyOverlayed = self.spellID and IsSpellOverlayed(self.spellID)
+    local alreadyOverlayed
+    if WOW_PROJECT_ID == 1 then
+        alreadyOvelayed = self.spellID and IsSpellOverlayed(self.spellID)
+    else
+        local parent = self:GetParent()
+        alreadyOverlayed = parent.overlay and parent.overlay:IsShown()
+    end
     self:ShowGlow(self.displayGlow and not alreadyOverlayed)
     self:ShowTimer(self.expireTime ~= nil)
     self:ShowStacks(self.stackCount ~= nil)

@@ -7,6 +7,25 @@
 
 local _, LBA = ...
 
+local ForEachAura = AuraUtil.ForEachAura
+
+if not ForEachAura then
+    ForEachAura =
+        function (unit, filter, maxCount, func)
+            local i = 1
+            while true do
+                if maxCount and i > maxCount then
+                    return
+                elseif UnitAura(unit, i, filter) then
+                    func(UnitAura(unit, i, filter))
+                else
+                    return
+                end
+                i = i + 1
+            end
+        end
+end
+
 LBA.state = {
     playerBuffs = {},
     playerTotems = {},
@@ -21,9 +40,11 @@ function LBA.UpdateAuraMap()
 
     for fromID, fromTable in pairs(LBA.db.profile.auraMap) do
         local fromName = GetSpellInfo(fromID)
-        LBA.auraMapByName[fromName] = {}
-        for i, toID in ipairs(fromTable) do
-            LBA.auraMapByName[fromName][i] = GetSpellInfo(toID)
+        if fromName then
+            LBA.auraMapByName[fromName] = {}
+            for i, toID in ipairs(fromTable) do
+                LBA.auraMapByName[fromName][i] = GetSpellInfo(toID)
+            end
         end
     end
 end
@@ -52,11 +73,13 @@ function LiteButtonAurasControllerMixin:Initialize()
     self:RegisterEvent('UNIT_SPELLCAST_START')
     self:RegisterEvent('UNIT_SPELLCAST_STOP')
     self:RegisterEvent('UNIT_SPELLCAST_DELAYED')
-    self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE')
-    self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE')
     self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START')
     self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP')
     self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
+    if WOW_PROJECT_ID == 1 then
+        self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE')
+        self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE')
+    end
 
     LBA.db.RegisterCallback(self, 'OnModified', 'StyleAllOverlays')
 end
@@ -100,11 +123,11 @@ end
 
 function LiteButtonAurasControllerMixin:UpdatePlayerBuffs()
     table.wipe(LBA.state.playerBuffs)
-    AuraUtil.ForEachAura('player', 'HELPFUL PLAYER', nil,
+    ForEachAura('player', 'HELPFUL PLAYER', nil,
         function (...)
             UpdateTableAura(LBA.state.playerBuffs, ...)
         end)
-    AuraUtil.ForEachAura('player', 'HELPFUL RAID', nil,
+    ForEachAura('player', 'HELPFUL RAID', nil,
         function (...)
             UpdateTableAura(LBA.state.playerBuffs, ...)
         end)
@@ -125,7 +148,7 @@ end
 
 function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
     table.wipe(LBA.state.targetDebuffs)
-    AuraUtil.ForEachAura('target', 'HARMFUL PLAYER', nil,
+    ForEachAura('target', 'HARMFUL PLAYER', nil,
         function (...)
             UpdateTableAura(LBA.state.targetDebuffs, ...)
         end)
@@ -135,12 +158,12 @@ function LiteButtonAurasControllerMixin:UpdateTargetBuffs()
     table.wipe(LBA.state.targetBuffs)
     if UnitCanAttack('player', 'target') then
         -- Hostile target buffs are only for dispels
-        AuraUtil.ForEachAura('target', 'HELPFUL', nil,
+        ForEachAura('target', 'HELPFUL', nil,
             function (name, ...)
                 LBA.state.targetBuffs[name] = { name, ... }
             end)
     else
-        AuraUtil.ForEachAura('target', 'HELPFUL PLAYER', nil,
+        ForEachAura('target', 'HELPFUL PLAYER', nil,
             function (name, ...)
                 LBA.state.targetBuffs[name] = { name, ... }
             end)
