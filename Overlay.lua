@@ -86,7 +86,6 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
     self.stackCount = nil
     self.displayGlow = nil
     self.displaySuggestion = nil
-    self.displayTimerColor = nil
 
     if self.name and not IsDeniedSpell(self.spellID) then
         if self:TrySetAsSoothe() then
@@ -115,9 +114,9 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
         alreadyOverlayed = parent.overlay and parent.overlay:IsShown()
     end
     self:ShowGlow(self.displayGlow and not alreadyOverlayed)
-    self:ShowTimer(self.expireTime ~= nil)
-    self:ShowStacks(self.stackCount ~= nil)
-    self:ShowSuggestion(self.displaySuggestion)
+    self:ShowTimer(self.expireTime ~= nil and LBA.db.profile.showTimers)
+    self:ShowStacks(self.stackCount ~= nil and LBA.db.profile.showStacks)
+    self:ShowSuggestion(self.displaySuggestion and LBA.db.profile.showSuggestions)
     self:SetShown(show)
 end
 
@@ -152,9 +151,8 @@ function LiteButtonAurasOverlayMixin:SetAsAura(info)
     if info[6] and info[6] ~= 0 then
         self.expireTime = info[6]
         self.timeMod = info[15]
-        self.displayTimerColor = LBA.db.profile.colorTimers
     end
-    if info[3] and info[3] > 1 and LBA.db.profile.stacks then
+    if info[3] and info[3] > 1 then
         self.stackCount = info[3]
     end
 end
@@ -181,7 +179,6 @@ function LiteButtonAurasOverlayMixin:SetAsTotem(expireTime)
     self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
     self.expireTime, self.modTime = expireTime, nil
     self.displayGlow = true
-    self.displayTimerColor = LBA.db.profile.colorTimers
 end
 
 
@@ -326,7 +323,7 @@ function LiteButtonAurasOverlayMixin:UpdateTimer()
     end
     if duration >= 0 then
         self.Timer:SetFormattedText(TimerAbbrev(duration))
-        if self.displayTimerColor then
+        if LBA.db.profile.colorTimers then
             self.Timer:SetTextColor(LBA.TimerRGB(duration))
         else
             self.Timer:SetTextColor(1, 1, 1)

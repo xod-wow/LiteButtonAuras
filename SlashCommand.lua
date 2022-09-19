@@ -20,16 +20,19 @@ end
 
 local function PrintUsage()
     printf(GAMEMENU_HELP .. ":")
+    printf("  /lba stacks on|off|default")
+    printf("  /lba timers on|off|default")
     printf("  /lba colortimers on|off|default")
     printf("  /lba decimaltimers on|off|default")
     printf("  /lba font FontName|default")
     printf("  /lba font path [ size [ flags ] ]")
-    printf("  /lba stacks on|off|default")
 end
 
 local function PrintOptions()
     local font = LBA.db.profile.font
     printf(SETTINGS .. ':')
+    printf("  stacks = " .. TrueStr(LBA.db.profile.showStacks))
+    printf("  timers = " .. TrueStr(LBA.db.profile.showTimers))
     printf("  colortimers = " .. TrueStr(LBA.db.profile.colorTimers))
     printf("  decimaltimers = " .. TrueStr(LBA.db.profile.decimalTimers))
     if type(font) == 'string' then
@@ -37,7 +40,6 @@ local function PrintOptions()
     else
         printf("  font = [ '%s', %.1f, '%s' ]", unpack(LBA.db.profile.font))
     end
-    printf("  stacks = " .. TrueStr(LBA.db.profile.stacks))
 end
 
 local function SetFont(args)
@@ -75,12 +77,14 @@ local function SlashCommand(argstr)
 
     if cmd == '' then
         PrintOptions()
+    elseif cmd:lower() == 'stacks' and #args == 1 then
+        LBA.SetOption('showStacks', args[1])
+    elseif cmd:lower() == 'timers' and #args == 1 then
+        LBA.SetOption('showTimers', args[1])
     elseif cmd:lower() == 'colortimers' and #args == 1 then
         LBA.SetOption('colorTimers', args[1])
     elseif cmd:lower() == 'decimaltimers' and #args == 1 then
         LBA.SetOption('decimalTimers', args[1])
-    elseif cmd:lower() == 'stacks' and #args == 1 then
-        LBA.SetOption('stacks', args[1])
     elseif cmd:lower() == 'font' and #args >= 1 then
         SetFont(args)
     else

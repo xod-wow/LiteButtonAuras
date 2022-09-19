@@ -52,9 +52,11 @@ local defaults = {
             enrage  = { r=1.00, g=0.25, b=0.00 },
         },
         minAuraDuration = 1.5,
+        showTimers = true,
+        showStacks = false,
+        showSuggestions = true,
         colorTimers = true,
         decimalTimers = true,
-        stacks = false,
         font = 'NumberFontNormal',
     },
     char = {
