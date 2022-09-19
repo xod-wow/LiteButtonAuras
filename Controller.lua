@@ -51,6 +51,11 @@ end
 
 --[[------------------------------------------------------------------------]]--
 
+local Masque = LibStub('Masque', true)
+local MasqueGroup = Masque and Masque:Group('LiteButtonAuras')
+
+--[[------------------------------------------------------------------------]]--
+
 LiteButtonAurasControllerMixin = {}
 
 function LiteButtonAurasControllerMixin:OnLoad()
@@ -89,6 +94,13 @@ function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
         local name = actionButton:GetName() .. "LiteButtonAurasOverlay"
         local overlay = CreateFrame('Frame', name, actionButton, "LiteButtonAurasOverlayTemplate")
         self.overlayFrames[actionButton] = overlay
+        if MasqueGroup then
+            MasqueGroup:AddButton(overlay, {
+                SpellHighlight = overlay.Glow,
+                -- Duration = overlay.Timer,
+                -- Count = overlay.Count,
+            })
+        end
     end
     return self.overlayFrames[actionButton]
 end
