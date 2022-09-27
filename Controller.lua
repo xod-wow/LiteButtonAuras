@@ -7,6 +7,35 @@
 
 local _, LBA = ...
 
+LBA.state = {
+    playerBuffs = {},
+    playerTotems = {},
+    targetDebuffs = {},
+    targetBuffs = {},
+}
+
+
+--[[------------------------------------------------------------------------]]--
+
+-- Cache a some things to be faster. This is annoying but it's really a lot
+-- faster. Only do this for things that are called in the event loop otherwise
+-- it's just a pain to maintain.
+
+local wipe = table.wipe
+local GetSpellInfo = GetSpellInfo
+local GetTotemInfo = GetTotemInfo
+local MAX_TOTEMS = MAX_TOTEMS
+local UnitAura = UnitAura
+local UnitCanAttack = UnitCanAttack
+local UnitCastingInfo = UnitCastingInfo
+local UnitChannelInfo = UnitChannelInfo
+local WOW_PROJECT_ID = WOW_PROJECT_ID
+
+
+--[[------------------------------------------------------------------------]]--
+
+-- Classic doesn't have ForEachAura even though it has AuraUtil.
+
 local ForEachAura = AuraUtil.ForEachAura
 
 if not ForEachAura then
@@ -26,33 +55,39 @@ if not ForEachAura then
         end
 end
 
-LBA.state = {
-    playerBuffs = {},
-    playerTotems = {},
-    targetDebuffs = {},
-    targetBuffs = {},
-}
 
-LBA.auraMapByName = {}
+--[[------------------------------------------------------------------------]]--
+
+-- LBA matches auras by name, but the profile auraMap is by ID so that it works
+-- in all locales. Translate it into the names once at load time.
+
+local AuraMapByName = {}
 
 function LBA.UpdateAuraMap()
-    LBA.auraMapByName = table.wipe(LBA.auraMapByName)
+    wipe(AuraMapByName)
 
     for fromID, fromTable in pairs(LBA.db.profile.auraMap) do
         local fromName = GetSpellInfo(fromID)
         if fromName then
-            LBA.auraMapByName[fromName] = {}
+            AuraMapByName[fromName] = {}
             for i, toID in ipairs(fromTable) do
-                LBA.auraMapByName[fromName][i] = GetSpellInfo(toID)
+                AuraMapByName[fromName][i] = GetSpellInfo(toID)
             end
         end
     end
 end
 
+
 --[[------------------------------------------------------------------------]]--
+
+-- Load and set up dependencies for Masque support. Because we make our own
+-- frame and don't touch the ActionButton itself (avoids a LOT of taint issues)
+-- we have to make our own masque group. It's a bit weird because it lets  you
+-- style LBA differently from the ActionButton, but it's the simplest way.
 
 local Masque = LibStub('Masque', true)
 local MasqueGroup = Masque and Masque:Group('LiteButtonAuras')
+
 
 --[[------------------------------------------------------------------------]]--
 
@@ -66,9 +101,11 @@ end
 function LiteButtonAurasControllerMixin:Initialize()
     LBA.InitializeOptions()
     LBA.SetupSlashCommand()
-    LBA.BarIntegrations:Initialize()
     LBA.UpdateAuraMap()
 
+    -- Maybe this should be delayed until PLAYER_LOGIN so we don't have to
+    -- list all possible LibActionButton derivatives in the TOC dependencies
+    LBA.BarIntegrations:Initialize()
 
     self:RegisterEvent('UNIT_AURA')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
@@ -122,19 +159,40 @@ function LiteButtonAurasControllerMixin:StyleAllOverlays()
     end
 end
 
--- name, icon, count, debuffType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod, ... = UnitAura(unit, index, filter)
+
+--[[------------------------------------------------------------------------]]--
+
+-- State updating local functions
+
+-- [ 1] name,
+-- [ 2] icon,
+-- [ 3] count,
+-- [ 4] debuffType,
+-- [ 5] duration,
+-- [ 6] expirationTime,
+-- [ 7] source,
+-- [ 8] isStealable,
+-- [ 9] nameplateShowPersonal,
+-- [10] spellId,
+-- [11] canApplyAura,
+-- [12] isBossDebuff,
+-- [13] castByPlayer,
+-- [14] nameplateShowAll,
+-- [15] timeMod,
+-- ...
+-- = UnitAura(unit, index, filter)
 
 local function UpdateTableAura(t, name, ...)
     t[name] = { name, ... }
-    if LBA.auraMapByName[name] then
-        for _, toName in ipairs(LBA.auraMapByName[name]) do
+    if AuraMapByName[name] then
+        for _, toName in ipairs(AuraMapByName[name]) do
             t[toName] = { name, ... }
         end
     end
 end
 
-function LiteButtonAurasControllerMixin:UpdatePlayerBuffs()
-    table.wipe(LBA.state.playerBuffs)
+local function UpdatePlayerBuffs()
+    wipe(LBA.state.playerBuffs)
     ForEachAura('player', 'HELPFUL PLAYER', nil,
         function (...)
             UpdateTableAura(LBA.state.playerBuffs, ...)
@@ -145,8 +203,8 @@ function LiteButtonAurasControllerMixin:UpdatePlayerBuffs()
         end)
 end
 
-function LiteButtonAurasControllerMixin:UpdatePlayerTotems()
-    table.wipe(LBA.state.playerTotems)
+local function UpdatePlayerTotems()
+    wipe(LBA.state.playerTotems)
     for i = 1, MAX_TOTEMS do
         local exists, name, startTime, duration, model = GetTotemInfo(i)
         if exists and name then
@@ -158,16 +216,16 @@ function LiteButtonAurasControllerMixin:UpdatePlayerTotems()
     end
 end
 
-function LiteButtonAurasControllerMixin:UpdateTargetDebuffs()
-    table.wipe(LBA.state.targetDebuffs)
+local function UpdateTargetDebuffs()
+    wipe(LBA.state.targetDebuffs)
     ForEachAura('target', 'HARMFUL PLAYER', nil,
         function (...)
             UpdateTableAura(LBA.state.targetDebuffs, ...)
         end)
 end
 
-function LiteButtonAurasControllerMixin:UpdateTargetBuffs()
-    table.wipe(LBA.state.targetBuffs)
+local function UpdateTargetBuffs()
+    wipe(LBA.state.targetBuffs)
     if UnitCanAttack('player', 'target') then
         -- Hostile target buffs are only for dispels
         ForEachAura('target', 'HELPFUL', nil,
@@ -182,7 +240,7 @@ function LiteButtonAurasControllerMixin:UpdateTargetBuffs()
     end
 end
 
-function LiteButtonAurasControllerMixin:UpdateTargetCast()
+local function UpdateTargetCast()
     local name, endTime, cantInterrupt, _
 
     if UnitCanAttack('player', 'target') then
@@ -202,39 +260,42 @@ function LiteButtonAurasControllerMixin:UpdateTargetCast()
     LBA.state.targetInterrupt = nil
 end
 
+
+--[[------------------------------------------------------------------------]]--
+
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     if event == 'ADDON_LOADED' then
         self:Initialize()
         self:UnregisterEvent('ADDON_LOADED')
     elseif event == 'PLAYER_ENTERING_WORLD' then
-        self:UpdateTargetBuffs()
-        self:UpdateTargetDebuffs()
-        self:UpdateTargetCast()
-        self:UpdatePlayerBuffs()
-        self:UpdatePlayerTotems()
+        UpdateTargetBuffs()
+        UpdateTargetDebuffs()
+        UpdateTargetCast()
+        UpdatePlayerBuffs()
+        UpdatePlayerTotems()
         self:UpdateAllOverlays()
     elseif event == 'PLAYER_TARGET_CHANGED' then
-        self:UpdateTargetBuffs()
-        self:UpdateTargetDebuffs()
-        self:UpdateTargetCast()
+        UpdateTargetBuffs()
+        UpdateTargetDebuffs()
+        UpdateTargetCast()
         self:UpdateAllOverlays()
     elseif event == 'UNIT_AURA' then
         local unit = ...
         if unit == 'player' then
-            self:UpdatePlayerBuffs()
+            UpdatePlayerBuffs()
             self:UpdateAllOverlays()
         elseif unit == 'target' then
-            self:UpdateTargetBuffs()
-            self:UpdateTargetDebuffs()
+            UpdateTargetBuffs()
+            UpdateTargetDebuffs()
             self:UpdateAllOverlays()
         end
     elseif event == 'PLAYER_TOTEM_UPDATE' then
-        self:UpdatePlayerTotems()
+        UpdatePlayerTotems()
         self:UpdateAllOverlays()
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
         local unit = ...
         if unit == 'target' then
-            self:UpdateTargetCast()
+            UpdateTargetCast()
             self:UpdateAllOverlays()
         end
     end

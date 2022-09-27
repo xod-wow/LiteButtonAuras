@@ -7,8 +7,29 @@
 
 local _, LBA = ...
 
-
 local LibBG = LibStub("LibButtonGlow-1.0")
+
+
+--[[------------------------------------------------------------------------]]--
+
+-- Cache a some things to be faster. This is annoying but it's really a lot
+-- faster. Only do this for things that are called in the event loop otherwise
+-- it's just a pain to maintain.
+
+local DebuffTypeColor = DebuffTypeColor
+local GetActionInfo = GetActionInfo
+local GetItemSpell = GetItemSpell
+local GetMacroItem = GetMacroItem
+local GetMacroSpell = GetMacroSpell
+local GetSpellCooldown = GetSpellCooldown
+local GetSpellInfo = GetSpellInfo
+local GetTime = GetTime
+local IsSpellOverlayed = IsSpellOverlayed
+local UnitIsFriend = UnitIsFriend
+local WOW_PROJECT_ID = WOW_PROJECT_ID
+
+
+--[[------------------------------------------------------------------------]]--
 
 LiteButtonAurasOverlayMixin = {}
 
@@ -38,6 +59,9 @@ end
 
 function LiteButtonAurasOverlayMixin:SetUpAction()
     local action = self:GetAction()
+
+    -- In an ideal world GetActionInfo would return the unit as well. Or there
+    -- would be a GetActionUnit function.
 
     local type, id, subType = GetActionInfo(action)
     if type == 'spell' then
@@ -108,7 +132,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
 
     local alreadyOverlayed
     if WOW_PROJECT_ID == 1 then
-        alreadyOvelayed = self.spellID and IsSpellOverlayed(self.spellID)
+        alreadyOverlayed = self.spellID and IsSpellOverlayed(self.spellID)
     else
         local parent = self:GetParent()
         alreadyOverlayed = parent.overlay and parent.overlay:IsShown()

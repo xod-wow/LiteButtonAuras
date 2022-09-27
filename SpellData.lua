@@ -7,6 +7,9 @@
 
 local _, LBA = ...
 
+-- Just to make luacheck shut up a bit
+local GetSpellInfo = GetSpellInfo
+
 LBA.Interrupts = {
     [ 47528] = true,    -- Mind Freeze (Death Knight)
     [183752] = true,    -- Disrupt (Demon Hunter)
