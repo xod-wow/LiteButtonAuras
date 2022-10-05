@@ -15,12 +15,12 @@ Debuff on your target shows red highlight in ability button:
 For all of your action buttons:
 
 - If the action is an interrupt, and your target is casting a spell you can interrupt, suggest the button (border glow/ants) with a timer.
-- If the target is enraged and the action is a soothe, show an orange highlight and a timer..
+- If the target is enraged and the action is a soothe, suggest the button.
 - If the action name matches a buff on you that you cast, show a green highlight and a timer. Includes some totems and guardians.
 - If the action name matches a debuff that you cast on your target, show a red highlight and a timer.
 - If the action is a purge or dispel, show a highlight colored by the buff or debuff you can purge/dispel.
 
-Works with the default Blizzard action bars, Dominos, and maybe ElvUI.
+Works with the default Blizzard action bars, Dominos, and probably ElvUI.
 
 Compared to AdiButtonAuras, LiteButtonAuras:
 
