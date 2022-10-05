@@ -108,6 +108,7 @@ function LiteButtonAurasControllerMixin:Initialize()
     LBA.BarIntegrations:Initialize()
 
     self:RegisterEvent('UNIT_AURA')
+    self:RegisterEvent('PLAYER_ENTERING_WORLD')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
     self:RegisterEvent('PLAYER_TOTEM_UPDATE')
 
