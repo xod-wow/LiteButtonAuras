@@ -17,7 +17,6 @@ local LibBG = LibStub("LibButtonGlow-1.0")
 -- it's just a pain to maintain.
 
 local DebuffTypeColor = DebuffTypeColor
-local GetActionInfo = GetActionInfo
 local GetItemSpell = GetItemSpell
 local GetMacroItem = GetMacroItem
 local GetMacroSpell = GetMacroSpell
@@ -58,12 +57,10 @@ end
 -- are all the same as before and doing nothing
 
 function LiteButtonAurasOverlayMixin:SetUpAction()
-    local action = self:GetAction()
-
     -- In an ideal world GetActionInfo would return the unit as well. Or there
     -- would be a GetActionUnit function.
 
-    local type, id, subType = GetActionInfo(action)
+    local type, id, subType = self:GetActionInfo()
     if type == 'spell' then
         self.name = GetSpellInfo(id)
         self.spellID = id

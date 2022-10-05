@@ -9,15 +9,17 @@ local _, LBA = ...
 
 LBA.BarIntegrations = {}
 
+local GetActionInfo = GetActionInfo
+
 -- Generic ---------------------------------------------------------------------
 
-local function GenericGetAction(overlay)
-    return overlay:GetParent().action
+local function GenericGetActionInfo(overlay)
+    return GetActionInfo(overlay:GetParent().action)
 end
 
 local function GenericInitButton(actionButton)
     local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
-    overlay.GetAction = GenericGetAction
+    overlay.GetActionInfo = GenericGetActionInfo
     if not overlay.isHooked then
         hooksecurefunc(actionButton, 'Update', function () overlay:Update() end)
         overlay.isHooked = true
@@ -36,7 +38,7 @@ end
 
 local function ClassicInitButton(actionButton)
     local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
-    overlay.GetAction = GenericGetAction
+    overlay.GetActionInfo = GenericGetActionInfo
 end
 
 function LBA.BarIntegrations:ClassicInit()
@@ -83,14 +85,18 @@ end
 
 -- Covers ElvUI, Bartender. TukUI reuses the Blizzard buttons
 
-local function LABGetAction(overlay)
-    local _, action = overlay:GetParent():GetAction()
-    return action or 0
+local function LABGetActionInfo(overlay)
+    local actionType, action = overlay:GetParent():GetAction()
+    if actionType == "action" then
+        return GetActionInfo(action)
+    else
+        return actionType, action
+    end
 end
 
 local function LABInitButton(event, actionButton)
     local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
-    overlay.GetAction = LABGetAction
+    overlay.GetActionInfo = LABGetActionInfo
     overlay:Update()
 end
 
