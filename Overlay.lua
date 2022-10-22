@@ -3,6 +3,10 @@
     LiteButtonAuras
     Copyright 2021 Mike "Xodiv" Battersby
 
+    Code for one overlay frame on top of a button. Most of this code is the
+    logic for what to display depending on what auras are in LBA.state, see
+    LiteButtonAurasOverlayMixin:Update() for the entry point.
+
 ----------------------------------------------------------------------------]]--
 
 local _, LBA = ...
@@ -55,10 +59,20 @@ end
 
 -- This could be optimized (?) slightly be checking if type, id, subType
 -- are all the same as before and doing nothing
+--
+-- In an ideal world GetActionInfo would return the unit as well. Or there
+-- would be a GetActionUnit function. If we could find the unit then it
+-- would make sense to change LBA.state to be unit-indexed and to collect
+-- state for all the units we are interested in rather than a hard coded
+-- player and target set. Exactly how to do that efficiently would be a
+-- bit of a challenge but I think it's still faster than not keeping the
+-- state and each overlay doing its own UnitAura calls.
+--
+-- Realistically speaking we could scan all the macros for @ and target=
+-- and add them to a "wanted units" list. I don't think it would be worth
+-- trying to handle auto-self-cast or the new blizzard mouseover cast.
 
 function LiteButtonAurasOverlayMixin:SetUpAction()
-    -- In an ideal world GetActionInfo would return the unit as well. Or there
-    -- would be a GetActionUnit function.
 
     local type, id, subType = self:GetActionInfo()
     if type == 'spell' then
@@ -126,6 +140,9 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             show = true
         end
     end
+
+    -- We want to try to avoid doubling up on buttons Blizzard are already
+    -- showing their overlay on, because it looks terrible.
 
     local alreadyOverlayed
     if WOW_PROJECT_ID == 1 then

@@ -3,6 +3,10 @@
     LiteButtonAuras
     Copyright 2021 Mike "Xodiv" Battersby
 
+    Create overlays for actionbuttons and hook update when they change. Note
+    that hooksecurefunc() is kinda slow and should be avoided in cases where
+    the actionbutton provides its own hook.
+
 ----------------------------------------------------------------------------]]--
 
 local _, LBA = ...
@@ -100,10 +104,12 @@ local function LABInitButton(event, actionButton)
     overlay:Update()
 end
 
+-- LAB doesn't fire OnButtonCreated until the end of CreateButton but
+-- fires OnButtonUpdate in the middle, so we get Update before Create,
+-- hence the "if".
+
 local function LABButtonUpdate(event, actionButton)
     local overlay = LiteButtonAurasController:GetOverlay(actionButton)
-    -- LAB doesn't fire OnButtonCreated until the end of CreateButton but
-    -- fires OnButtonUpdate in the middle, so we get Update before Create
     if overlay then overlay:Update() end
 end
 
@@ -115,6 +121,10 @@ local function LABInitAllButtons(lib)
         LABInitButton(nil, actionButton)
     end
 end
+
+-- The %- here is a literal - instead of "zero or more repetitions". A
+-- few addons (most noteable ElvUI) use their own private version of
+-- LibActionButton with a suffix added to the name.
 
 function LBA.BarIntegrations:LABInit()
     for name, lib in LibStub:IterateLibraries() do

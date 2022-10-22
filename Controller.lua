@@ -3,6 +3,10 @@
     LiteButtonAuras
     Copyright 2021 Mike "Xodiv" Battersby
 
+    This is the event handler and state updater. Watches for the buffs and
+    updates LBA.state, then calls overlay:Update() on all actionbutton overlays
+    when required.
+
 ----------------------------------------------------------------------------]]--
 
 local _, LBA = ...

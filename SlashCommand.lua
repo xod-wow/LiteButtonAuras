@@ -3,6 +3,9 @@
     LiteButtonAuras
     Copyright 2021 Mike "Xodiv" Battersby
 
+    Slash command just allows setting and displaying the options since
+    there is no GUI for it.
+
 ----------------------------------------------------------------------------]]--
 
 local addonName, LBA = ...

@@ -3,6 +3,11 @@
     LiteButtonAuras
     Copyright 2021 Mike "Xodiv" Battersby
 
+    This is a register of spells that match a few criteria for special
+    display: interrupts, soothes, dispels. Also a list of model IDs to
+    match totem/guardians to spells (5th return value of GetTotemInfo)
+    since the names differ a lot.
+
 ----------------------------------------------------------------------------]]--
 
 local _, LBA = ...
