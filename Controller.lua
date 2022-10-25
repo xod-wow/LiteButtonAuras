@@ -99,16 +99,22 @@ LiteButtonAurasControllerMixin = {}
 
 function LiteButtonAurasControllerMixin:OnLoad()
     self.overlayFrames = {}
-    self:RegisterEvent('ADDON_LOADED')
+    self:RegisterEvent('PLAYER_LOGIN')
 end
 
 function LiteButtonAurasControllerMixin:Initialize()
+    self.LCD = LibStub("LibClassicDurations", true)
+    if self.LCD then
+        self.LCD:Register("LiteButtonAuras")
+        UnitAura = self.LCD.UnitAuraWrapper
+    end
+
     LBA.InitializeOptions()
     LBA.SetupSlashCommand()
     LBA.UpdateAuraMap()
 
-    -- Maybe this should be delayed until PLAYER_LOGIN so we don't have to
-    -- list all possible LibActionButton derivatives in the TOC dependencies
+    -- Now this is be delayed until PLAYER_LOGIN do we still need to list
+    -- list all possible LibActionButton derivatives in the TOC dependencies?
     LBA.BarIntegrations:Initialize()
 
     self:RegisterEvent('UNIT_AURA')
@@ -269,9 +275,9 @@ end
 --[[------------------------------------------------------------------------]]--
 
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
-    if event == 'ADDON_LOADED' then
+    if event == 'PLAYER_LOGIN' then
         self:Initialize()
-        self:UnregisterEvent('ADDON_LOADED')
+        self:UnregisterEvent('PLAYER_LOGIN')
     elseif event == 'PLAYER_ENTERING_WORLD' then
         UpdateTargetBuffs()
         UpdateTargetDebuffs()
