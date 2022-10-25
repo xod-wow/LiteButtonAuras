@@ -64,7 +64,11 @@ LBA.HostileDispels = {
 
 -- Where the totem name does not match the spell name. There's few enough
 -- of these that I think it's possible to maintain it.
--- [Texture ID] = Summoning Spell Name
+--
+-- [model] = Summoning Spell Name
+--
+--  for i = 1, MAX_TOTEMS do
+--      local exists, name, startTime, duration, model = GetTotemInfo(i)
 
 LBA.TotemOrGuardianModels = {
     [ 627607] = GetSpellInfo(115315),   -- Black Ox Statue (Monk)
