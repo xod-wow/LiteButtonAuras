@@ -227,7 +227,7 @@ local function UpdatePlayerTotems()
     end
 end
 
-local function UpdateTargetDebuffs()
+local function UpdateEnemyDebuffs()
     wipe(LBA.state.targetDebuffs)
     ForEachAura('target', 'HARMFUL PLAYER', nil,
         function (...)
@@ -235,7 +235,7 @@ local function UpdateTargetDebuffs()
         end)
 end
 
-local function UpdateTargetBuffs()
+local function UpdateEnemyBuffs()
     wipe(LBA.state.targetBuffs)
     if UnitCanAttack('player', 'target') then
         -- Hostile target buffs are only for dispels
@@ -251,7 +251,7 @@ local function UpdateTargetBuffs()
     end
 end
 
-local function UpdateTargetCast()
+local function UpdateEnemyCast()
     local name, endTime, cantInterrupt, _
 
     if UnitCanAttack('player', 'target') then
@@ -279,16 +279,16 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         self:Initialize()
         self:UnregisterEvent('PLAYER_LOGIN')
     elseif event == 'PLAYER_ENTERING_WORLD' then
-        UpdateTargetBuffs()
-        UpdateTargetDebuffs()
-        UpdateTargetCast()
+        UpdateEnemyBuffs()
+        UpdateEnemyDebuffs()
+        UpdateEnemyCast()
         UpdatePlayerBuffs()
         UpdatePlayerTotems()
         self:UpdateAllOverlays()
     elseif event == 'PLAYER_TARGET_CHANGED' then
-        UpdateTargetBuffs()
-        UpdateTargetDebuffs()
-        UpdateTargetCast()
+        UpdateEnemyBuffs()
+        UpdateEnemyDebuffs()
+        UpdateEnemyCast()
         self:UpdateAllOverlays()
     elseif event == 'UNIT_AURA' then
         local unit = ...
@@ -296,8 +296,8 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
             UpdatePlayerBuffs()
             self:UpdateAllOverlays()
         elseif unit == 'target' then
-            UpdateTargetBuffs()
-            UpdateTargetDebuffs()
+            UpdateEnemyBuffs()
+            UpdateEnemyDebuffs()
             self:UpdateAllOverlays()
         end
     elseif event == 'PLAYER_TOTEM_UPDATE' then
@@ -306,7 +306,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
         local unit = ...
         if unit == 'target' then
-            UpdateTargetCast()
+            UpdateEnemyCast()
             self:UpdateAllOverlays()
         end
     end
