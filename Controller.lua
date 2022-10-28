@@ -145,6 +145,7 @@ function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
         if MasqueGroup then
             MasqueGroup:AddButton(overlay, {
                 SpellHighlight = overlay.Glow,
+                Normal = false,
                 -- Duration = overlay.Timer,
                 -- Count = overlay.Count,
             })

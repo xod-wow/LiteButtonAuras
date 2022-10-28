@@ -2,10 +2,13 @@
 
   <Script file="Overlay.lua"/>
 
-  <Frame name="LiteButtonAurasOverlayTemplate" mixin="LiteButtonAurasOverlayMixin" setAllPoints="true" hidden="true" virtual="true">
+  <Frame name="LiteButtonAurasOverlayTemplate" mixin="LiteButtonAurasOverlayMixin" hidden="true" virtual="true">
     <Scripts>
       <OnLoad method="OnLoad" />
     </Scripts>
+    <Anchors>
+      <Anchor point="CENTER" />
+    </Anchors>
     <Layers>
       <Layer level="ARTWORK">
         <Texture parentKey="Glow" file="Interface\AddOns\LiteButtonAuras\Textures\Overlay" setAllPoints="true" alphaMode="ADD" />
