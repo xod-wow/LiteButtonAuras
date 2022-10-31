@@ -29,6 +29,16 @@ local function PrintUsage()
     printf("  /lba decimaltimers on|off|default")
     printf("  /lba font FontName|default")
     printf("  /lba font path [ size [ flags ] ]")
+    printf("  /lba aura help")
+end
+
+local function PrintAuraUsage()
+    printf(GAMEMENU_HELP .. ":")
+    printf("  /lba aura defaults")
+    printf("  /lba aura list")
+    printf("  /lba aura wipe")
+    printf("  /lba aura hide <auraSpellID> on <ability>")
+    printf("  /lba aura show <auraSpellID> on <ability>")
 end
 
 local function PrintOptions()
@@ -74,6 +84,84 @@ local function SetFont(args)
     LBA.SetOption('font', fontName or fontTable)
 end
 
+local function ParseAuraMap(cmdarg)
+    local aura, ability = cmdarg:match('^(.+) on (.+)$')
+    local auraName, _, _, _, _, _, auraID = GetSpellInfo(aura)
+    local abilityName, _, _, _, _, _, abilityID = GetSpellInfo(ability)
+    return auraID, auraName or aura, abilityID, abilityName or ability
+end
+
+local function AuraMapString(aura, auraName, ability, abilityName)
+    local c = NORMAL_FONT_COLOR
+    return format(
+                "%s %d on %s %d",
+                c:WrapTextInColorCode(auraName),
+                aura,
+                c:WrapTextInColorCode(abilityName),
+                ability
+            )
+end
+
+local function GetAuraMapList()
+    local out = { }
+    for aura, abilityTable in pairs(LBA.db.profile.auraMap) do
+        for _, ability in ipairs(abilityTable) do
+            if ability then -- false indicates default override
+                local auraName = GetSpellInfo(aura) or UNKNOWN
+                local abilityName = GetSpellInfo(ability) or UNKNOWN
+                table.insert(out, { aura, auraName, ability, abilityName })
+            end
+        end
+    end
+    sort(out, function (a, b) return a[2] < b[2] end)
+    return out
+end
+
+local function PrintAuraMapList()
+    printf("Aura list:")
+    for i, entry in ipairs(GetAuraMapList()) do
+        printf("%3d. %s", i, AuraMapString(unpack(entry)))
+    end
+end
+
+local function AuraCommand(argstr)
+    local _, cmd, cmdarg = strsplit(" ", argstr, 3)
+    if cmd == 'list' then
+        PrintAuraMapList()
+    elseif cmd == 'show' and cmdarg then
+        local aura, auraName, ability, abilityName = ParseAuraMap(cmdarg)
+        if aura and ability then
+            printf("show %s", AuraMapString(aura, auraName, ability, abilityName))
+            LBA.AddAuraMap(aura, ability)
+        elseif not aura then
+            printf("Error: unknown aura spell: %s", NORMAL_FONT_COLOR:WrapTextInColorCode(auraName))
+        elseif not ability then
+            printf("Error: unknown ability spell: %s", NORMAL_FONT_COLOR:WrapTextInColorCode(abilityName))
+        end
+    elseif cmd == 'hide' and cmdarg then
+        local aura, auraName, ability, abilityName = ParseAuraMap(cmdarg)
+        if aura and ability then
+            printf("hide %s", AuraMapString(aura, auraName, ability, abilityName))
+            LBA.RemoveAuraMap(aura, ability)
+        elseif not aura then
+            printf("Error: unknown aura spell.")
+        elseif not ability then
+            printf("Error: unknown ability spell.")
+        end
+    elseif cmd == 'wipe' then
+        printf("Wiping aura list.")
+        LBA.WipeAuraMap()
+    elseif cmd == 'default' then
+        printf("Setting aura list to defaults.")
+        LBA.WipeAuraMap()
+        LBA.DefaultAuraMap()
+    else
+        PrintAuraUsage()
+    end
+
+    return true
+end
+
 local function SlashCommand(argstr)
     local args = { strsplit(" ", argstr) }
     local cmd = table.remove(args, 1)
@@ -90,6 +178,8 @@ local function SlashCommand(argstr)
         LBA.SetOption('decimalTimers', args[1])
     elseif cmd:lower() == 'font' and #args >= 1 then
         SetFont(args)
+    elseif cmd:lower() == 'aura' then
+        AuraCommand(argstr)
     else
         PrintUsage()
     end
@@ -101,4 +191,3 @@ function LBA.SetupSlashCommand()
     _G.SLASH_LiteButtonAuras1 = "/litebuttonauras"
     _G.SLASH_LiteButtonAuras1 = "/lba"
 end
-
