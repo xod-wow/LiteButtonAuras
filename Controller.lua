@@ -75,7 +75,9 @@ function LBA.UpdateAuraMap()
         if fromName then
             AuraMapByName[fromName] = {}
             for i, toID in ipairs(fromTable) do
-                AuraMapByName[fromName][i] = GetSpellInfo(toID)
+                if toID ~= false then
+                    AuraMapByName[fromName][i] = GetSpellInfo(toID)
+                end
             end
         end
     end

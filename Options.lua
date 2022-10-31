@@ -91,3 +91,41 @@ function LBA.SetOption(option, value, key)
     end
     LBA.db.callbacks:Fire("OnModified")
 end
+
+function LBA.AddAuraMap(auraSpell, abilitySpell)
+    if LBA.db.profile.auraMap[auraSpell] then
+        table.insert(LBA.db.profile.auraMap[auraSpell], abilitySpell)
+    else
+        LBA.db.profile.auraMap[auraSpell] = { abilitySpell }
+    end
+    tDeleteItem(LBA.db.profile.auraMap, false)
+    LBA.UpdateAuraMap()
+end
+
+function LBA.RemoveAuraMap(auraSpell, abilitySpell)
+    if not LBA.db.profile.auraMap[auraSpell] then return end
+
+    tDeleteItem(LBA.db.profile.auraMap[auraSpell], abilitySpell)
+
+    if next(LBA.db.profile.auraMap[auraSpell]) == nil then
+        if not defaults.profile.auraMap[auraSpell] then
+            LBA.db.profile.auraMap[auraSpell] = nil
+        else
+            LBA.db.profile.auraMap[auraSpell] = { false }
+        end
+    end
+    LBA.UpdateAuraMap()
+end
+
+function LBA.DefaultAuraMap(auraSpell, abilitySpell)
+    LBA.db.profile.auraMap = CopyTable(defaults.profile.auraMap)
+    LBA.UpdateAuraMap()
+end
+
+function LBA.WipeAuraMap(auraSpell, abilitySpell)
+    table.wipe(LBA.db.profile.auraMap)
+    for n in pairs(defaults.profile.auraMap) do
+        LBA.db.profile.auraMap[n] = { false }
+    end
+    LBA.UpdateAuraMap()
+end
