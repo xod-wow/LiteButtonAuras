@@ -47,3 +47,13 @@ Config Options
 /lba font Size - set font size (default 14)
 /lba font FontPath Size FontFlags - set font by path size and flags
 ```
+
+Aura Options
+```
+/lba aura list - list current extra aura mappings
+/lba aura show <auraSpellID> on <ability>
+/lba aura hide <auraSpellID> on <ability>
+```
+If ability is in your spell book you can use it by name otherwise spell ID.
+
+This is only for extra mappings, it does not affect the matching name display.
