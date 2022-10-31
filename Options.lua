@@ -26,7 +26,7 @@ local defaults = {
                 77575,          --  Outbreak
                 115989,         --  Unholy Blight
             },
-            [55005] = {         -- Frost Fever
+            [55095] = {         -- Frost Fever
                 49184,          --  Howling Blast
             },
             [55078] = {         -- Blood Plague
