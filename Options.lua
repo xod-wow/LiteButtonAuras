@@ -34,8 +34,9 @@ local defaults = {
                 100780,         --  Tiger Palm
                 -- 100784,         --  Blackout Kick
             },
-            [138279] = {        -- Victorious
+            [32216] = {        -- Victorious
                 34428,          --  Victory Rush
+                202168,         --  Impending Victory
             },
         },
         color = {
