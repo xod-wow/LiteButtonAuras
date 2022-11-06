@@ -17,9 +17,6 @@ local defaults = {
             [190356]    = true, -- Blizzard (Mage)
         },
         auraMap = {
-            [224509] = {        -- Frailty
-                73572,          --  Spirit Bomb
-            },
             [191587] = {        -- Virulent Plague
                 77575,          --  Outbreak
                 115989,         --  Unholy Blight
@@ -29,9 +26,6 @@ local defaults = {
             },
             [55078] = {         -- Blood Plague
                 50842,          --  Blood Boil
-            },
-            [340459] = {        -- Maraad's Dying Breath
-                183998,         --  Light of the Martyr
             },
             [228287] = {        -- Mark of the Crane
                 100780,         --  Tiger Palm
@@ -47,7 +41,7 @@ local defaults = {
         color = {
             buff    = { r=0.00, g=0.70, b=0.00 },
             debuff  = { r=1.00, g=0.00, b=0.00 },
-            enrage  = { r=1.00, g=0.25, b=0.00 },
+            enrage  = { r=1.00, g=0.25, b=0.00 }, -- unused
         },
         minAuraDuration = 1.5,
         showTimers = true,

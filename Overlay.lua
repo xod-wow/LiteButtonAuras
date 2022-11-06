@@ -248,12 +248,14 @@ end
 
 -- Soothe Config ---------------------------------------------------------------
 
+--[[
 function LiteButtonAurasOverlayMixin:SetAsSoothe(info)
     local color = LBA.db.profile.color.enrage
     self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
     self.Count:SetTextColor(color.r, color.g, color.b, 1.0)
     self:SetAsAura(info)
 end
+]]
 
 function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
     if not self.spellID or not LBA.Soothes[self.spellID] then return end
