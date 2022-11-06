@@ -173,27 +173,14 @@ local function AuraCommand(argstr)
 end
 
 local function PrintDenyList()
-    printf("Deny list:")
-    local spells = { missing = 0 }
-
-    local function printSpells()
-        table.sort(spells, function (a, b) return a:GetSpellName() < b:GetSpellName() end)
-        for i, spell in ipairs(spells) do
-            printf("%3d. %s (%d)", i, spell:GetSpellName(), spell:GetSpellID())
-        end
-    end
-
+    local spells = { }
     for spellID in pairs(LBA.db.profile.denySpells) do
-        spells.missing = spells.missing + 1
-        table.insert(spells, Spell:CreateFromSpellID(spellID))
+        table.insert(spells, spellID)
     end
-
-    for _, spell in ipairs(spells) do
-        spell:ContinueOnSpellLoad(
-            function ()
-                spells.missing = spells.missing - 1
-                if spells.missing == 0 then printSpells() end
-            end)
+    table.sort(spells, function (a, b) return GetSpellInfo(a) < GetSpellInfo(b) end)
+    printf("Deny list:")
+    for i, spellID in ipairs(spells) do
+        printf("%3d. %s (%d)", i, GetSpellInfo(spellID) or "?", spellID)
     end
 end
 
