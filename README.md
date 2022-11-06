@@ -54,6 +54,14 @@ Aura Options
 /lba aura show <auraSpellID> on <ability>
 /lba aura hide <auraSpellID> on <ability>
 ```
+
+Deny List Options
+```
+/lba deny list - show aura spells never to show
+/lba deny add <auraSpellID>
+/lba deny remove <auraSpellID>
+```
+
 If ability is in your spell book you can use it by name otherwise spell ID.
 
 This is only for extra mappings, it does not affect the matching name display.
