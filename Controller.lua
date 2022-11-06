@@ -14,6 +14,7 @@ local _, LBA = ...
 LBA.state = {
     playerBuffs = {},
     playerTotems = {},
+    playerChannel = nil,
     targetDebuffs = {},
     targetBuffs = {},
 }
@@ -205,6 +206,10 @@ local function UpdateTableAura(t, name, ...)
     end
 end
 
+local function UpdatePlayerChannel()
+    LBA.state.playerChannel = UnitChannelInfo('player')
+end
+
 local function UpdatePlayerBuffs()
     wipe(LBA.state.playerBuffs)
     ForEachAura('player', 'HELPFUL PLAYER', nil,
@@ -311,6 +316,8 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         if unit == 'target' then
             UpdateEnemyCast()
             self:UpdateAllOverlays()
+        elseif unit == 'player' then
+            UpdatePlayerChannel()
         end
     end
 end
