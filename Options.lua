@@ -15,8 +15,6 @@ local defaults = {
             [116]       = true, -- Frostbolt (Mage)
             [152175]    = true, -- Whirling Dragon Punch (Monk)
             [190356]    = true, -- Blizzard (Mage)
-            [328283]    = true, -- Fallen Order Soothing Mist (Monk)
-            [344008]    = true, -- Fallen Order Enveloping Mist (Monk)
         },
         auraMap = {
             [224509] = {        -- Frailty
