@@ -35,6 +35,7 @@ LBA.Interrupts = {
     [132411] = true,    -- Command Demon: Singe Magic (Warlock)
     [212623] = true,    -- Command Demon: Singe Magic (Warlock PvP Talent)
     [  6552] = true,    -- Pummel (Warrior)
+    [351338] = true,    -- Quell (Evoker)
 }
 
 LBA.Soothes = {
