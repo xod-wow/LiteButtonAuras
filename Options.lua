@@ -117,15 +117,31 @@ function LBA.RemoveAuraMap(auraSpell, abilitySpell)
     LBA.UpdateAuraMap()
 end
 
-function LBA.DefaultAuraMap(auraSpell, abilitySpell)
+function LBA.DefaultAuraMap()
     LBA.db.profile.auraMap = CopyTable(defaults.profile.auraMap)
     LBA.UpdateAuraMap()
 end
 
-function LBA.WipeAuraMap(auraSpell, abilitySpell)
+function LBA.WipeAuraMap()
     table.wipe(LBA.db.profile.auraMap)
     for n in pairs(defaults.profile.auraMap) do
         LBA.db.profile.auraMap[n] = { false }
     end
     LBA.UpdateAuraMap()
+end
+
+function LBA.AddDenySpell(auraID)
+    LBA.db.profile.denySpells[auraID] = true
+end
+
+function LBA.RemoveDenySpell(auraID)
+    LBA.db.profile.denySpells[auraID] = nil
+end
+
+function LBA.DefaultDenySpells()
+    LBA.db.profile.denySpells = CopyTable(defaults.profile.denySpells)
+end
+
+function LBA.WipeDenySpells()
+    table.wipe(LBA.db.profile.denySpells)
 end

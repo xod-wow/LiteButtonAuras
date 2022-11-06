@@ -30,6 +30,7 @@ local function PrintUsage()
     printf("  /lba font FontName|default")
     printf("  /lba font path [ size [ flags ] ]")
     printf("  /lba aura help")
+    printf("  /lba deny help")
 end
 
 local function PrintAuraUsage()
@@ -39,6 +40,15 @@ local function PrintAuraUsage()
     printf("  /lba aura wipe")
     printf("  /lba aura hide <auraSpellID> on <ability>")
     printf("  /lba aura show <auraSpellID> on <ability>")
+end
+
+local function PrintDenyUsage()
+    printf(GAMEMENU_HELP .. ":")
+    printf("  /lba deny defaults")
+    printf("  /lba deny list")
+    printf("  /lba deny wipe")
+    printf("  /lba deny add <auraSpellID>")
+    printf("  /lba deny remove <auraSpellID>")
 end
 
 local function PrintOptions()
@@ -162,6 +172,59 @@ local function AuraCommand(argstr)
     return true
 end
 
+local function PrintDenyList()
+    printf("Deny list:")
+    local spells = { missing = 0 }
+
+    local function printSpells()
+        table.sort(spells, function (a, b) return a:GetSpellName() < b:GetSpellName() end)
+        for i, spell in ipairs(spells) do
+            printf("%3d. %s (%d)", i, spell:GetSpellName(), spell:GetSpellID())
+        end
+    end
+
+    for spellID in pairs(LBA.db.profile.denySpells) do
+        spells.missing = spells.missing + 1
+        table.insert(spells, Spell:CreateFromSpellID(spellID))
+    end
+
+    for _, spell in ipairs(spells) do
+        spell:ContinueOnSpellLoad(
+            function ()
+                spells.missing = spells.missing - 1
+                if spells.missing == 0 then printSpells() end
+            end)
+    end
+end
+
+local function DenyCommand(argstr)
+    local _, cmd, spell = strsplit(" ", argstr, 3)
+    if cmd == 'list' then
+        PrintDenyList()
+    elseif cmd == 'default' then
+        LBA.DefaultDenyList()
+    elseif cmd == 'wipe' then
+        LBA.WipeDenyList()
+    elseif cmd == 'add' and spell then
+        local id = select(7, GetSpellInfo(spell))
+        if id then
+            LBA.AddDenySpell(id)
+        else
+            printf("Error: unknown spell: " .. spell)
+        end
+    elseif cmd == 'remove' and spell then
+        local id = select(7, GetSpellInfo(spell))
+        if id then
+            LBA.RemoveDenySpell(id)
+        else
+            printf("Error: unknown spell: " .. spell)
+        end
+    else
+        PrintDenyUsage()
+    end
+    return true
+end
+
 local function SlashCommand(argstr)
     local args = { strsplit(" ", argstr) }
     local cmd = table.remove(args, 1)
@@ -180,6 +243,8 @@ local function SlashCommand(argstr)
         SetFont(args)
     elseif cmd:lower() == 'aura' then
         AuraCommand(argstr)
+    elseif cmd:lower() == 'deny' then
+        DenyCommand(argstr)
     else
         PrintUsage()
     end
