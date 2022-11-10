@@ -47,8 +47,8 @@ local function PrintDenyUsage()
     printf("  /lba deny defaults")
     printf("  /lba deny list")
     printf("  /lba deny wipe")
-    printf("  /lba deny add <auraSpellID>")
-    printf("  /lba deny remove <auraSpellID>")
+    printf("  /lba deny add <abilit>")
+    printf("  /lba deny remove <abilit>")
 end
 
 local function PrintOptions()

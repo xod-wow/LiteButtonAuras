@@ -57,9 +57,9 @@ Aura Options
 
 Deny List Options
 ```
-/lba deny list - show aura spells never to show
-/lba deny add <auraSpellID>
-/lba deny remove <auraSpellID>
+/lba deny list - abilities never to show auras on
+/lba deny add <ability>
+/lba deny remove <ability>
 ```
 
 If ability is in your spell book you can use it by name otherwise spell ID.
