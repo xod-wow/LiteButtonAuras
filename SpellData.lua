@@ -63,6 +63,10 @@ LBA.HostileDispels = {
     [232633] = { Magic = true },    -- Arcane Torrent (Blood Elf Priest)
 }
 
+LBA.PlayerPetBuffs = {
+    [   136] = true,                -- Mend Pet
+}
+
 -- Where the totem name does not match the spell name. There's few enough
 -- of these that I think it's possible to maintain it.
 --

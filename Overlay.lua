@@ -134,6 +134,11 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
         elseif state.playerBuffs[self.name] then
             self:SetAsBuff(state.playerBuffs[self.name])
             show = true
+        elseif state.playerPetBuffs[self.name] then
+            if LBA.PlayerPetBuffs[self.spellID] then
+                self:SetAsBuff(state.playerPetBuffs[self.name])
+                show = true
+            end
         elseif state.targetDebuffs[self.name] then
             if self.name ~= LBA.state.playerChannel then
                 self:SetAsDebuff(state.targetDebuffs[self.name])

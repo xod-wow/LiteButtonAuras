@@ -13,6 +13,7 @@ local _, LBA = ...
 
 LBA.state = {
     playerBuffs = {},
+    playerPetBuffs = {},
     playerTotems = {},
     playerChannel = nil,
     targetDebuffs = {},
@@ -222,6 +223,14 @@ local function UpdatePlayerBuffs()
         end)
 end
 
+local function UpdatePlayerPetBuffs()
+    wipe(LBA.state.playerPetBuffs)
+    ForEachAura('pet', 'HELPFUL PLAYER', nil,
+        function (...)
+            UpdateTableAura(LBA.state.playerPetBuffs, ...)
+        end)
+end
+
 local function UpdatePlayerTotems()
     wipe(LBA.state.playerTotems)
     for i = 1, MAX_TOTEMS do
@@ -286,38 +295,37 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     if event == 'PLAYER_LOGIN' then
         self:Initialize()
         self:UnregisterEvent('PLAYER_LOGIN')
+        return
     elseif event == 'PLAYER_ENTERING_WORLD' then
         UpdateEnemyBuffs()
         UpdateEnemyDebuffs()
         UpdateEnemyCast()
         UpdatePlayerBuffs()
+        UpdatePlayerPetBuffs()
         UpdatePlayerTotems()
-        self:UpdateAllOverlays()
     elseif event == 'PLAYER_TARGET_CHANGED' then
         UpdateEnemyBuffs()
         UpdateEnemyDebuffs()
         UpdateEnemyCast()
-        self:UpdateAllOverlays()
     elseif event == 'UNIT_AURA' then
         local unit = ...
         if unit == 'player' then
             UpdatePlayerBuffs()
-            self:UpdateAllOverlays()
+        elseif unit == 'pet' then
+            UpdatePlayerPetBuffs()
         elseif unit == 'target' then
             UpdateEnemyBuffs()
             UpdateEnemyDebuffs()
-            self:UpdateAllOverlays()
         end
     elseif event == 'PLAYER_TOTEM_UPDATE' then
         UpdatePlayerTotems()
-        self:UpdateAllOverlays()
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
         local unit = ...
         if unit == 'target' then
             UpdateEnemyCast()
-            self:UpdateAllOverlays()
         elseif unit == 'player' then
             UpdatePlayerChannel()
         end
     end
+    self:UpdateAllOverlays()
 end
