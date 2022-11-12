@@ -140,23 +140,23 @@ local function AuraCommand(argstr)
         PrintAuraMapList()
     elseif cmd == 'show' and cmdarg then
         local aura, auraName, ability, abilityName = ParseAuraMap(cmdarg)
-        if aura and ability then
-            printf("show %s", AuraMapString(aura, auraName, ability, abilityName))
-            LBA.AddAuraMap(aura, ability)
-        elseif not aura then
+        if not aura then
             printf("Error: unknown aura spell: %s", NORMAL_FONT_COLOR:WrapTextInColorCode(auraName))
         elseif not ability then
             printf("Error: unknown ability spell: %s", NORMAL_FONT_COLOR:WrapTextInColorCode(abilityName))
+        else
+            printf("show %s", AuraMapString(aura, auraName, ability, abilityName))
+            LBA.AddAuraMap(aura, ability)
         end
     elseif cmd == 'hide' and cmdarg then
         local aura, auraName, ability, abilityName = ParseAuraMap(cmdarg)
-        if aura and ability then
-            printf("hide %s", AuraMapString(aura, auraName, ability, abilityName))
-            LBA.RemoveAuraMap(aura, ability)
-        elseif not aura then
+        if not aura then
             printf("Error: unknown aura spell.")
         elseif not ability then
             printf("Error: unknown ability spell.")
+        else
+            printf("hide %s", AuraMapString(aura, auraName, ability, abilityName))
+            LBA.RemoveAuraMap(aura, ability)
         end
     elseif cmd == 'wipe' then
         printf("Wiping aura list.")
