@@ -65,7 +65,8 @@ end
 --[[------------------------------------------------------------------------]]--
 
 -- LBA matches auras by name, but the profile auraMap is by ID so that it works
--- in all locales. Translate it into the names once at load time.
+-- in all locales. Translate it into the names at load time and when the player
+-- adds more mappings.
 
 local AuraMapByName = {}
 
@@ -180,6 +181,29 @@ end
 
 -- State updating local functions
 
+-- This could be made (probably) more efficient by using the 10.0 event
+-- argument auraUpdateInfo at the price of losing classic compatibility.
+--
+-- "Probably" because once you do that you have to do your own "filtering"
+-- duplicating the 'HELPFUL PLAYER' etc. and iterate over a bunch of auras
+-- that aren't relevant here. It depends on how efficient the filter in
+-- UnitAuraSlots is (and by extension AuraUtil.ForEachAura). Would also have
+-- to either index them by auraInstanceID + scan for name in overlay, or
+-- keep indexing them by name and scan for auraInstanceID when updating.
+
+-- There's no point guessing at what would be better performance, if you're
+-- going to try to improve then measure it. Potentials for performance
+-- improvement (but measure!):
+--
+--  * limit the overlay updates using a dirty/sweep
+--  * limit the aura scans by using a dirty/sweep
+--  * use the UNIT_AURA push data (as above)
+--  * handle AuraMapByName in the overlay instead of here
+--  * store only the parts of the UnitAura() return the overlay wants
+--  * use C_UnitAura.GetAuraDataBySlot which has a struct return
+--
+-- Overall the 10.0 changes are not that helpful for matching by name.
+
 -- [ 1] name,
 -- [ 2] icon,
 -- [ 3] count,
@@ -202,7 +226,7 @@ local function UpdateTableAura(t, name, ...)
     t[name] = { name, ... }
     if AuraMapByName[name] then
         for _, toName in ipairs(AuraMapByName[name]) do
-            t[toName] = { name, ... }
+            t[toName] = t[name]
         end
     end
 end
@@ -311,6 +335,9 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         UpdateEnemyCast()
         self:UpdateAllOverlays()
     elseif event == 'UNIT_AURA' then
+        -- Be careful, this fires a lot. It might be better to dirty these
+        -- for an OnUpdate handler so at least it can't be more than once a
+        -- frame.
         local unit = ...
         if unit == 'player' then
             UpdatePlayerBuffs()
@@ -327,6 +354,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         UpdatePlayerTotems()
         self:UpdateAllOverlays()
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
+        -- This fires a lot too, same applies as UNIT_AURA.
         local unit = ...
         if unit == 'target' then
             UpdateEnemyCast()
