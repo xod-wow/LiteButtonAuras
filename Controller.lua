@@ -295,6 +295,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     if event == 'PLAYER_LOGIN' then
         self:Initialize()
         self:UnregisterEvent('PLAYER_LOGIN')
+        self:UpdateAllOverlays()
         return
     elseif event == 'PLAYER_ENTERING_WORLD' then
         UpdateEnemyBuffs()
@@ -303,29 +304,36 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         UpdatePlayerBuffs()
         UpdatePlayerPetBuffs()
         UpdatePlayerTotems()
+        self:UpdateAllOverlays()
     elseif event == 'PLAYER_TARGET_CHANGED' then
         UpdateEnemyBuffs()
         UpdateEnemyDebuffs()
         UpdateEnemyCast()
+        self:UpdateAllOverlays()
     elseif event == 'UNIT_AURA' then
         local unit = ...
         if unit == 'player' then
             UpdatePlayerBuffs()
+            self:UpdateAllOverlays()
         elseif unit == 'pet' then
             UpdatePlayerPetBuffs()
+            self:UpdateAllOverlays()
         elseif unit == 'target' then
             UpdateEnemyBuffs()
             UpdateEnemyDebuffs()
+            self:UpdateAllOverlays()
         end
     elseif event == 'PLAYER_TOTEM_UPDATE' then
         UpdatePlayerTotems()
+        self:UpdateAllOverlays()
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
         local unit = ...
         if unit == 'target' then
             UpdateEnemyCast()
+            self:UpdateAllOverlays()
         elseif unit == 'player' then
             UpdatePlayerChannel()
+            self:UpdateAllOverlays()
         end
     end
-    self:UpdateAllOverlays()
 end
