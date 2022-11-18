@@ -200,9 +200,13 @@ end
 --  * use the UNIT_AURA push data (as above)
 --  * handle AuraMapByName in the overlay instead of here
 --  * store only the parts of the UnitAura() return the overlay wants
---  * use C_UnitAura.GetAuraDataBySlot which has a struct return
+--  * use C_UnitAuras.GetAuraDataBySlot which has a struct return
 --
 -- Overall the 10.0 changes are not that helpful for matching by name.
+--
+-- It's worth noting that the 10.0 BuffFrame still uses the same mechanism
+-- as used here, but both the CompactUnitFrame and the TargetFrame have
+-- switched to using the new ways.
 
 -- [ 1] name,
 -- [ 2] icon,

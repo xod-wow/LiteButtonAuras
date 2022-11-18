@@ -78,6 +78,7 @@ LBA.PlayerPetBuffs = {
 LBA.TotemOrGuardianModels = {
     [ 627607] = GetSpellInfo(115315),   -- Black Ox Statue (Monk)
     [ 620831] = GetSpellInfo(115313),   -- Jade Serpent Statue (Monk)
+    [4667418] = GetSpellInfo(388686),   -- White Tiger Statue (Monk)
     [ 620832] = GetSpellInfo(123904),   -- Xuen,the White Tiger (Monk)
     [ 574571] = GetSpellInfo(322118),   -- Yu'lon, The Jade Serpent (Monk)
 --  [ 608951] = GetSpellInfo(132578),   -- Niuzao, the Black Ox (Monk)
