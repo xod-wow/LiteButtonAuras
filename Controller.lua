@@ -27,7 +27,6 @@ LBA.state = {
 -- faster. Only do this for things that are called in the event loop otherwise
 -- it's just a pain to maintain.
 
-local wipe = table.wipe
 local GetSpellInfo = GetSpellInfo
 local GetTotemInfo = GetTotemInfo
 local MAX_TOTEMS = MAX_TOTEMS
@@ -71,7 +70,7 @@ end
 local AuraMapByName = {}
 
 function LBA.UpdateAuraMap()
-    wipe(AuraMapByName)
+    table.wipe(AuraMapByName)
 
     for fromID, fromTable in pairs(LBA.db.profile.auraMap) do
         local fromName = GetSpellInfo(fromID)
@@ -240,7 +239,7 @@ local function UpdatePlayerChannel()
 end
 
 local function UpdatePlayerBuffs()
-    wipe(LBA.state.playerBuffs)
+    LBA.state.playerBuffs = {}
     ForEachAura('player', 'HELPFUL PLAYER', nil,
         function (...)
             UpdateTableAura(LBA.state.playerBuffs, ...)
@@ -252,7 +251,7 @@ local function UpdatePlayerBuffs()
 end
 
 local function UpdatePlayerPetBuffs()
-    wipe(LBA.state.playerPetBuffs)
+    LBA.state.playerPetBuffs = {}
     ForEachAura('pet', 'HELPFUL PLAYER', nil,
         function (...)
             UpdateTableAura(LBA.state.playerPetBuffs, ...)
@@ -260,7 +259,7 @@ local function UpdatePlayerPetBuffs()
 end
 
 local function UpdatePlayerTotems()
-    wipe(LBA.state.playerTotems)
+    LBA.state.playerTotems = {}
     for i = 1, MAX_TOTEMS do
         local exists, name, startTime, duration, model = GetTotemInfo(i)
         if exists and name then
@@ -273,7 +272,7 @@ local function UpdatePlayerTotems()
 end
 
 local function UpdateEnemyDebuffs()
-    wipe(LBA.state.targetDebuffs)
+    LBA.state.targetDebuffs = {}
     ForEachAura('target', 'HARMFUL PLAYER', nil,
         function (...)
             UpdateTableAura(LBA.state.targetDebuffs, ...)
@@ -281,7 +280,7 @@ local function UpdateEnemyDebuffs()
 end
 
 local function UpdateEnemyBuffs()
-    wipe(LBA.state.targetBuffs)
+    LBA.state.targetBuffs = {}
     if UnitCanAttack('player', 'target') then
         -- Hostile target buffs are only for dispels
         ForEachAura('target', 'HELPFUL', nil,
