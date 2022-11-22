@@ -13,6 +13,6 @@ SpellData.lua
 ColorGradient.lua
 BarIntegrations.lua
 SlashCommand.lua
-Options.lua
+Options-Classic.lua
 Overlay.xml
 Controller.xml

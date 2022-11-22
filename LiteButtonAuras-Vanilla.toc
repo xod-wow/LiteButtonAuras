@@ -14,5 +14,5 @@ ColorGradient.lua
 BarIntegrations.lua
 SlashCommand.lua
 Options.lua
-Overlay.xml
+Overlay-Classic.xml
 Controller.xml

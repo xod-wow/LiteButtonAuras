@@ -11,17 +11,17 @@
     </Anchors>
     <Layers>
       <Layer level="ARTWORK">
-        <Texture parentKey="Glow" atlas="UI-HUD-ActionBar-IconFrame-Down" setAllPOints="true" alphaMode="ADD" />
+        <Texture parentKey="Glow" file="Interface\AddOns\LiteButtonAuras\Textures\Overlay" setAllPOints="true" alphaMode="ADD" />
       </Layer>
       <Layer level="OVERLAY">
         <FontString parentKey="Timer" inherits="NumberFontNormal" justifyH="LEFT">
           <Anchors>
-            <Anchor point="BOTTOMLEFT" x="5" y="5" />
+            <Anchor point="BOTTOMLEFT" x="2" y="2" />
           </Anchors>
         </FontString>
         <FontString parentKey="Stacks" inherits="NumberFontNormal" justifyH="LEFT">
           <Anchors>
-            <Anchor point="TOPLEFT" x="5" y="-5" />
+            <Anchor point="TOPLEFT" x="2" y="-2" />
           </Anchors>
         </FontString>
       </Layer>
