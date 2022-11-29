@@ -151,16 +151,18 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
     end
 
     -- We want to try to avoid doubling up on buttons Blizzard are already
-    -- showing their overlay on, because it looks terrible.
+    -- showing their overlay on, because it looks terrible. Also try to
+    -- avoid calling IsSpellOverlayed as it seems to cause issues with the
+    -- new WoW 10.0.2 glow.
 
-    local alreadyOverlayed
     if WOW_PROJECT_ID == 1 then
-        alreadyOverlayed = self.spellID and IsSpellOverlayed(self.spellID)
+        self.displayGlow = self.displayGlow and not (self.spellID and IsSpellOverlayed(self.spellID))
     else
         local parent = self:GetParent()
-        alreadyOverlayed = parent.overlay and parent.overlay:IsShown()
+        self.displayGlow = self.displayGlow and not (parent.overlay and parent.overlay:IsShown())
     end
-    self:ShowGlow(self.displayGlow and not alreadyOverlayed)
+
+    self:ShowGlow(self.displayGlow)
     self:ShowTimer(self.expireTime ~= nil and LBA.db.profile.showTimers)
     self:ShowStacks(self.stackCount ~= nil and LBA.db.profile.showStacks)
     self:ShowSuggestion(self.displaySuggestion and LBA.db.profile.showSuggestions)
