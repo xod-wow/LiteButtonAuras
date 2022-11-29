@@ -34,10 +34,6 @@ local defaults = {
                 100780,         --  Tiger Palm
                 -- 100784,         --  Blackout Kick
             },
-            [32216] = {        -- Victorious
-                34428,          --  Victory Rush
-                202168,         --  Impending Victory
-            },
         },
         color = {
             buff    = { r=0.00, g=0.70, b=0.00 },
