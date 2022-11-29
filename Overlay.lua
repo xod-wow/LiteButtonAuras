@@ -101,6 +101,7 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
         end
     end
 
+    self.spellID = nil
     self.name = nil
 end
 
