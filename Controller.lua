@@ -341,17 +341,19 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         -- Be careful, this fires a lot. It might be better to dirty these
         -- for an OnUpdate handler so at least it can't be more than once a
         -- frame.
-        local unit = ...
-        if unit == 'player' then
-            UpdatePlayerBuffs()
-            self:UpdateAllOverlays()
-        elseif unit == 'pet' then
-            UpdatePlayerPetBuffs()
-            self:UpdateAllOverlays()
-        elseif unit == 'target' then
-            UpdateEnemyBuffs()
-            UpdateEnemyDebuffs()
-            self:UpdateAllOverlays()
+        local unit, auraInfo = ...
+        if not auraInfo or auraInfo.addedAuras or auraInfo.removedAuraInstanceIDs or auraInfo.updatedAuraInstanceIDs then
+            if unit == 'player' then
+                UpdatePlayerBuffs()
+                self:UpdateAllOverlays()
+            elseif unit == 'pet' then
+                UpdatePlayerPetBuffs()
+                self:UpdateAllOverlays()
+            elseif unit == 'target' then
+                UpdateEnemyBuffs()
+                UpdateEnemyDebuffs()
+                self:UpdateAllOverlays()
+            end
         end
     elseif event == 'PLAYER_TOTEM_UPDATE' then
         UpdatePlayerTotems()
