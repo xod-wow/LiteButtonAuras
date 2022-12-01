@@ -21,9 +21,15 @@ local function GenericGetActionInfo(overlay)
     return GetActionInfo(overlay:GetParent().action)
 end
 
+local function GenericHasAction(overlay)
+    return HasAction(overlay:GetParent().action)
+end
+
 local function GenericInitButton(actionButton)
     local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
     overlay.GetActionInfo = GenericGetActionInfo
+    overlay.HasAction = GenericHasAction
+
     if not overlay.isHooked then
         hooksecurefunc(actionButton, 'Update', function () overlay:Update() end)
         overlay.isHooked = true
@@ -43,6 +49,7 @@ end
 local function ClassicInitButton(actionButton)
     local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
     overlay.GetActionInfo = GenericGetActionInfo
+    overlay.HasAction = GenericHasAction
 end
 
 function LBA.BarIntegrations:ClassicInit()
@@ -98,9 +105,17 @@ local function LABGetActionInfo(overlay)
     end
 end
 
+local function LABHasAction(overlay)
+    local actionType, action = overlay:GetParent():GetAction()
+    if actionType == "action" then
+        return HasAction(action)
+    end
+end
+
 local function LABInitButton(event, actionButton)
     local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
     overlay.GetActionInfo = LABGetActionInfo
+    overlay.HasAction = LABHasAction
     overlay:Update()
 end
 
@@ -123,7 +138,7 @@ local function LABInitAllButtons(lib)
 end
 
 -- The %- here is a literal - instead of "zero or more repetitions". A
--- few addons (most noteable ElvUI) use their own private version of
+-- few addons (most noteably ElvUI) use their own private version of
 -- LibActionButton with a suffix added to the name.
 
 function LBA.BarIntegrations:LABInit()
