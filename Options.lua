@@ -31,8 +31,8 @@ local defaults = {
                 100780,         --  Tiger Palm
             },
             [116645] = {        -- Teachings of the Monastery
-                100780,         --  Tiger Palm
-                -- 100784,         --  Blackout Kick
+                -- 100780,         --  Tiger Palm
+                100784,         --  Blackout Kick
             },
         },
         color = {
