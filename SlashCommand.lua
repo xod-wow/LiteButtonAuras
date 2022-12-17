@@ -35,7 +35,7 @@ end
 
 local function PrintAuraUsage()
     printf(GAMEMENU_HELP .. ":")
-    printf("  /lba aura defaults")
+    printf("  /lba aura default")
     printf("  /lba aura list")
     printf("  /lba aura wipe")
     printf("  /lba aura hide <auraSpellID> on <ability>")
