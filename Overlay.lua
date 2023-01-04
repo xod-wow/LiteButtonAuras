@@ -241,8 +241,13 @@ end
 -- https://wowpedia.fandom.com/wiki/API_GetSpellCooldown
 
 function LiteButtonAurasOverlayMixin:ReadyBefore(endTime)
-    local start, duration = GetSpellCooldown(self.spellID)
-    return start + duration < endTime
+    if endTime == 0 then
+        -- Indefinite enrage, such as from the Raging M+ affix
+        return true
+    else
+        local start, duration = GetSpellCooldown(self.spellID)
+        return start + duration < endTime
+    end
 end
 
 function LiteButtonAurasOverlayMixin:TrySetAsInterrupt()
