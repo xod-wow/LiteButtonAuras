@@ -6,7 +6,7 @@
 ## OptionalDeps: Bartender4, Dominos, ElvUI, Masque
 ## SavedVariables: LiteButtonAurasDB
 ## X-Curse-Project-ID: 526431
-## X-WOWI-ID: 26528
+## X-WoWI-ID: 26528
 
 Libs\embeds.xml
 
