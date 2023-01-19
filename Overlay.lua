@@ -136,8 +136,10 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
                 self:SetAsTotem(state.playerTotems[self.name])
                 show = true
             elseif state.playerBuffs[self.name] then
-                self:SetAsBuff(state.playerBuffs[self.name])
-                show = true
+                if self.name ~= LBA.state.playerChannel then
+                    self:SetAsBuff(state.playerBuffs[self.name])
+                    show = true
+                end
             elseif state.playerPetBuffs[self.name] then
                 if LBA.PlayerPetBuffs[self.spellID] then
                     self:SetAsBuff(state.playerPetBuffs[self.name])
