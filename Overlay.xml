@@ -11,7 +11,7 @@
     </Anchors>
     <Layers>
       <Layer level="ARTWORK">
-        <Texture parentKey="Glow" atlas="UI-HUD-ActionBar-IconFrame-Down" setAllPOints="true" alphaMode="ADD" />
+        <Texture parentKey="Glow" file="Interface\AddOns\LiteButtonAuras\Textures\Overlay" setAllPOints="true" alphaMode="ADD" />
       </Layer>
       <Layer level="OVERLAY">
         <FontString parentKey="Timer" inherits="NumberFontNormal" justifyH="LEFT">
