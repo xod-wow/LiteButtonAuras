@@ -89,9 +89,9 @@ if not ForEachAura then
                     return
                 elseif UnitAura(unit, i, filter) then
                     if usePackedAura then
-                        func(UnitAura(unit, i, filter))
-                    else
                         func(UnitAuraData(unit, i, filter))
+                    else
+                        func(UnitAura(unit, i, filter))
                     end
                 else
                     return
