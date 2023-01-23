@@ -334,7 +334,7 @@ local function UpdateEnemyBuffs()
         ForEachAura('target', 'HELPFUL PLAYER', nil,
             function (auraData)
                 UpdateTableAura(LBA.state.targetBuffs, auraData)
-            end)
+            end, true)
     end
 end
 
