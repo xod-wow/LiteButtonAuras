@@ -44,14 +44,55 @@ local WOW_PROJECT_ID = WOW_PROJECT_ID
 local ForEachAura = AuraUtil.ForEachAura
 
 if not ForEachAura then
+    -- Turn the UnitAura returns into a facsimile of the UnitAuraInfo struct
+    -- returned by C_UnitAuras.GetAuraDataBySlot(unit, slot)
+
+    local auraInstanceID = 0
+
+    local function UnitAuraData(unit, i, filter)
+        local name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod = UnitAura(unit, i, filter)
+        auraInstanceID = auraInstanceID + 1
+        return {
+            applications = count,
+            auraInstanceID = auraInstanceID,
+            canApplyAura = canApplyAura,
+            -- charges = ,
+            dispelName = dispelType,
+            duration = duration,
+            expirationTime = expirationTime,
+            icon = icon,
+            isBossAura = isBossDebuff,
+            isFromPlayerOrPlayerPet = castByPlayer,
+            -- These would have to be pulled from the filter with string splitting
+            -- which would be super slow, so don't.
+            -- isHarmful =
+            -- isHelpful =
+            -- isNameplateOnly =
+            -- isRaid =
+            isStealable = isStealable,
+            -- maxCharges =
+            name = name,
+            nameplateShowAll = nameplateShowAll,
+            nameplateShowPersonal = nameplateShowPersonal,
+            -- points =
+            sourceUnit = source,
+            spellId = spellId,
+            timeMod = timeMod,
+        }
+    end
+
     ForEachAura =
-        function (unit, filter, maxCount, func)
+        function (unit, filter, maxCount, func, usePackedAura)
             local i = 1
             while true do
                 if maxCount and i > maxCount then
                     return
                 elseif UnitAura(unit, i, filter) then
-                    func(UnitAura(unit, i, filter))
+                    if usePackedAura then
+                        func(UnitAura(unit, i, filter))
+                    else
+                        func(UnitAuraData(unit, i, filter))
+                    end
                 else
                     return
                 end
@@ -224,12 +265,14 @@ end
 -- [15] timeMod,
 -- ...
 -- = UnitAura(unit, index, filter)
+--
+-- https://wowpedia.fandom.com/wiki/API_C_UnitAuras.GetAuraDataBySlot
 
-local function UpdateTableAura(t, name, ...)
-    t[name] = { name, ... }
-    if AuraMapByName[name] then
-        for _, toName in ipairs(AuraMapByName[name]) do
-            t[toName] = t[name]
+local function UpdateTableAura(t, auraData)
+    t[auraData.name] = auraData
+    if AuraMapByName[auraData.name] then
+        for _, toName in ipairs(AuraMapByName[auraData.name]) do
+            t[toName] = auraData
         end
     end
 end
@@ -241,21 +284,21 @@ end
 local function UpdatePlayerBuffs()
     LBA.state.playerBuffs = {}
     ForEachAura('player', 'HELPFUL PLAYER', nil,
-        function (...)
-            UpdateTableAura(LBA.state.playerBuffs, ...)
-        end)
+        function (auraData)
+            UpdateTableAura(LBA.state.playerBuffs, auraData)
+        end, true)
     ForEachAura('player', 'HELPFUL RAID', nil,
-        function (...)
-            UpdateTableAura(LBA.state.playerBuffs, ...)
-        end)
+        function (auraData)
+            UpdateTableAura(LBA.state.playerBuffs, auraData)
+        end, true)
 end
 
 local function UpdatePlayerPetBuffs()
     LBA.state.playerPetBuffs = {}
     ForEachAura('pet', 'HELPFUL PLAYER', nil,
-        function (...)
-            UpdateTableAura(LBA.state.playerPetBuffs, ...)
-        end)
+        function (auraData)
+            UpdateTableAura(LBA.state.playerPetBuffs, auraData)
+        end, true)
 end
 
 local function UpdatePlayerTotems()
@@ -274,9 +317,9 @@ end
 local function UpdateEnemyDebuffs()
     LBA.state.targetDebuffs = {}
     ForEachAura('target', 'HARMFUL PLAYER', nil,
-        function (...)
-            UpdateTableAura(LBA.state.targetDebuffs, ...)
-        end)
+        function (auraData)
+            UpdateTableAura(LBA.state.targetDebuffs, auraData)
+        end, true)
 end
 
 local function UpdateEnemyBuffs()
@@ -284,13 +327,13 @@ local function UpdateEnemyBuffs()
     if UnitCanAttack('player', 'target') then
         -- Hostile target buffs are only for dispels
         ForEachAura('target', 'HELPFUL', nil,
-            function (name, ...)
-                LBA.state.targetBuffs[name] = { name, ... }
-            end)
+            function (auraData)
+                UpdateTableAura(LBA.state.targetBuffs, auraData)
+            end, true)
     else
         ForEachAura('target', 'HELPFUL PLAYER', nil,
-            function (name, ...)
-                LBA.state.targetBuffs[name] = { name, ... }
+            function (auraData)
+                UpdateTableAura(LBA.state.targetBuffs, auraData)
             end)
     end
 end

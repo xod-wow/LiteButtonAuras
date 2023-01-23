@@ -194,36 +194,35 @@ end
 --      ...
 --  = UnitAura(unit, index, filter)
 
-function LiteButtonAurasOverlayMixin:SetAsAura(info)
+function LiteButtonAurasOverlayMixin:SetAsAura(auraData)
     -- Anything that's too short is just annoying
-    local duration = info[5]
-    if duration > 0 and duration < LBA.db.profile.minAuraDuration then
+    if auraData.duration > 0 and auraData.duration < LBA.db.profile.minAuraDuration then
         return
     end
     self.displayGlow = true
-    if info[6] and info[6] ~= 0 then
-        self.expireTime = info[6]
-        self.timeMod = info[15]
+    if auraData.expirationTime and auraData.expirationTime ~= 0 then
+        self.expireTime = auraData.expirationTime
+        self.timeMod = auraData.timeMod
     end
-    if info[3] and info[3] > 1 then
-        self.stackCount = info[3]
+    if auraData.applications and auraData.applications > 1 then
+        self.stackCount = auraData.applications
     end
 end
 
-function LiteButtonAurasOverlayMixin:SetAsBuff(info)
+function LiteButtonAurasOverlayMixin:SetAsBuff(auraData)
     local color = LBA.db.profile.color.buff
     local alpha = LBA.db.profile.glowAlpha
     self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
     -- self.Stacks:SetTextColor(color.r, color.g, color.b, 1.0)
-    self:SetAsAura(info)
+    self:SetAsAura(auraData)
 end
 
-function LiteButtonAurasOverlayMixin:SetAsDebuff(info)
+function LiteButtonAurasOverlayMixin:SetAsDebuff(auraData)
     local color = LBA.db.profile.color.debuff
     local alpha = LBA.db.profile.glowAlpha
     self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
     -- self.Stacks:SetTextColor(color.r, color.g, color.b, 1.0)
-    self:SetAsAura(info)
+    self:SetAsAura(auraData)
 end
 
 
@@ -269,11 +268,11 @@ end
 -- Soothe Config ---------------------------------------------------------------
 
 --[[
-function LiteButtonAurasOverlayMixin:SetAsSoothe(info)
+function LiteButtonAurasOverlayMixin:SetAsSoothe(auraData)
     local color = LBA.db.profile.color.enrage
     self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
     -- self.Stacks:SetTextColor(color.r, color.g, color.b, 1.0)
-    self:SetAsAura(info)
+    self:SetAsAura(auraData)
 end
 ]]
 
@@ -281,9 +280,9 @@ function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
     if not self.spellID or not LBA.Soothes[self.spellID] then return end
     if UnitIsFriend('player', 'target') then return end
 
-    for _, info in pairs(LBA.state.targetBuffs) do
-        if info[8] and info[4] == "" and self:ReadyBefore(info[6]) then
-            self.expireTime = info[6]
+    for _, auraData in pairs(LBA.state.targetBuffs) do
+        if auraData.isStealable and auraData.dispelName == "" and self:ReadyBefore(auraData.expirationTime) then
+            self.expireTime = auraData.expirationTime
             self.displaySuggestion = true
             return true
         end
@@ -292,12 +291,12 @@ end
 
 -- Dispel Config ---------------------------------------------------------------
 
-function LiteButtonAurasOverlayMixin:SetAsDispel(info)
-    local color = DebuffTypeColor[info[4] or ""]
+function LiteButtonAurasOverlayMixin:SetAsDispel(auraData)
+    local color = DebuffTypeColor[auraData.dispelName or ""]
     local alpha = LBA.db.profile.glowAlpha
     self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
     -- self.Stacks:SetTextColor(color.r, color.g, color.b, 1.0)
-    self:SetAsAura(info)
+    self:SetAsAura(auraData)
 end
 
 function LiteButtonAurasOverlayMixin:TrySetAsDispel()
@@ -312,9 +311,9 @@ function LiteButtonAurasOverlayMixin:TrySetAsDispel()
     local dispels = LBA.HostileDispels[self.spellID]
     if dispels then
         for k in pairs(dispels) do
-            for _, info in pairs(LBA.state.targetBuffs) do
-                if info[4] == k then
-                    self:SetAsDispel(info)
+            for _, auraData in pairs(LBA.state.targetBuffs) do
+                if auraData.dispelName == k then
+                    self:SetAsDispel(auraData)
                     return true
                 end
             end
