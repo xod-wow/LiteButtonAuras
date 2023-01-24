@@ -102,7 +102,19 @@ You can stop an ability from ever getting highlighted due to the default name ma
 
 If ability is in your spell book you can use it by name otherwise spell ID.
 
-## Features I would like to support, but can't or won't, and why
+## How to find spell IDs
+
+Every ability and every buff/debuff has an associated Spell ID, which you need to know to
+configure custom highlights (above).
+
+LiteButtonAuras doesn't include any helpers for finding spell IDs, you'll need to do it
+yourself. Here are three ways to do this:
+
+1. Look up wowhead.com. The spell ID is the number after spell= in the URL.
+1. Get an addon that adds Spell IDs to the tooltip.
+1. If you have the _Details!_ addon, it keeps a list of spells you can view with `/details spells`
+
+## Features I can't or won't support, and why
 
 1. __Weapon Enchants__. There's no way to get the name from the enchant ID that I can see.
 1. __Macro @units__. There's no simple way to figure out what unit an action will target.
@@ -115,18 +127,6 @@ If ability is in your spell book you can use it by name otherwise spell ID.
 In general a lot of not supporting things involves keeping LiteButtonAuras small and
 simple enough that when a major WoW release comes out I can update it without causing
 myself so much stress I give up.
-
-## How to find spell IDs
-
-Every ability and every buff/debuff has an associated Spell ID, which you need to know to
-configure custom highlights (above).
-
-LiteButtonAuras doesn't include any helpers for finding spell IDs, you'll need to do it
-yourself. Here are three ways to do this:
-
-1. Look up wowhead.com. The spell ID is the number after spell= in the URL.
-1. Get an addon that adds Spell IDs to the tooltip.
-1. If you have the _Details!_ addon, it keeps a list of spells you can view with `/details spells`
 
 ##  If This AddOn Seems Abandoned
 
