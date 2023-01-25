@@ -23,7 +23,7 @@ For all of your action buttons:
 - Show a red highlight and timer if:
     - the action name matches a debuff that you cast on your target
 - Show a debuff-colored border (curse/disease/magic/poison) if:
-    * your target is an enemy, and
+    - your target is an enemy, and
     - you can purge the buff, and
     - the button action is a purge/spellsteal
 
@@ -86,9 +86,6 @@ If an ability is in your spell book you can use it by name otherwise by spell ID
 
 You can only add auras using this, or remove ones you previously added. You can't use "hide" to
 change the default behaviour of showing buffs/debuffs that match the ability name.
-
-The `hide` option is only to remove extra mappings you have added, it does not affect the default
-display when the names match.
 
 ## Never Highlight An Ability
 
