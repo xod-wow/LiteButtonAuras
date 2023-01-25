@@ -51,6 +51,10 @@ if not ForEachAura then
 
     local function UnitAuraData(unit, i, filter)
         local name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod = UnitAura(unit, i, filter)
+
+        local isHarmful = filter:find('HARMFUL') and true or false
+        local isHelpful = filter:find('HELPFUL') and true or false
+
         auraInstanceID = auraInstanceID + 1
         return {
             applications = count,
@@ -63,10 +67,8 @@ if not ForEachAura then
             icon = icon,
             isBossAura = isBossDebuff,
             isFromPlayerOrPlayerPet = castByPlayer,
-            -- These would have to be pulled from the filter with string splitting
-            -- which would be super slow, so don't.
-            -- isHarmful =
-            -- isHelpful =
+            isHarmful = isHarmful,
+            isHelpful = isHelpful,
             -- isNameplateOnly =
             -- isRaid =
             isStealable = isStealable,
