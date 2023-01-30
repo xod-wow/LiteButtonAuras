@@ -358,11 +358,24 @@ end
 
 --[[------------------------------------------------------------------------]]--
 
+function LiteButtonAurasControllerMixin:MarkOverlaysDirty(stateOnly)
+    -- Tri-state encodes stateOnly : nil / true / false
+    self.isOverlayDirty = ( stateOnly == true and self.isOverlayDirty ~= false )
+end
+
+-- Limit UNIT_AURA and UNIT_SPELLCAST overlay updates to one per frame
+function LiteButtonAurasControllerMixin:OnUpdate()
+    if self.isOverlayDirty ~= nil then
+        self:UpdateAllOverlays(self.isOverlayDirty)
+        self.isOverlayDirty = nil
+    end
+end
+
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     if event == 'PLAYER_LOGIN' then
         self:Initialize()
         self:UnregisterEvent('PLAYER_LOGIN')
-        self:UpdateAllOverlays()
+        self:MarkOverlaysDirty()
         return
     elseif event == 'PLAYER_ENTERING_WORLD' then
         UpdateUnitAuras('target')
@@ -371,11 +384,11 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         UpdateUnitAuras('pet')
         UpdatePlayerChannel()
         UpdatePlayerTotems()
-        self:UpdateAllOverlays()
+        self:MarkOverlaysDirty()
     elseif event == 'PLAYER_TARGET_CHANGED' then
         UpdateUnitAuras('target')
         UpdateTargetCast()
-        self:UpdateAllOverlays(true)
+        self:MarkOverlaysDirty(true)
     elseif event == 'UNIT_AURA' then
         -- Be careful, this fires a lot. It might be better to dirty these
         -- for an OnUpdate handler so at least it can't be more than once a
@@ -384,21 +397,21 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         if not auraInfo or auraInfo.addedAuras or auraInfo.removedAuraInstanceIDs or auraInfo.updatedAuraInstanceIDs then
             if unit == 'player' or unit == 'pet' or unit == 'target' then
                 UpdateUnitAuras(unit)
-                self:UpdateAllOverlays(true)
+                self:MarkOverlaysDirty(true)
             end
         end
     elseif event == 'PLAYER_TOTEM_UPDATE' then
         UpdatePlayerTotems()
-        self:UpdateAllOverlays(true)
+        self:MarkOverlaysDirty(true)
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
         -- This fires a lot too, same applies as UNIT_AURA.
         local unit = ...
         if unit == 'target' then
             UpdateTargetCast()
-            self:UpdateAllOverlays(true)
+            self:MarkOverlaysDirty(true)
         elseif unit == 'player' then
             UpdatePlayerChannel()
-            self:UpdateAllOverlays(true)
+            self:MarkOverlaysDirty(true)
         end
     end
 end
