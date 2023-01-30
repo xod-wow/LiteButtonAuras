@@ -12,12 +12,21 @@
 local _, LBA = ...
 
 LBA.state = {
-    playerBuffs = {},
-    playerPetBuffs = {},
-    playerTotems = {},
-    playerChannel = nil,
-    targetDebuffs = {},
-    targetBuffs = {},
+    player = {
+        buffs = {},
+        debuffs = {},
+        totems = {},
+        channel = nil,
+    },
+    pet = {
+        buffs = {},
+        debuffs = {},
+    },
+    target = {
+        buffs = {},
+        debuffs = {},
+        interrupt = nil,
+    },
 }
 
 
@@ -279,85 +288,71 @@ local function UpdateTableAura(t, auraData)
     end
 end
 
+local function UpdateUnitAuras(unit)
+    LBA.state[unit].buffs = {}
+    LBA.state[unit].debuffs = {}
+
+    if UnitCanAttack('player', unit) then
+        -- Hostile target buffs are only for dispels
+        ForEachAura(unit, 'HELPFUL', nil,
+            function (auraData)
+                UpdateTableAura(LBA.state[unit].buffs, auraData)
+            end,
+            true)
+        ForEachAura(unit, 'HARMFUL PLAYER', nil,
+            function (auraData)
+                UpdateTableAura(LBA.state[unit].debuffs, auraData)
+            end,
+            true)
+    else
+        ForEachAura(unit, 'HELPFUL PLAYER', nil,
+            function (auraData)
+                UpdateTableAura(LBA.state[unit].buffs, auraData)
+            end,
+            true)
+        ForEachAura(unit, 'HELPFUL RAID', nil,
+            function (auraData)
+                UpdateTableAura(LBA.state[unit].buffs, auraData)
+            end,
+            true)
+    end
+end
+
 local function UpdatePlayerChannel()
-    LBA.state.playerChannel = UnitChannelInfo('player')
-end
-
-local function UpdatePlayerBuffs()
-    LBA.state.playerBuffs = {}
-    ForEachAura('player', 'HELPFUL PLAYER', nil,
-        function (auraData)
-            UpdateTableAura(LBA.state.playerBuffs, auraData)
-        end, true)
-    ForEachAura('player', 'HELPFUL RAID', nil,
-        function (auraData)
-            UpdateTableAura(LBA.state.playerBuffs, auraData)
-        end, true)
-end
-
-local function UpdatePlayerPetBuffs()
-    LBA.state.playerPetBuffs = {}
-    ForEachAura('pet', 'HELPFUL PLAYER', nil,
-        function (auraData)
-            UpdateTableAura(LBA.state.playerPetBuffs, auraData)
-        end, true)
+    LBA.state.player.channel = UnitChannelInfo('player')
 end
 
 local function UpdatePlayerTotems()
-    LBA.state.playerTotems = {}
+    LBA.state.player.totems = {}
     for i = 1, MAX_TOTEMS do
         local exists, name, startTime, duration, model = GetTotemInfo(i)
         if exists and name then
             if model then
                 name = LBA.TotemOrGuardianModels[model] or name
             end
-            LBA.state.playerTotems[name] = startTime + duration
+            LBA.state.player.totems[name] = startTime + duration
         end
     end
 end
 
-local function UpdateEnemyDebuffs()
-    LBA.state.targetDebuffs = {}
-    ForEachAura('target', 'HARMFUL PLAYER', nil,
-        function (auraData)
-            UpdateTableAura(LBA.state.targetDebuffs, auraData)
-        end, true)
-end
-
-local function UpdateEnemyBuffs()
-    LBA.state.targetBuffs = {}
-    if UnitCanAttack('player', 'target') then
-        -- Hostile target buffs are only for dispels
-        ForEachAura('target', 'HELPFUL', nil,
-            function (auraData)
-                UpdateTableAura(LBA.state.targetBuffs, auraData)
-            end, true)
-    else
-        ForEachAura('target', 'HELPFUL PLAYER', nil,
-            function (auraData)
-                UpdateTableAura(LBA.state.targetBuffs, auraData)
-            end, true)
-    end
-end
-
-local function UpdateEnemyCast()
+local function UpdateTargetCast()
     local name, endTime, cantInterrupt, _
 
     if UnitCanAttack('player', 'target') then
         name, _, _, _, endTime, _, _, cantInterrupt = UnitCastingInfo('target')
         if name and not cantInterrupt then
-            LBA.state.targetInterrupt = endTime / 1000
+            LBA.state.target.interrupt = endTime / 1000
             return
         end
 
         name, _, _, _, endTime, _, cantInterrupt = UnitChannelInfo('target')
         if name and not cantInterrupt then
-            LBA.state.targetInterrupt = endTime / 1000
+            LBA.state.target.interrupt = endTime / 1000
             return
         end
     end
 
-    LBA.state.targetInterrupt = nil
+    LBA.state.target.interrupt = nil
 end
 
 
@@ -370,17 +365,16 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         self:UpdateAllOverlays()
         return
     elseif event == 'PLAYER_ENTERING_WORLD' then
-        UpdateEnemyBuffs()
-        UpdateEnemyDebuffs()
-        UpdateEnemyCast()
-        UpdatePlayerBuffs()
-        UpdatePlayerPetBuffs()
+        UpdateUnitAuras('target')
+        UpdateTargetCast()
+        UpdateUnitAuras('player')
+        UpdateUnitAuras('pet')
+        UpdatePlayerChannel()
         UpdatePlayerTotems()
         self:UpdateAllOverlays()
     elseif event == 'PLAYER_TARGET_CHANGED' then
-        UpdateEnemyBuffs()
-        UpdateEnemyDebuffs()
-        UpdateEnemyCast()
+        UpdateUnitAuras('target')
+        UpdateTargetCast()
         self:UpdateAllOverlays(true)
     elseif event == 'UNIT_AURA' then
         -- Be careful, this fires a lot. It might be better to dirty these
@@ -388,15 +382,8 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         -- frame.
         local unit, auraInfo = ...
         if not auraInfo or auraInfo.addedAuras or auraInfo.removedAuraInstanceIDs or auraInfo.updatedAuraInstanceIDs then
-            if unit == 'player' then
-                UpdatePlayerBuffs()
-                self:UpdateAllOverlays(true)
-            elseif unit == 'pet' then
-                UpdatePlayerPetBuffs()
-                self:UpdateAllOverlays(true)
-            elseif unit == 'target' then
-                UpdateEnemyBuffs()
-                UpdateEnemyDebuffs()
+            if unit == 'player' or unit == 'pet' or unit == 'target' then
+                UpdateUnitAuras(unit)
                 self:UpdateAllOverlays(true)
             end
         end
@@ -407,7 +394,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         -- This fires a lot too, same applies as UNIT_AURA.
         local unit = ...
         if unit == 'target' then
-            UpdateEnemyCast()
+            UpdateTargetCast()
             self:UpdateAllOverlays(true)
         elseif unit == 'player' then
             UpdatePlayerChannel()
