@@ -288,7 +288,10 @@ local function UpdateTableAura(t, auraData)
     end
 end
 
-local function UpdateUnitAuras(unit)
+local function UpdateUnitAuras(unit, auraInfo)
+
+    -- XXX TODO handle auraInfo for efficiency
+
     LBA.state[unit].buffs = {}
     LBA.state[unit].debuffs = {}
 
@@ -390,15 +393,12 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         UpdateTargetCast()
         self:MarkOverlaysDirty(true)
     elseif event == 'UNIT_AURA' then
-        -- Be careful, this fires a lot. It might be better to dirty these
-        -- for an OnUpdate handler so at least it can't be more than once a
-        -- frame.
+        -- This fires a lot. Be careful. In DF, UNIT_AURA seems to tick every
+        -- second for 'player' with no updates, but it's not worth optimizing.
         local unit, auraInfo = ...
-        if not auraInfo or auraInfo.addedAuras or auraInfo.removedAuraInstanceIDs or auraInfo.updatedAuraInstanceIDs then
-            if unit == 'player' or unit == 'pet' or unit == 'target' then
-                UpdateUnitAuras(unit)
-                self:MarkOverlaysDirty(true)
-            end
+        if unit == 'player' or unit == 'pet' or unit == 'target' then
+            UpdateUnitAuras(unit, auraInfo)
+            self:MarkOverlaysDirty(true)
         end
     elseif event == 'PLAYER_TOTEM_UPDATE' then
         UpdatePlayerTotems()
