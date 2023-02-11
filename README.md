@@ -58,15 +58,15 @@ it returns for all the people who want the extra features it provides.
 ```
 /lba - print current settings
 /lba help - print help
-/lba colortimers on | off | default - turn on/off using colors for timers
-/lba decimaltimers on | off | default - turn on/off showing 10ths of a second on low timers
-/lba stacks on | off | default - turn on/off showing buff/debuff stacks
-/lba font default - set font to default
-/lba font FontName - set font by name (e.g., NumberFontNormal)
+/lba colortimers on | off | default - turn on/off using colors for timers (default on)
+/lba decimaltimers on | off | default - turn on/off showing 10ths of a second on low timers (default on)
+/lba stacks on | off | default - turn on/off showing buff/debuff stacks (default off)
+/lba font default - set font to default (NumberFontNormal)
+/lba font FontName - set font by name (e.g., GameFontNormalOutline)
 /lba font FontPath - set font by path (e.g., Fonts\ARIALN.TTF)
 /lba font Size - set font size (default 14)
-/lba font FontFlags - set font flag (_OUTLINE_ or _THICKOUTLINE_)
-/lba font FontNameOrPath Size FontFlags - set font by name/path size and flags
+/lba font FontFlag - set font flag (OUTLINE or THICKOUTLINE)
+/lba font FontNameOrPath Size FontFlag - set font by name/path, size and flag
 ```
 
 ## Fonts
