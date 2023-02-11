@@ -76,7 +76,7 @@ fonts with the __OUTLINE__ flag (shows a dark border around) for them to be visi
 
 The default LBA font _NumberFontNormal_ has an outline, but (for example)
 _GameFontNormal_ doesn't and you'd need to use _GameFontNormalOutline_
-instead or can explicitly set the _OUTLINE_ flag.
+instead or explicitly set the _OUTLINE_ flag.
 
 Note that setting colored fonts will __not__ use the color, only the font, size,
 and flags. There is no difference in LBA between _NumberFontNormal_ and _NumberFontNormalYellow_.
