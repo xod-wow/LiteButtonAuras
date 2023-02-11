@@ -65,8 +65,21 @@ it returns for all the people who want the extra features it provides.
 /lba font FontName - set font by name (e.g., NumberFontNormal)
 /lba font FontPath - set font by path (e.g., Fonts\ARIALN.TTF)
 /lba font Size - set font size (default 14)
-/lba font FontPath Size FontFlags - set font by path size and flags
+/lba font FontFlags - set font flag (_OUTLINE_ or _THICKOUTLINE_)
+/lba font FontNameOrPath Size FontFlags - set font by name/path size and flags
 ```
+
+## Fonts
+
+If you are changing the font from the default, you will (almost certainly) want to use
+fonts with the __OUTLINE__ flag (shows a dark border around) for them to be visible.
+
+The default LBA font _NumberFontNormal_ has an outline, but (for example)
+_GameFontNormal_ doesn't and you'd need to use _GameFontNormalOutline_
+instead or can explicitly set the _OUTLINE_ flag.
+
+Note that setting colored fonts will __not__ use the color, only the font, size,
+and flags. There is no difference in LBA between _NumberFontNormal_ and _NumberFontNormalYellow_.
 
 ## Show Highlights for Other Auras
 
