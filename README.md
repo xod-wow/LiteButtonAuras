@@ -44,7 +44,7 @@ Compared to AdiButtonAuras (which this addon is modeled on), LiteButtonAuras:
 1. matches buffs/debuffs by name, so it doesn't require manually maintaining spells every expansion.
 1. has less code and hopefully uses less CPU (probably not though).
 1. has limited support for custom rules (only "show aura on ability").
-1. doesn't show buffs/debuffs on abilities that have a different name unless manualy configured.
+1. doesn't show buffs/debuffs on abilities that have a different name unless manually configured.
 1. limited support for customizing (timer appearance, show stacks or not).
 1. doesn't show hints for using abilities, except for interrupt, purge and soothe.
 1. doesn't show holy power/chi/combo points/soul shards.
