@@ -178,8 +178,10 @@ function LiteButtonAurasControllerMixin:Initialize()
     self:RegisterEvent('PLAYER_ENTERING_WORLD')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
     self:RegisterEvent('PLAYER_TOTEM_UPDATE')
-    self:RegisterEvent('WEAPON_ENCHANT_CHANGED')
-    self:RegisterEvent('WEAPON_SLOT_CHANGED')
+    if WOW_PROJECT_ID ~= 1 then
+        self:RegisterEvent('WEAPON_ENCHANT_CHANGED')
+        self:RegisterEvent('WEAPON_SLOT_CHANGED')
+    end
 
     -- All of these are for the interrupt detection
     self:RegisterEvent('UNIT_SPELLCAST_START')
@@ -307,6 +309,9 @@ local function WeaponEnchantAuraData(duration, charges, id)
 end
 
 local function UpdateWeaponEnchants()
+    -- Classic doesn't have the events to do this efficiently
+    if WOW_PROJECT_ID ~= 1 then return end
+
     LBA.state.player.weaponEnchants = {}
 
     local mhEnchant, mhDuration, mhCharges, mhID,
