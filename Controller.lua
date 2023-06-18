@@ -16,6 +16,7 @@ LBA.state = {
         buffs = {},
         debuffs = {},
         totems = {},
+        weaponEnchants = {},
         channel = nil,
     },
     pet = {
@@ -177,6 +178,8 @@ function LiteButtonAurasControllerMixin:Initialize()
     self:RegisterEvent('PLAYER_ENTERING_WORLD')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
     self:RegisterEvent('PLAYER_TOTEM_UPDATE')
+    self:RegisterEvent('WEAPON_ENCHANT_CHANGED')
+    self:RegisterEvent('WEAPON_SLOT_CHANGED')
 
     -- All of these are for the interrupt detection
     self:RegisterEvent('UNIT_SPELLCAST_START')
@@ -288,6 +291,41 @@ local function UpdateTableAura(t, auraData)
     end
 end
 
+-- Fake AuraData for weapon enchants, see BuffFrame.lua for how WoW does it
+local function WeaponEnchantAuraData(duration, charges, id)
+    local name = LBA.WeaponEnchantSpellID[id]
+    if name then
+        return {
+            isTempEnchant = true,
+            auraType = "TempEnchant",
+            applications = charges,
+            duration = 0,
+            expirationTime = GetTime() + duration/1000,
+            name = name,
+        }
+    end
+end
+
+local function UpdateWeaponEnchants()
+    LBA.state.player.weaponEnchants = {}
+
+    local mhEnchant, mhDuration, mhCharges, mhID,
+          ohEnchant, ohDuration, ohCharges, ohID = GetWeaponEnchantInfo()
+
+    if mhEnchant then
+        local auraData = WeaponEnchantAuraData(mhDuration, mhCharges, mhID)
+        if auraData then
+            UpdateTableAura(LBA.state.player.weaponEnchants, auraData)
+        end
+    end
+    if ohEnchant then
+        local auraData = WeaponEnchantAuraData(ohDuration, ohCharges, ohID)
+        if auraData then
+            UpdateTableAura(LBA.state.player.weaponEnchants, auraData)
+        end
+    end
+end
+
 local function UpdateUnitAuras(unit, auraInfo)
 
     -- XXX TODO handle auraInfo for efficiency
@@ -382,6 +420,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         return
     elseif event == 'PLAYER_ENTERING_WORLD' then
         UpdateUnitAuras('target')
+        UpdateWeaponEnchants()
         UpdateTargetCast()
         UpdateUnitAuras('player')
         UpdateUnitAuras('pet')
@@ -398,10 +437,17 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         local unit, auraInfo = ...
         if unit == 'player' or unit == 'pet' or unit == 'target' then
             UpdateUnitAuras(unit, auraInfo)
+            -- Shouldn't be needed but weapon enchant duration is returned
+            -- wrongly as 0 at PLAYER_LOGIN. This is how Blizzard works around
+            -- it too. Their server code must be a nightmare.
+            if unit == 'player' then UpdateWeaponEnchants() end
             self:MarkOverlaysDirty(true)
         end
     elseif event == 'PLAYER_TOTEM_UPDATE' then
         UpdatePlayerTotems()
+        self:MarkOverlaysDirty(true)
+    elseif event == 'WEAPON_ENCHANT_CHANGED' or event == 'WEAPON_SLOT_CHANGED' then
+        UpdateWeaponEnchants()
         self:MarkOverlaysDirty(true)
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
         -- This fires a lot too, same applies as UNIT_AURA.

@@ -89,6 +89,11 @@ LBA.TotemOrGuardianModels = {
     [ 237577] = GetSpellInfo(51533),    -- Feral Spirit (Shaman)
 }
 
+LBA.WeaponEnchantSpellID = {
+    [   5400] = GetSpellInfo(318038),   -- Flametongue Weapon
+    [   5401] = GetSpellInfo(33757),    -- Windfury Weapon
+}
+
 --@debug
 _G.LBA = LBA
 --@end-debug

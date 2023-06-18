@@ -148,6 +148,9 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
                     self:SetAsDebuff(state.target.debuffs[self.name])
                     show = true
                 end
+            elseif state.player.weaponEnchants[self.name] then
+                self:SetAsBuff(state.player.weaponEnchants[self.name])
+                show = true
             elseif self:TrySetAsDispel(self) then
                 show = true
             end
