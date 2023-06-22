@@ -178,7 +178,7 @@ function LiteButtonAurasControllerMixin:Initialize()
     self:RegisterEvent('PLAYER_ENTERING_WORLD')
     self:RegisterEvent('PLAYER_TARGET_CHANGED')
     self:RegisterEvent('PLAYER_TOTEM_UPDATE')
-    if WOW_PROJECT_ID ~= 1 then
+    if WOW_PROJECT_ID == 1 then
         self:RegisterEvent('WEAPON_ENCHANT_CHANGED')
         self:RegisterEvent('WEAPON_SLOT_CHANGED')
     end
