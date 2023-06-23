@@ -17,3 +17,5 @@ SlashCommand.lua
 Options.lua
 Overlay.xml
 Controller.xml
+
+FixBlizzardAnimStuckBug.lua
