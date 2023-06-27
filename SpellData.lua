@@ -94,6 +94,28 @@ LBA.WeaponEnchantSpellID = {
     [   5401] = GetSpellInfo(33757),    -- Windfury Weapon
 }
 
+-- The main reason for this is that Classic Era still has spell ranks,
+-- each rank has a different spell ID, and the tables above only have the
+-- first rank since that's what retail/wotlk use. It is generally more in
+-- keeping with our "match by name" anyway.
+
+do
+    local function AddSpellNames(t)
+        for spellID, data in pairs(t) do
+            local name = GetSpellInfo(spellID)
+            -- If it's in the spellbook GetSpellInfo(name) works
+            if name and GetSpellInfo(name) then
+                t[name] = data
+            end
+        end
+    end
+
+    AddSpellNames(LBA.Interrupts)
+    AddSpellNames(LBA.Soothes)
+    AddSpellNames(LBA.HostileDispels)
+    AddSpellNames(LBA.PlayerPetBuffs)
+end
+
 --@debug
 _G.LBA = LBA
 --@end-debug

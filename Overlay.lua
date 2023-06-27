@@ -139,7 +139,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
                 self:SetAsBuff(state.player.buffs[self.name])
                 show = true
             elseif state.pet.buffs[self.name] then
-                if LBA.PlayerPetBuffs[self.spellID] then
+                if LBA.PlayerPetBuffs[self.name] then
                     self:SetAsBuff(state.pet.buffs[self.name])
                     show = true
                 end
@@ -257,7 +257,7 @@ end
 
 function LiteButtonAurasOverlayMixin:TrySetAsInterrupt()
     if LBA.state.target.interrupt then
-        if self.spellID and LBA.Interrupts[self.spellID] then
+        if self.name and LBA.Interrupts[self.name] then
             local castEnds = LBA.state.target.interrupt
             if self:ReadyBefore(castEnds) then
                 self.expireTime = castEnds
@@ -280,7 +280,7 @@ end
 ]]
 
 function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
-    if not self.spellID or not LBA.Soothes[self.spellID] then return end
+    if not self.name or not LBA.Soothes[self.name] then return end
     if UnitIsFriend('player', 'target') then return end
 
     for _, auraData in pairs(LBA.state.target.buffs) do
@@ -303,7 +303,7 @@ function LiteButtonAurasOverlayMixin:SetAsDispel(auraData)
 end
 
 function LiteButtonAurasOverlayMixin:TrySetAsDispel()
-    if not self.spellID then
+    if not self.name then
         return
     end
 
@@ -311,7 +311,7 @@ function LiteButtonAurasOverlayMixin:TrySetAsDispel()
         return
     end
 
-    local dispels = LBA.HostileDispels[self.spellID]
+    local dispels = LBA.HostileDispels[self.name]
     if dispels then
         for k in pairs(dispels) do
             for _, auraData in pairs(LBA.state.target.buffs) do
