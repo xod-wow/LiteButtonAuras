@@ -101,11 +101,14 @@ LBA.WeaponEnchantSpellID = {
 
 do
     local function AddSpellNames(t)
-        for spellID, data in pairs(t) do
-            local name = GetSpellInfo(spellID)
-            -- If it's in the spellbook GetSpellInfo(name) works
-            if name and GetSpellInfo(name) then
-                t[name] = data
+        local spellIDs = GetKeysArray(t)
+        for _, spellID in ipairs(spellIDs) do
+            local spell = Spell:CreateFromSpellID(spellID)
+            if not spell:IsSpellEmpty() then
+                spell:ContinueOnSpellLoad(
+                    function ()
+                        t[spell:GetSpellName()] = t[spellID]
+                    end)
             end
         end
     end
