@@ -1,4 +1,4 @@
-## Interface: 100100
+## Interface: 100105
 ## Title: LiteButtonAuras
 ## Version: @project-version@
 ## Author: Xodiv-Nagrand
@@ -17,5 +17,3 @@ SlashCommand.lua
 Options.lua
 Overlay.xml
 Controller.xml
-
-FixBlizzardAnimStuckBug.lua
