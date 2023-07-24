@@ -100,16 +100,23 @@ LBA.WeaponEnchantSpellID = {
 -- first rank since that's what retail/wotlk use. It is generally more in
 -- keeping with our "match by name" anyway.
 
+-- Note: due to https://github.com/Stanzilla/WoWUIBugs/issues/373 it's not
+-- safe to use ContinueOnSpellLoad as it taints the spellbook if we're the
+-- first to query the spell. Fingers crossed that GetSpellInfo always
+-- return true for spellbook spells, even at load time. Otherwise I'll have
+-- to build my own SpellEventListener.
+
 do
     local function AddSpellNames(t)
         local spellIDs = GetKeysArray(t)
         for _, spellID in ipairs(spellIDs) do
-            local spell = Spell:CreateFromSpellID(spellID)
-            if not spell:IsSpellEmpty() then
-                spell:ContinueOnSpellLoad(
-                    function ()
-                        t[spell:GetSpellName()] = t[spellID]
-                    end)
+            local name = GetSpellInfo(spellID)
+            if name then
+                t[name] = t[spellID]
+--@debug
+            else
+                print('Missing ' .. tostring(spellID))
+--@end-debug
             end
         end
     end
