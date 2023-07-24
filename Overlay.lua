@@ -332,13 +332,31 @@ end
 
 -- Suggestion Display-----------------------------------------------------------
 
-function LiteButtonAurasOverlayMixin:ShowSuggestion(isShown)
-    if isShown then
-        LibBG.ShowOverlayGlow(self)
-    else
-        LibBG.HideOverlayGlow(self)
+if WOW_PROJECT_ID == 1 then
+    function LiteButtonAurasOverlayMixin:ShowSuggestion(isShown)
+        if isShown then
+            -- Taken from ActionButton_ShowOverlayGlow(self) but we don't want the
+            -- start animation because it takes 0.7s before the button starts to
+            -- glow which is awful for time-sensitive things like interrupts (and
+            -- in my opinion awful in general).
+            ActionButton_SetupOverlayGlow(self)
+            self.SpellActivationAlert.ProcStartFlipbook:SetAlpha(0)
+            self.SpellActivationAlert.ProcLoop:Play()
+            self.SpellActivationAlert:Show()
+        else
+            ActionButton_HideOverlayGlow(self)
+        end
+    end
+else
+    function LiteButtonAurasOverlayMixin:ShowSuggestion(isShown)
+        if isShown then
+            LibBG.ShowOverlayGlow(self)
+        else
+            LibBG.HideOverlayGlow(self)
+        end
     end
 end
+
 
 -- Count Display ---------------------------------------------------------------
 
