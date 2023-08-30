@@ -30,12 +30,11 @@ For all of your action buttons:
 LiteButtonAuras works with the default Blizzard action bars, Dominos, Bartender and anything that
 uses LibActionButton (including ElvUI).
 
-Supports WoW retail, classic (Vanilla) and classic (WotLK).
+Supports WoW retail, classic era (Vanilla) and classic (WotLK).
 
-## WoW Classic (Vanilla) Timers
+## WoW Classic Era Timers and Interrupts
 
-For WoW Classic (Vanilla) to get debuff timers you will need to also install LibClassicDurations or
-have WeakAuras installed which bundles it.
+For WoW Classic Era to get debuff timers and interrupts you will need to also install LibClassicDurations and LibClassicCasterino. Or install WeakAuras which bundles both.
 
 ## Comparison with AdiButtonAuras
 
