@@ -169,8 +169,8 @@ function LiteButtonAurasControllerMixin:Initialize()
 
         self.LCC = LibStub("LibClassicCasterino", true)
         if self.LCC then
-            UnitCastingInfo = self.LCC.UnitCastingInfo
-            UnitChannelInfo = self.LCC.UnitChannelInfo
+            UnitCastingInfo = function (...) return self.LCC:UnitCastingInfo(...) end
+            UnitChannelInfo = function (...) return self.LCC:UnitChannelInfo(...) end
         end
     end
 
