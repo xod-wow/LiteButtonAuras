@@ -160,10 +160,18 @@ function LiteButtonAurasControllerMixin:OnLoad()
 end
 
 function LiteButtonAurasControllerMixin:Initialize()
-    self.LCD = LibStub("LibClassicDurations", true)
-    if self.LCD then
-        self.LCD:Register("LiteButtonAuras")
-        UnitAura = self.LCD.UnitAuraWrapper
+    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+        self.LCD = LibStub("LibClassicDurations", true)
+        if self.LCD then
+            self.LCD:Register("LiteButtonAuras")
+            UnitAura = self.LCD.UnitAuraWrapper
+        end
+
+        self.LCC = LibStub("LibClassicCasterino", true)
+        if self.LCC then
+            UnitCastingInfo = self.LCC.UnitCastingInfo
+            UnitChannelInfo = self.LCC.UnitChannelInfo
+        end
     end
 
     LBA.InitializeOptions()
@@ -183,14 +191,25 @@ function LiteButtonAurasControllerMixin:Initialize()
         self:RegisterEvent('WEAPON_SLOT_CHANGED')
     end
 
-    -- All of these are for the interrupt detection
-    self:RegisterEvent('UNIT_SPELLCAST_START')
-    self:RegisterEvent('UNIT_SPELLCAST_STOP')
-    self:RegisterEvent('UNIT_SPELLCAST_DELAYED')
-    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START')
-    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP')
-    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
-    if WOW_PROJECT_ID == 1 then
+    -- All of these are for the interrupt and player channel detection
+    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
+        self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_START', 'OnEvent')
+        self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_STOP', 'OnEvent')
+        self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_DELAYED', 'OnEvent')
+        self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_FAILED', 'OnEvent')
+        self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_INTERRUPTED', 'OnEvent')
+        self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_START', 'OnEvent')
+        self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_STOP', 'OnEvent')
+        self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_UPDATE', 'OnEvent')
+    else
+        self:RegisterEvent('UNIT_SPELLCAST_START')
+        self:RegisterEvent('UNIT_SPELLCAST_STOP')
+        self:RegisterEvent('UNIT_SPELLCAST_DELAYED')
+        self:RegisterEvent('UNIT_SPELLCAST_FAILED')
+        self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTED')
+        self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START')
+        self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP')
+        self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
         self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE')
         self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE')
     end
