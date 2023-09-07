@@ -113,10 +113,10 @@ do
             local name = GetSpellInfo(spellID)
             if name then
                 t[name] = t[spellID]
---@debug
+--@debug@
             else
                 print('Missing ' .. tostring(spellID))
---@end-debug
+--@end-debug@
             end
         end
     end
@@ -127,6 +127,6 @@ do
     AddSpellNames(LBA.PlayerPetBuffs)
 end
 
---@debug
+--@debug@
 _G.LBA = LBA
---@end-debug
+--@end-debug@
