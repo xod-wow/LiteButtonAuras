@@ -76,6 +76,7 @@ end
 function LiteButtonAurasOverlayMixin:SetUpAction()
 
     local type, id, subType = self:GetActionInfo()
+
     if type == 'spell' then
         self.name = GetSpellInfo(id)
         self.spellID = id
@@ -88,16 +89,26 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
     end
 
     if type == 'macro' then
-        local itemName = GetMacroItem(id)
-        if itemName then
-            local name, spellID = GetItemSpell(itemName)
-            self.spellID = spellID
-            self.name = name or itemName
-            return
-        else
-            self.spellID = GetMacroSpell(id)
+        if subType == 'spell' then
+            self.spellID = id
             self.name = GetSpellInfo(self.spellID)
             return
+        elseif subType == 'item' then
+            -- 10.2 GetActionInfo() seems bugged for this case
+            local actionID = self:GetActionID()
+            if actionID then
+                self.spellID = C_ActionBar.GetItemActionOnEquipSpellID(actionID)
+                self.name = GetSpellInfo(self.spellID)
+                return
+            end
+        elseif not subType then
+            local itemName = GetMacroItem(id)
+            if itemName then
+                local name, spellID = GetItemSpell(itemName)
+                self.spellID = spellID
+                self.name = name or itemName
+                return
+            end
         end
     end
 

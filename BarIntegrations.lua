@@ -14,8 +14,13 @@ local _, LBA = ...
 LBA.BarIntegrations = {}
 
 local GetActionInfo = GetActionInfo
+local HasAction = HasAction
 
 -- Generic ---------------------------------------------------------------------
+
+local function GenericGetActionID(overlay)
+    return overlay:GetParent().action
+end
 
 local function GenericGetActionInfo(overlay)
     return GetActionInfo(overlay:GetParent().action)
@@ -27,6 +32,7 @@ end
 
 local function GenericInitButton(actionButton)
     local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
+    overlay.GetActionID = GenericGetActionID
     overlay.GetActionInfo = GenericGetActionInfo
     overlay.HasAction = GenericHasAction
 
@@ -48,6 +54,7 @@ end
 
 local function ClassicInitButton(actionButton)
     local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
+    overlay.GetActionID = GenericGetActionID
     overlay.GetActionInfo = GenericGetActionInfo
     overlay.HasAction = GenericHasAction
 end
@@ -65,7 +72,7 @@ end
 -- Blizzard Retail -------------------------------------------------------------
 
 -- The OverrideActionButtons have the same action (ID) as the main buttons and
--- mess up framesByAction (as well as we don't want to handle them)
+-- we don't want to handle them.
 
 function LBA.BarIntegrations:RetailInit()
     if WOW_PROJECT_ID ~= 1 then return end
@@ -96,6 +103,13 @@ end
 
 -- Covers ElvUI, Bartender. TukUI reuses the Blizzard buttons
 
+local function LABGetActionID(overlay)
+    local actionType, action = overlay:GetParent():GetAction()
+    if actionType == "action" then
+        return action
+    end
+end
+
 local function LABGetActionInfo(overlay)
     local actionType, action = overlay:GetParent():GetAction()
     if actionType == "action" then
@@ -114,6 +128,7 @@ end
 
 local function LABInitButton(event, actionButton)
     local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
+    overlay.GetActionID = LABGetActionID
     overlay.GetActionInfo = LABGetActionInfo
     overlay.HasAction = LABHasAction
     overlay:Update()
