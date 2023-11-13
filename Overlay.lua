@@ -94,12 +94,19 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
             self.name = GetSpellInfo(self.spellID)
             return
         elseif subType == 'item' then
-            -- 10.2 GetActionInfo() seems bugged for this case
+            -- 10.2 GetActionInfo() seems bugged for this case. In an ideal
+            -- world id would be the itemID but it seemds to be actionID-1.
+            -- This workaround assumes no two macros have the same name. Maybe
+            -- there's a better way.
             local actionID = self:GetActionID()
             if actionID then
-                self.spellID = C_ActionBar.GetItemActionOnEquipSpellID(actionID)
-                self.name = GetSpellInfo(self.spellID)
-                return
+                local macroName = GetActionText(actionID)
+                local macroID = GetMacroIndexByName(macroName or "")
+                if macroID then
+                    local _, itemLink = GetMacroItem(macroID)
+                    self.name, self.spellID = GetItemSpell(itemLink)
+                    return
+                end
             end
         elseif not subType then
             local itemName = GetMacroItem(id)
