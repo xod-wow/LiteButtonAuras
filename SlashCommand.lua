@@ -117,9 +117,11 @@ local function GetAuraMapList()
     for aura, abilityTable in pairs(LBA.db.profile.auraMap) do
         for _, ability in ipairs(abilityTable) do
             if ability then -- false indicates default override
-                local auraName = GetSpellInfo(aura) or UNKNOWN
-                local abilityName = GetSpellInfo(ability) or UNKNOWN
-                table.insert(out, { aura, auraName, ability, abilityName })
+                local auraName = GetSpellInfo(aura)
+                local abilityName = GetSpellInfo(ability)
+                if auraName and abilityName then
+                    table.insert(out, { aura, auraName, ability, abilityName })
+                end
             end
         end
     end
@@ -175,12 +177,15 @@ end
 local function PrintDenyList()
     local spells = { }
     for spellID in pairs(LBA.db.profile.denySpells) do
-        table.insert(spells, spellID)
+        local spell = Spell:CreateFromSpellID(spellID)
+        if not spell:IsSpellEmpty() then
+            spell:ContinueOnSpellLoad(function () table.insert(spells, spell) end)
+        end
     end
-    table.sort(spells, function (a, b) return GetSpellInfo(a) < GetSpellInfo(b) end)
+    table.sort(spells, function (a, b) return a:GetSpellName() < b:GetSpellName() end)
     printf("Deny list:")
-    for i, spellID in ipairs(spells) do
-        printf("%3d. %s (%d)", i, GetSpellInfo(spellID) or "?", spellID)
+    for i, spell in ipairs(spells) do
+        printf("%3d. %s (%d)", i, spell:GetSpellName() or "?", spell:GetSpellID())
     end
 end
 
