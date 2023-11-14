@@ -16,25 +16,7 @@ local defaults = {
             [152175]    = true, -- Whirling Dragon Punch (Monk)
             [190356]    = true, -- Blizzard (Mage)
         },
-        auraMap = {
-            [191587] = {        -- Virulent Plague
-                77575,          --  Outbreak
-                115989,         --  Unholy Blight
-            },
-            [55095] = {         -- Frost Fever
-                49184,          --  Howling Blast
-            },
-            [55078] = {         -- Blood Plague
-                50842,          --  Blood Boil
-            },
-            [228287] = {        -- Mark of the Crane
-                100780,         --  Tiger Palm
-            },
-            [116645] = {        -- Teachings of the Monastery
-                -- 100780,         --  Tiger Palm
-                100784,         --  Blackout Kick
-            },
-        },
+        auraMap = { },
         color = {
             buff    = { r=0.00, g=0.70, b=0.00 },
             debuff  = { r=1.00, g=0.00, b=0.00 },
