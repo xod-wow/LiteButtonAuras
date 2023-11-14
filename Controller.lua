@@ -253,6 +253,14 @@ function LiteButtonAurasControllerMixin:StyleAllOverlays()
     end
 end
 
+function LiteButtonAurasControllerMixin:DumpAllOverlays()
+    self:UpdateAllOverlays()
+    local sortedOverlays = GetValuesArray(self.overlayFrames)
+    table.sort(sortedOverlays, function (a, b) return a:GetActionID() < b:GetActionID() end)
+    for _, overlay in pairs(sortedOverlays) do
+        overlay:Dump()
+    end
+end
 
 --[[------------------------------------------------------------------------]]--
 

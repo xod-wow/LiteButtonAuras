@@ -449,3 +449,13 @@ function LiteButtonAurasOverlayMixin:ShowTimer(isShown)
         self.Timer:Hide()
     end
 end
+
+function LiteButtonAurasOverlayMixin:Dump(force)
+    if self.name or force then
+        print(string.format("%d. %s = %s (%d)",
+                            self:GetActionID(),
+                            self:GetParent():GetName(),
+                            self.name or NONE,
+                            self.spellID or 0))
+    end
+end

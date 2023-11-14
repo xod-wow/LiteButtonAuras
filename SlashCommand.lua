@@ -232,6 +232,8 @@ local function SlashCommand(argstr)
         AuraCommand(argstr)
     elseif cmd:lower() == 'deny' then
         DenyCommand(argstr)
+    elseif cmd:lower() == 'dump' then
+        LiteButtonAurasController:DumpAllOverlays()
     else
         PrintUsage()
     end
