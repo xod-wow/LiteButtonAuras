@@ -288,6 +288,10 @@ local function UpdateDynamicOptions()
     for spellID in pairs(LBA.db.profile.denySpells) do
         local spell = Spell:CreateFromSpellID(spellID)
         if not spell:IsSpellEmpty() then
+            if WOW_PROJECT_ID ~= 1 then
+                spell.IsDataEvictable = function () end
+                spell.ContinueWithCancelOnItemLoad = spell.ContinueWithCancelOnSpellLoad
+            end
             cc:AddContinuable(spell)
             local info = { spellID }
             table.insert(denySpellList, info)
