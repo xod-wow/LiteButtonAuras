@@ -45,17 +45,9 @@ function LiteButtonAurasOverlayMixin:OnLoad()
 end
 
 function LiteButtonAurasOverlayMixin:Style()
-    local font = LBA.db.profile.font
-    if type(font) == 'string' and _G[font] and _G[font].GetFont then
-        self.Timer:SetFont(_G[font]:GetFont())
-        self.Stacks:SetFont(_G[font]:GetFont())
-    elseif type(font) == 'table' then
-        self.Timer:SetFont(unpack(font))
-        self.Stacks:SetFont(unpack(font))
-    else
-        self.Timer:SetFont(NumberFontNormal:GetFont())
-        self.Stacks:SetFont(NumberFontNormalYellow:GetFont())
-    end
+    local p = LBA.db.profile
+    self.Timer:SetFont(p.fontPath, p.fontSize, p.fontFlags)
+    self.Stacks:SetFont(p.fontPath, p.fontSize, p.fontFlags)
 end
 
 -- This could be optimized (?) slightly be checking if type, id, subType

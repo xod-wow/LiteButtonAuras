@@ -8,7 +8,7 @@
 ## X-Curse-Project-ID: 526431
 ## X-WoWI-ID: 26528
 
-Libs\embeds.xml
+embeds.xml
 
 SpellData.lua
 ColorGradient.lua
@@ -17,3 +17,5 @@ SlashCommand.lua
 Options.lua
 Overlay-Classic.xml
 Controller.xml
+
+UI\Options.lua

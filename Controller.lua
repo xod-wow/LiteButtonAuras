@@ -175,6 +175,7 @@ function LiteButtonAurasControllerMixin:Initialize()
     end
 
     LBA.InitializeOptions()
+    LBA.InitializeGUIOptions()
     LBA.SetupSlashCommand()
     LBA.UpdateAuraMap()
 
