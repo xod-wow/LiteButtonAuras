@@ -289,23 +289,22 @@ local function UpdateDynamicOptions()
         local spell = Spell:CreateFromSpellID(spellID)
         if not spell:IsSpellEmpty() then
             if WOW_PROJECT_ID ~= 1 then
-                spell.IsDataEvictable = function () end
+                spell.IsDataEvictable = function () return true end
+                spell.IsItemDataCached = spell.IsSpellDataCached
                 spell.ContinueWithCancelOnItemLoad = spell.ContinueWithCancelOnSpellLoad
             end
             cc:AddContinuable(spell)
-            local info = { spellID }
-            table.insert(denySpellList, info)
-            spell:ContinueOnSpellLoad(function () info[2] = spell:GetSpellName() end)
+            table.insert(denySpellList, spell)
         end
     end
 
     local ignoreAbilities = {}
     cc:ContinueOnLoad(
         function ()
-            table.sort(denySpellList, function (a, b) return a[2] < b[2] end)
-            for i, info in ipairs(denySpellList) do
+            table.sort(denySpellList, function (a, b) return a:GetSpellName() < b:GetSpellName() end)
+            for i, spell in ipairs(denySpellList) do
                 ignoreAbilities["ability"..i] = {
-                    name = format("%s (%d)", info[2], info[1]),
+                    name = format("%s (%d)", spell:GetSpellName(), spell:GetSpellID()),
                     type = "description",
                     width = 2.5,
                     order = 10*i,
@@ -314,7 +313,7 @@ local function UpdateDynamicOptions()
                     order = 10*i+5,
                     name = DELETE,
                     type = "execute",
-                    func = function () LBA.RemoveDenySpell(info[1]) end,
+                    func = function () LBA.RemoveDenySpell(spell:GetSpellID()) end,
                     width = 0.5,
                 }
             end
