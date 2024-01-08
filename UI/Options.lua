@@ -64,6 +64,12 @@ local options = {
             name = GENERAL,
             order = order(),
             args = {
+                topGap = {
+                    type = "description",
+                    name = "",
+                    width = "full",
+                    order = order(),
+                },
                 showTimers = {
                     type = "toggle",
                     name = L["Display aura duration timers."],
@@ -111,16 +117,22 @@ local options = {
                 },
                 fontPath = {
                     type = "select",
-                    name = L["Name"],
+                    name = L["Font name"],
                     order = order(),
                     dialogControl = 'LSM30_Font',
                     values = ALL_FONTS,
                     get = FontPathGetter,
                     set = FontPathSetter,
                 },
+                fontSizePreGap = {
+                    type = "description",
+                    name = "",
+                    width = 0.1,
+                    order = order(),
+                },
                 fontSize = {
                     type = "range",
-                    name = L["Size"],
+                    name = L["Font size"],
                     order = order(),
                     min = 6,
                     max = 24,
@@ -154,6 +166,12 @@ local options = {
                         end,
                     validate = ValidateSpellValue,
                 },
+                preOnAbilityGap = {
+                    name = "",
+                    type = "description",
+                    width = 0.1,
+                    order = order(),
+                },
                 onAbility = {
                     name = L["On ability"],
                     type = "input",
@@ -173,10 +191,16 @@ local options = {
                         end,
                     validate = ValidateSpellValue,
                 },
+                preAddButtonGap = {
+                    name = "",
+                    type = "description",
+                    width = 0.1,
+                    order = order(),
+                },
                 AddButton = {
                     name = ADD,
                     type = "execute",
-                    width = 1,
+                    width = 0.5,
                     order = order(),
                     disabled =
                         function (info, v)
@@ -198,7 +222,7 @@ local options = {
                         end,
                 },
                 Mappings = {
-                    name = L["Show Auras"],
+                    name = L["Extra Aura Displays"],
                     type = "group",
                     order = order(),
                     inline = true,
@@ -208,7 +232,7 @@ local options = {
             }
         },
         IgnoreGroup = {
-            name = L["Ignore Abilities"],
+            name = L["Ignored Abilities"],
             type = "group",
             inline = false,
             args = {
@@ -259,18 +283,24 @@ local function UpdateDynamicOptions()
             order = 10*i,
             name = format("%s (%d)", NORMAL_FONT_COLOR:WrapTextInColorCode(entry[2]), entry[1]),
             type = "description",
+            image = select(3, GetSpellInfo(entry[1])),
+            imageWidth = 22,
+            imageHeight = 22,
             width = 1.4,
         }
         auraMaps["onText"..i] = {
             order = 10*i+2,
-            name = GRAY_FONT_COLOR:WrapTextInColorCode("on"),
+            name = GRAY_FONT_COLOR:WrapTextInColorCode(L["on"]),
             type = "description",
-            width = 0.1,
+            width = 0.15,
         }
         auraMaps["mapAbility"..i] = {
             order = 10*i+3,
             name = format("%s (%d)", NORMAL_FONT_COLOR:WrapTextInColorCode(entry[4]), entry[3]),
             type = "description",
+            image = select(3, GetSpellInfo(entry[3])),
+            imageWidth = 22,
+            imageHeight = 22,
             width = 1.4,
         }
         auraMaps["delete"..i] = {
@@ -304,8 +334,13 @@ local function UpdateDynamicOptions()
             table.sort(denySpellList, function (a, b) return a:GetSpellName() < b:GetSpellName() end)
             for i, spell in ipairs(denySpellList) do
                 ignoreAbilities["ability"..i] = {
-                    name = format("%s (%d)", spell:GetSpellName(), spell:GetSpellID()),
+                    name = format("%s (%d)",
+                                NORMAL_FONT_COLOR:WrapTextInColorCode(spell:GetSpellName()),
+                                spell:GetSpellID()),
                     type = "description",
+                    image = spell:GetSpellTexture(),
+                    imageWidth = 22,
+                    imageHeight = 22,
                     width = 2.5,
                     order = 10*i,
                 }
