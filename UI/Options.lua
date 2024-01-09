@@ -308,7 +308,7 @@ local function UpdateDynamicOptions()
             name = DELETE,
             type = "execute",
             func = function () LBA.RemoveAuraMap(entry[1], entry[3]) end,
-            width = 0.5,
+            width = 0.45,
         }
     end
     options.args.MappingGroup.args.Mappings.plugins.auraMaps = auraMaps
