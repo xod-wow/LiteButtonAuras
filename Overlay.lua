@@ -149,6 +149,8 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             elseif state.player.totems[self.name] then
                 self:SetAsTotem(state.player.totems[self.name])
                 show = true
+            elseif self:TrySetAsTaunt() then
+                show = true
             elseif state.player.buffs[self.name] then
                 self:SetAsBuff(state.player.buffs[self.name])
                 show = true
@@ -171,9 +173,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
         end
 
         -- We want to try to avoid doubling up on buttons Blizzard are already
-        -- showing their overlay on, because it looks terrible. Also try to
-        -- avoid calling IsSpellOverlayed as it seems to cause issues with the
-        -- new WoW 10.0.2 glow.
+        -- showing their overlay on, because it looks terrible.
 
         if WOW_PROJECT_ID == 1 then
             self.displayGlow = self.displayGlow and not (self.spellID and IsSpellOverlayed(self.spellID))
@@ -301,6 +301,20 @@ function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
         if auraData.isStealable and auraData.dispelName == "" and self:ReadyBefore(auraData.expirationTime) then
             self.expireTime = auraData.expirationTime
             self.displaySuggestion = true
+            return true
+        end
+    end
+end
+
+-- Taunt Config ----------------------------------------------------------------
+
+function LiteButtonAurasOverlayMixin:TrySetAsTaunt()
+    if not self.name or not LBA.Taunts[self.name] then return end
+    if UnitIsFriend('player', 'target') then return end
+
+    for _, auraData in pairs(LBA.state.target.debuffs) do
+        if LBA.Taunts[auraData.name] then
+            self:SetAsDebuff(auraData)
             return true
         end
     end
