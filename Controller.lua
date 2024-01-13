@@ -386,9 +386,13 @@ local function UpdateUnitAuras(unit, auraInfo)
                 UpdateTableAura(LBA.state[unit].buffs, auraData)
             end,
             true)
+        -- Inclue long-lasting buffs we can cast even if applied
+        -- by someone else, since we don't care who cast Battle Shout, etc.
         ForEachAura(unit, 'HELPFUL RAID', nil,
             function (auraData)
-                UpdateTableAura(LBA.state[unit].buffs, auraData)
+                if auraData.duration >= 10*60 then
+                    UpdateTableAura(LBA.state[unit].buffs, auraData)
+                end
             end,
             true)
     end
