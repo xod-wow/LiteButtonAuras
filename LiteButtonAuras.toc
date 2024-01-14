@@ -18,4 +18,6 @@ Options.lua
 Overlay.xml
 Controller.xml
 
+UI\AceGUIWidgets-LBAAnchorButtons.lua
+UI\AceGUIWidgets-LBAInputFocus.lua
 UI\Options.lua

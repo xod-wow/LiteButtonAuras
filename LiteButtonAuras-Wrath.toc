@@ -15,7 +15,9 @@ ColorGradient.lua
 BarIntegrations.lua
 SlashCommand.lua
 Options.lua
-Overlay-Classic.xml
+Overlay.xml
 Controller.xml
 
+UI\AceGUIWidgets-LBAAnchorButtons.lua
+UI\AceGUIWidgets-LBAInputFocus.lua
 UI\Options.lua

@@ -7,6 +7,10 @@
 
 local _, LBA = ...
 
+local fontPath, fontSize, fontFlags = NumberFontNormal:GetFont()
+
+local defaultAdjust = ( WOW_PROJECT_ID == 1 and 5 or 2 )
+
 local defaults = {
     global = {
     },
@@ -29,9 +33,13 @@ local defaults = {
         showSuggestions = true,
         colorTimers = true,
         decimalTimers = true,
-        fontPath = NumberFontNormal:GetFont(),
-        fontSize = math.floor(select(2, NumberFontNormal:GetFont()) + 0.5),
-        fontFlags = select(3, NumberFontNormal:GetFont()),
+        timerAnchor = "BOTTOMLEFT",
+        timerAdjust = defaultAdjust,
+        stacksAnchor = "TOPLEFT",
+        stacksAdjust = defaultAdjust,
+        fontPath = fontPath,
+        fontSize = math.floor(fontSize + 0.5),
+        fontFlags = fontFlags,
     },
     char = {
     },

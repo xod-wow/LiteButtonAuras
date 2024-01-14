@@ -63,10 +63,12 @@ local options = {
             type = "group",
             name = GENERAL,
             order = order(),
+            get = Getter,
+            set = Setter,
             args = {
                 topGap = {
                     type = "description",
-                    name = "",
+                    name = "\n",
                     width = "full",
                     order = order(),
                 },
@@ -75,44 +77,46 @@ local options = {
                     name = L["Display aura duration timers."],
                     order = order(),
                     width = "full",
-                    get = Getter,
-                    set = Setter,
                 },
                 colorTimers = {
                     type = "toggle",
                     name = L["Color aura duration timers based on remaining time."],
                     order = order(),
                     width = "full",
-                    get = Getter,
-                    set = Setter,
                 },
                 decimalTimers = {
                     type = "toggle",
                     name = L["Show fractions of a second on timers."],
                     order = order(),
                     width = "full",
-                    get = Getter,
-                    set = Setter,
                 },
                 showStacks = {
                     type = "toggle",
                     name = L["Show aura stacks."],
                     order = order(),
                     width = "full",
-                    get = Getter,
-                    set = Setter,
                 },
                 showSuggestions = {
                     type = "toggle",
                     name = L["Highlight buttons for interrupt and soothe."],
                     order = order(),
                     width = "full",
-                    get = Getter,
-                    set = Setter,
+                },
+                preFontHeaderGap = {
+                    name = "\n",
+                    type = "description",
+                    width = 'full',
+                    order = order(),
                 },
                 FontHeader = {
                     type = "header",
                     name = L["Font"],
+                    order = order(),
+                },
+                postFontHeaderGap = {
+                    name = "",
+                    type = "description",
+                    width = 'full',
                     order = order(),
                 },
                 fontPath = {
@@ -137,8 +141,103 @@ local options = {
                     min = 6,
                     max = 24,
                     step = 1,
-                    get = Getter,
-                    set = Setter,
+                },
+                preAnchorHeaderGap = {
+                    name = "\n",
+                    type = "description",
+                    width = 'full',
+                    order = order(),
+                },
+                AnchorHeader = {
+                    type = "header",
+                    name = L["Anchors"],
+                    order = order(),
+                },
+                postAnchorHeaderGap = {
+                    name = "",
+                    type = "description",
+                    width = 'full',
+                    order = order(),
+                },
+                preTimerAnchorGap = {
+                    name = "",
+                    type = "description",
+                    width = 0.1,
+                    order = order(),
+                },
+                timerAnchor = {
+                    name = L["Timer Anchor"],
+                    type = "select",
+                    control = 'LBAAnchorButtons',
+                    values = {
+                        BOTTOMLEFT = L["Bottom Left"],
+                        BOTTOM = L["Bottom"],
+                        BOTTOMRIGHT = L["Bottom Right"],
+                        RIGHT = L["Right"],
+                        TOPRIGHT = L["Top Right"],
+                        TOP = L["Top"],
+                        TOPLEFT = L["Top Left"],
+                        LEFT = L["Left"],
+                        CENTER = L["Center"]
+                    },
+                    order = order(),
+                },
+                preStacksAnchorGap = {
+                    name = "",
+                    type = "description",
+                    width = 0.25,
+                    order = order(),
+                },
+                stacksAnchor = {
+                    name = L["Stacks Anchor"],
+                    type = "select",
+                    control = 'LBAAnchorButtons',
+                    values = {
+                        BOTTOMLEFT = L["Bottom Left"],
+                        BOTTOM = L["Bottom"],
+                        BOTTOMRIGHT = L["Bottom Right"],
+                        RIGHT = L["Right"],
+                        TOPRIGHT = L["Top Right"],
+                        TOP = L["Top"],
+                        TOPLEFT = L["Top Left"],
+                        LEFT = L["Left"],
+                        CENTER = L["Center"]
+                    },
+                    order = order(),
+                },
+                AnchorsGap = {
+                    name = "",
+                    type = "description",
+                    width = 'full',
+                    order = order(),
+                },
+                preTimerAdjustGap = {
+                    name = "",
+                    type = "description",
+                    width = 0.1,
+                    order = order(),
+                },
+                timerAdjust = {
+                    name = L["Timer Offset"],
+                    type = "range",
+                    order = order(),
+                    min = -16,
+                    max = 16,
+                    step = 1,
+                },
+                preStacksAdjustGap = {
+                    name = "",
+                    type = "description",
+                    width = 0.25,
+                    order = order(),
+                },
+                stacksAdjust = {
+                    name = L["Stacks Offset"],
+                    type = "range",
+                    order = order(),
+                    min = -16,
+                    max = 16,
+                    step = 1,
                 },
             },
         },
@@ -150,20 +249,19 @@ local options = {
                 showAura = {
                     name = L["Show aura"],
                     type = "input",
-                    width = 1,
+                    width = 1.4,
                     order = order(),
-                    desc =
-                        function ()
-                            return GetSpellInfo(addAuraMap[1])
-                        end,
                     get =
                         function ()
-                            return addAuraMap[1] and tostring(addAuraMap[1])
+                            if not addAuraMap[1] then return end
+                            local spellName, _, _, _, _, _, spellID = GetSpellInfo(addAuraMap[1])
+                            return ("%s (%s)"):format(spellName, spellID) .. "\0" .. addAuraMap[1]
                         end,
                     set =
                         function (_, v)
-                            addAuraMap[1] = v
+                            addAuraMap[1] = select(7, GetSpellInfo(v))
                         end,
+                    control = 'LBAInputFocus',
                     validate = ValidateSpellValue,
                 },
                 preOnAbilityGap = {
@@ -175,20 +273,19 @@ local options = {
                 onAbility = {
                     name = L["On ability"],
                     type = "input",
-                    width = 1,
+                    width = 1.4,
                     order = order(),
-                    desc =
-                        function ()
-                            return GetSpellInfo(addAuraMap[2])
-                        end,
                     get =
                         function ()
-                            return addAuraMap[2]
+                            if not addAuraMap[2] then return end
+                            local spellName, _, _, _, _, _, spellID = GetSpellInfo(addAuraMap[2])
+                            return ("%s (%s)"):format(spellName, spellID) .. "\0" .. addAuraMap[2]
                         end,
                     set =
                         function (_, v)
-                            addAuraMap[2] = v
+                            addAuraMap[2] = select(7, GetSpellInfo(v))
                         end,
+                    control = 'LBAInputFocus',
                     validate = ValidateSpellValue,
                 },
                 preAddButtonGap = {
@@ -204,7 +301,9 @@ local options = {
                     order = order(),
                     disabled =
                         function (info, v)
-                            if GetSpellInfo(addAuraMap[1]) and GetSpellInfo(addAuraMap[2]) then
+                            local auraName = GetSpellInfo(addAuraMap[1])
+                            local abilityName = GetSpellInfo(addAuraMap[2])
+                            if auraName and abilityName and auraName ~= abilityName then
                                 return false
                             else
                                 return true
@@ -241,9 +340,17 @@ local options = {
                     type = "input",
                     width = 1,
                     order = order(),
-                    desc = function (...) GetSpellInfo(addDenyAbility) end,
-                    get = function () return addDenyAbility end,
-                    set = function (_, v) addDenyAbility = v end,
+                    get =
+                        function ()
+                            if not addDenyAbility then return end
+                            local spellName, _, _, _, _, _, spellID = GetSpellInfo(addDenyAbility)
+                            return ("%s (%s)"):format(spellName, spellID) .. "\0" .. addDenyAbility
+                        end,
+                    set =
+                        function (_, v)
+                            addDenyAbility = select(7, GetSpellInfo(v))
+                        end,
+                    control = 'LBAInputFocus',
                     validate = ValidateSpellValue,
                 },
                 AddButton = {
