@@ -27,7 +27,7 @@ For all of your action buttons:
     - you can purge the buff, and
     - the button action is a purge/spellsteal
 
-LiteButtonAuras works with the default Blizzard action bars, Dominos, Bartender and anything that
+LiteButtonAuras works with the default Blizzard action bars, Dominos, Bartender, ButtonForge and anything that
 uses LibActionButton (including ElvUI).
 
 Supports WoW retail, classic era (Vanilla) and classic (WotLK).
@@ -49,10 +49,26 @@ Compared to AdiButtonAuras (which this addon is modeled on), LiteButtonAuras:
 1. doesn't show holy power/chi/combo points/soul shards.
 1. doesn't handle macros that change the unit (always assumes target).
 
-As of Dragonflight it appears that AdiButtonAuras is no longer being maintained, but I hope
+AdiButtonAuras seems to be maintained again no longer being maintained, but I hope
 it returns for all the people who want the extra features it provides.
 
-## Appearance Options
+## Options Panel
+
+LiteButtonAuras has a configuration panel that you can open from the Blizzard settings or by using the `/lba opt` slash command.
+
+You can adjust the visual appearance of the ability overlay, as well as add and remove extra aura displays were the name doesn't match.
+
+![](https://i.imgur.com/a3kHH9l.png)
+
+![](https://i.imgur.com/ne7YXhW.png)
+
+![](https://i.imgur.com/8BvBY1l.png)
+
+## Slash Command Options
+
+You can also adjust the options via slash command.
+
+### Appearance Options
 
 ```
 /lba - print current settings
@@ -68,7 +84,7 @@ it returns for all the people who want the extra features it provides.
 /lba font FontNameOrPath Size FontFlag - set font by name/path, size and flag
 ```
 
-## Fonts
+### Fonts
 
 If you are changing the font from the default, you will (almost certainly) want to use
 fonts with the __OUTLINE__ flag (shows a dark border around) for them to be visible.
@@ -99,7 +115,7 @@ If an ability is in your spell book you can use it by name otherwise by spell ID
 You can only add auras using this, or remove ones you previously added. You can't use "hide" to
 change the default behaviour of showing buffs/debuffs that match the ability name.
 
-## Never Highlight An Ability
+### Never Highlight An Ability
 
 You can stop an ability from ever getting highlighted due to the default name matching.
 
@@ -125,7 +141,6 @@ yourself. Here are three ways to do this:
 
 ## Features I can't or won't support, and why
 
-1. __Weapon Enchants__. There's no way to get the name from the enchant ID that I can see.
 1. __Macro @units__. There's no simple way to figure out what unit an action will target.
    It can be done with a lot of complex processing, maybe. If Blizzard ever added a
    GetActionUnit() I would do it in a heartbeat so I can have focus interrupt suggesting.
