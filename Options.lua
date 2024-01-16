@@ -45,6 +45,18 @@ local defaults = {
     },
 }
 
+LBA.anchorSettings = {
+    TOPLEFT     = { "TOPLEFT",       1, -1,     "LEFT" },
+    TOP         = { "TOP",           0, -1,     "MIDDLE" },
+    TOPRIGHT    = { "TOPRIGHT",     -1, -1,     "RIGHT" },
+    LEFT        = { "LEFT",          1,  0,     "LEFT", },
+    CENTER      = { "CENTER",        0,  0,     "MIDDLE" },
+    RIGHT       = { "RIGHT",        -1,  0,     "RIGHT" },
+    BOTTOMLEFT  = { "BOTTOMLEFT",    1,  1,     "LEFT" },
+    BOTTOM      = { "BOTTOM",        0,  1,     "MIDDLE" },
+    BOTTOMRIGHT = { "BOTTOMRIGHT",  -1,  1,     "RIGHT" },
+}
+
 local function IsTrue(x)
     if x == nil or x == false or x == "0" or x == "off" or x == "false" then
         return false
@@ -82,7 +94,13 @@ function LBA.SetOption(option, value, key)
     if type(defaults[key][option]) == 'boolean' then
         LBA.db[key][option] = IsTrue(value)
     elseif type(defaults[key][option]) == 'number' then
-        LBA.db[key][option] = tonumber(value)
+        if tonumber(value) then
+            LBA.db[key][option] = tonumber(value)
+        end
+    elseif LBA.anchorSettings[defaults[key][option]] then
+        if  LBA.anchorSettings[value] then
+            LBA.db[key][option] = value
+        end
     else
         LBA.db[key][option] = value
     end
@@ -178,3 +196,8 @@ function LBA.GetAuraMapList()
     sort(out, function (a, b) return a[2] < b[2] end)
     return out
 end
+
+function LBA.ApplyDefaultSettings()
+    LBA.db:ResetProfile()
+end
+

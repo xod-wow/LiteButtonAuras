@@ -14,6 +14,18 @@ local LSM = LibStub('LibSharedMedia-3.0')
 local FONT = LSM.MediaType.FONT
 local ALL_FONTS = LSM:HashTable(FONT)
 
+local ANCHOR_SELECT_VALUES = {
+    BOTTOMLEFT = L["Bottom Left"],
+    BOTTOM = L["Bottom"],
+    BOTTOMRIGHT = L["Bottom Right"],
+    RIGHT = L["Right"],
+    TOPRIGHT = L["Top Right"],
+    TOP = L["Top"],
+    TOPLEFT = L["Top Left"],
+    LEFT = L["Left"],
+    CENTER = L["Center"]
+}
+
 local function Getter(info)
     local k = info[#info]
     return LBA.db.profile[k]
@@ -169,17 +181,7 @@ local options = {
                     name = L["Timer Anchor"],
                     type = "select",
                     control = 'LBAAnchorButtons',
-                    values = {
-                        BOTTOMLEFT = L["Bottom Left"],
-                        BOTTOM = L["Bottom"],
-                        BOTTOMRIGHT = L["Bottom Right"],
-                        RIGHT = L["Right"],
-                        TOPRIGHT = L["Top Right"],
-                        TOP = L["Top"],
-                        TOPLEFT = L["Top Left"],
-                        LEFT = L["Left"],
-                        CENTER = L["Center"]
-                    },
+                    values = ANCHOR_SELECT_VALUES,
                     order = order(),
                 },
                 preStacksAnchorGap = {
@@ -192,17 +194,7 @@ local options = {
                     name = L["Stacks Anchor"],
                     type = "select",
                     control = 'LBAAnchorButtons',
-                    values = {
-                        BOTTOMLEFT = L["Bottom Left"],
-                        BOTTOM = L["Bottom"],
-                        BOTTOMRIGHT = L["Bottom Right"],
-                        RIGHT = L["Right"],
-                        TOPRIGHT = L["Top Right"],
-                        TOP = L["Top"],
-                        TOPLEFT = L["Top Left"],
-                        LEFT = L["Left"],
-                        CENTER = L["Center"]
-                    },
+                    values = ANCHOR_SELECT_VALUES,
                     order = order(),
                 },
                 AnchorsGap = {

@@ -31,18 +31,6 @@ local IsSpellOverlayed = IsSpellOverlayed
 local UnitIsFriend = UnitIsFriend
 local WOW_PROJECT_ID = WOW_PROJECT_ID
 
-local anchorSettings = {
-    TOPLEFT     = { "TOPLEFT",       1, -1,     "LEFT" },
-    TOP         = { "TOP",           0, -1,     "MIDDLE" },
-    TOPRIGHT    = { "TOPRIGHT",     -1, -1,     "RIGHT" },
-    LEFT        = { "LEFT",          1,  0,     "LEFT", },
-    CENTER      = { "CENTER",        0,  0,     "MIDDLE" },
-    RIGHT       = { "RIGHT",        -1,  0,     "RIGHT" },
-    BOTTOMLEFT  = { "BOTTOMLEFT",    1,  1,     "LEFT" },
-    BOTTOM      = { "BOTTOM",        0,  1,     "MIDDLE" },
-    BOTTOMRIGHT = { "BOTTOMRIGHT",  -1,  1,     "RIGHT" },
-}
-
 --[[------------------------------------------------------------------------]]--
 
 LiteButtonAurasOverlayMixin = {}
@@ -63,13 +51,13 @@ function LiteButtonAurasOverlayMixin:Style()
     local point, x, y, justifyH
 
     self.Timer:SetFont(p.fontPath, p.fontSize, p.fontFlags)
-    point, x, y, justifyH = unpack(anchorSettings[p.timerAnchor])
+    point, x, y, justifyH = unpack(LBA.anchorSettings[p.timerAnchor])
     self.Timer:ClearAllPoints()
     self.Timer:SetPoint(point, self, x*p.timerAdjust, y*p.timerAdjust)
     self.Timer:SetJustifyH(justifyH)
 
     self.Stacks:SetFont(p.fontPath, p.fontSize, p.fontFlags)
-    point, x, y, justifyH = unpack(anchorSettings[p.stacksAnchor])
+    point, x, y, justifyH = unpack(LBA.anchorSettings[p.stacksAnchor])
     self.Stacks:ClearAllPoints()
     self.Stacks:SetPoint(point, self, x*p.stacksAdjust, y*p.stacksAdjust)
     self.Stacks:SetJustifyH(justifyH)
