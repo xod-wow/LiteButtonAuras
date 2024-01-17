@@ -49,8 +49,7 @@ Compared to AdiButtonAuras (which this addon is modeled on), LiteButtonAuras:
 1. doesn't show holy power/chi/combo points/soul shards.
 1. doesn't handle macros that change the unit (always assumes target).
 
-AdiButtonAuras seems to be maintained again no longer being maintained, but I hope
-it returns for all the people who want the extra features it provides.
+AdiButtonAuras seems to be maintained again, so if you want more of those excellent features give it a look.
 
 ## Options Panel
 
