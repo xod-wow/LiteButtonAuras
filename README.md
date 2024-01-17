@@ -55,7 +55,7 @@ AdiButtonAuras seems to be maintained again, so if you want more of those excell
 
 LiteButtonAuras has a configuration panel that you can open from the Blizzard settings or by using the `/lba opt` slash command.
 
-You can adjust the visual appearance of the ability overlay, as well as add and remove extra aura displays were the name doesn't match.
+You can adjust the visual appearance of the ability overlay, as well as add and remove extra aura displays where the name doesn't match.
 
 ![](https://i.imgur.com/a3kHH9l.png)
 
