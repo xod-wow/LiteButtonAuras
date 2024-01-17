@@ -34,7 +34,7 @@ LBA.Interrupts = {
     [ 15487] = true,    -- Silence (Priest)
     [  1766] = true,    -- Kick (Rogue)
     [ 57994] = true,    -- Wind Shear (Shaman)
-    [ 89808] = true,    -- Singe Magic (Warlock)
+    [ 19647] = true,    -- Spell Lock (Warlock Felhunter Pet)
     [  6552] = true,    -- Pummel (Warrior)
     [351338] = true,    -- Quell (Evoker)
 }
