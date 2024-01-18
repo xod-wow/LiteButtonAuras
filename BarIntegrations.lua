@@ -143,15 +143,14 @@ end
 
 -- Dominos ---------------------------------------------------------------------
 
-local function DominosInitCallback()
-    for _, actionButton in pairs(Dominos.ActionButtons) do
-        GenericInitButton(actionButton)
-    end
-end
-
 function LBA.BarIntegrations:DominosInit()
-    if Dominos then
-        Dominos.RegisterCallback(self, 'LAYOUT_LOADED', DominosInitCallback)
+    if Dominos and not Dominos.BlizzardActionButtons then
+        -- "New" dominos with their own buttons
+        for actionButton in pairs(Dominos.ActionButtons.buttons) do
+            GenericInitButton(actionButton)
+        end
+        hooksecurefunc(Dominos.ActionButton, 'OnCreate',
+            function (button, id) GenericInitButton(button) end)
     end
 end
 
