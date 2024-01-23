@@ -160,20 +160,6 @@ function LiteButtonAurasControllerMixin:OnLoad()
 end
 
 function LiteButtonAurasControllerMixin:Initialize()
-    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
-        self.LCD = LibStub("LibClassicDurations", true)
-        if self.LCD then
-            self.LCD:Register("LiteButtonAuras")
-            UnitAura = self.LCD.UnitAuraWrapper
-        end
-
-        self.LCC = LibStub("LibClassicCasterino", true)
-        if self.LCC then
-            UnitCastingInfo = function (...) return self.LCC:UnitCastingInfo(...) end
-            UnitChannelInfo = function (...) return self.LCC:UnitChannelInfo(...) end
-        end
-    end
-
     LBA.InitializeOptions()
     LBA.InitializeGUIOptions()
     LBA.SetupSlashCommand()
@@ -193,29 +179,16 @@ function LiteButtonAurasControllerMixin:Initialize()
     end
 
     -- All of these are for the interrupt and player channel detection
-    if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC then
-        if self.LCC then
-            self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_START', 'OnEvent')
-            self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_STOP', 'OnEvent')
-            self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_DELAYED', 'OnEvent')
-            self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_FAILED', 'OnEvent')
-            self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_INTERRUPTED', 'OnEvent')
-            self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_START', 'OnEvent')
-            self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_STOP', 'OnEvent')
-            self.LCC.RegisterCallback(self, 'UNIT_SPELLCAST_CHANNEL_UPDATE', 'OnEvent')
-        end
-    else
-        self:RegisterEvent('UNIT_SPELLCAST_START')
-        self:RegisterEvent('UNIT_SPELLCAST_STOP')
-        self:RegisterEvent('UNIT_SPELLCAST_DELAYED')
-        self:RegisterEvent('UNIT_SPELLCAST_FAILED')
-        self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTED')
-        self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START')
-        self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP')
-        self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
-        self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE')
-        self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE')
-    end
+    self:RegisterEvent('UNIT_SPELLCAST_START')
+    self:RegisterEvent('UNIT_SPELLCAST_STOP')
+    self:RegisterEvent('UNIT_SPELLCAST_DELAYED')
+    self:RegisterEvent('UNIT_SPELLCAST_FAILED')
+    self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTED')
+    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START')
+    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP')
+    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
+    self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE')
+    self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE')
 
     LBA.db.RegisterCallback(self, 'OnModified', 'StyleAllOverlays')
 end

@@ -34,22 +34,23 @@ Supports WoW retail, classic era (Vanilla) and classic (WotLK).
 
 ## WoW Classic Era Timers and Interrupts
 
-For WoW Classic Era to get debuff timers and interrupts you will need to also install LibClassicDurations and LibClassicCasterino. Or install WeakAuras which bundles both.
+Support for interrupts and timers on classic is now baseline in the WoW API. You don't need to install
+any other libraries.
 
 ## Comparison with AdiButtonAuras
 
-Compared to AdiButtonAuras (which this addon is modeled on), LiteButtonAuras:
+Compared to AdiButtonAuras (which this addon was modeled on), LiteButtonAuras:
 
 1. matches buffs/debuffs by name, so it doesn't require manually maintaining spells every expansion.
 1. has less code and hopefully uses less CPU (probably not though).
 1. has limited support for custom rules (only "show aura on ability").
 1. doesn't show buffs/debuffs on abilities that have a different name unless manually configured.
-1. limited support for customizing (timer appearance, show stacks or not).
+1. limited support for customizing (timer appearance, location, show stacks or not).
 1. doesn't show hints for using abilities, except for interrupt, purge and soothe.
 1. doesn't show holy power/chi/combo points/soul shards.
 1. doesn't handle macros that change the unit (always assumes target).
 
-AdiButtonAuras seems to be maintained again, so if you want more of those excellent features give it a look.
+AdiButtonAuras seems to be maintained again, so if you want some extra features give it a look.
 
 ## Options Panel
 
@@ -88,12 +89,12 @@ You can also adjust the options via slash command.
 If you are changing the font from the default, you will (almost certainly) want to use
 fonts with the __OUTLINE__ flag (shows a dark border around) for them to be visible.
 
-The default LBA font _NumberFontNormal_ has an outline, but (for example)
-_GameFontNormal_ doesn't and you'd need to use _GameFontNormalOutline_
-instead or explicitly set the _OUTLINE_ flag.
+The default LBA font `NumberFontNormal` has an outline, but (for example)
+`GameFontNormal` doesn't and you'd need to use `GameFontNormalOutline`
+instead or explicitly set the __OUTLINE__ flag.
 
 Note that setting colored fonts will __not__ use the color, only the font, size,
-and flags. There is no difference in LBA between _NumberFontNormal_ and _NumberFontNormalYellow_.
+and flags. There is no difference in LBA between `NumberFontNormal` and `NumberFontNormalYellow`.
 
 ## Show Highlights for Other Auras
 
