@@ -153,9 +153,9 @@ local function DenyCommand(argstr)
     if cmd == 'list' then
         PrintDenyList()
     elseif cmd == 'default' then
-        LBA.DefaultDenyList()
+        LBA.DefaultDenySpells()
     elseif cmd == 'wipe' then
-        LBA.WipeDenyList()
+        LBA.WipeDenySpells()
     elseif cmd == 'add' and spell then
         local id = select(7, GetSpellInfo(spell))
         if id then
