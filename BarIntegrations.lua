@@ -143,14 +143,19 @@ end
 
 -- Dominos ---------------------------------------------------------------------
 
+-- On classic Dominos re-uses the Blizzard action buttons and then adds some
+-- more of its own. On retail it uses all its own buttons, but they still use
+-- the ActionBarButton API enough for us.
+
 function LBA.BarIntegrations:DominosInit()
+    local Init = WOW_PROJECT_ID == 1 and GenericInitButton or ClassicInitButton
     if Dominos and not Dominos.BlizzardActionButtons then
         -- "New" dominos with their own buttons
         for actionButton in pairs(Dominos.ActionButtons.buttons) do
-            GenericInitButton(actionButton)
+            Init(actionButton)
         end
         hooksecurefunc(Dominos.ActionButton, 'OnCreate',
-            function (button, id) GenericInitButton(button) end)
+            function (button, id) Init(button) end)
     end
 end
 
