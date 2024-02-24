@@ -27,10 +27,9 @@ For all of your action buttons:
     - you can purge the buff, and
     - the button action is a purge/spellsteal
 
-LiteButtonAuras works with the default Blizzard action bars, Dominos, Bartender, ButtonForge and anything that
-uses LibActionButton (including ElvUI).
+LiteButtonAuras works with the default Blizzard action bars, Dominos, Bartender, ButtonForge, ActionbarPlus, and anything that uses LibActionButton (including ElvUI).
 
-Supports WoW retail, classic era (Vanilla) and classic (WotLK).
+Supports WoW retail, classic era (Vanilla/SoD) and classic (WotLK).
 
 ## WoW Classic Era Timers and Interrupts
 

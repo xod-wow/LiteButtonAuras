@@ -160,6 +160,74 @@ function LBA.BarIntegrations:DominosInit()
 end
 
 
+-- ActionbarPlus which is all SecureActionButton without any actionID
+
+-- I'm not 100% convinced about the wisdom of supporting this. The addon is
+-- overengineered and still doesn't support basic things like putting a pet
+-- action on a button. The code is inscrutable to me and looks like the kind
+-- of thing you get when you believe boolean should be a class and have a
+-- BooleanFactory to create one. But this does seem to work.
+
+local function ABPGetActionID(overlay)
+    return 0
+end
+
+local function ABPGetActionInfo(overlay)
+    local button = overlay:GetParent()
+    local type = button:GetAttribute("type")
+    if type == 'spell' then
+        local spell = button:GetAttribute('spell')
+        local id = select(7, GetSpellInfo(spell))
+        if id then return type, id end
+    elseif type == 'macro' then
+        local id = button:GetAttribute('macro')
+        if id then return type, id end
+    elseif type == 'item' then
+        local item = button:GetAttribute('item')
+        local id = GetItemInfoInstant(item)
+        if id then return type, id end
+    end
+end
+
+local function ABPHasAction(overlay)
+    local button = overlay:GetParent()
+    return not button.widget:IsEmpty()
+end
+
+local function ABPInitButton(actionButton)
+    local overlay = LiteButtonAurasController:CreateOverlay(actionButton)
+    overlay:SetFrameLevel(actionButton.widget.cooldown():GetFrameLevel() + 1)
+
+    overlay.GetActionID = ABPGetActionID
+    overlay.GetActionInfo = ABPGetActionInfo
+    overlay.HasAction = ABPHasAction
+
+    if not overlay.isHooked then
+        actionButton:HookScript('OnAttributeChanged', function () overlay:Update() end)
+        hooksecurefunc(actionButton.widget, 'UpdateMacroState', function () overlay:Update() end)
+        overlay.isHooked = true
+    end
+end
+
+local function ABPInitFrameWidget(actionBar)
+    for _, actionButton in ipairs(actionBar.buttonFrames) do
+        ABPInitButton(actionButton)
+    end
+end
+
+function LBA.BarIntegrations:ActionbarPlusInit()
+    if ABP_NS then
+        for _, actionBar in ipairs(ABP_NS.O.ButtonFactory.FRAMES) do
+            ABPInitFrameWidget(actionBar)
+        end
+        hooksecurefunc(ABP_NS.O.ButtonFactory, 'CreateButtons',
+            function (self, fw, rowSize, colSize)
+                ABPInitFrameWidget(fw)
+            end)
+    end
+end
+
+
 -- LibActionButton-1.0 and derivatives -----------------------------------------
 
 -- Covers ElvUI, Bartender. TukUI reuses the Blizzard buttons
@@ -235,4 +303,5 @@ function LBA.BarIntegrations:Initialize()
     self:DominosInit()
     self:ButtonForgeInit()
     self:LABInit()
+    self:ActionbarPlusInit()
 end

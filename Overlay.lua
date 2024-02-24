@@ -36,9 +36,12 @@ local WOW_PROJECT_ID = WOW_PROJECT_ID
 LiteButtonAurasOverlayMixin = {}
 
 function LiteButtonAurasOverlayMixin:OnLoad()
-    -- Bump it so it's on top of the cooldown frame
+    -- Bump it so it's on top of the cooldown frame, otherwise the individual
+    -- bar integration will need to adjust the level accordingly
     local parent = self:GetParent()
-    self:SetFrameLevel(parent.cooldown:GetFrameLevel() + 1)
+    if parent.cooldown then
+        self:SetFrameLevel(parent.cooldown:GetFrameLevel() + 1)
+    end
     self:Style()
 end
 
