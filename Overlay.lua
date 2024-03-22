@@ -112,10 +112,12 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
                 local macroID = GetMacroIndexByName(macroName or "")
                 if macroID then
                     local _, itemLink = GetMacroItem(macroID)
-                    self.name, self.spellID = GetItemSpell(itemLink)
-                    return
+                    if itemLink then
+                        self.name, self.spellID = GetItemSpell(itemLink)
+                    end
                 end
             end
+            return
         elseif not subType then
             local itemName = GetMacroItem(id)
             if itemName then
