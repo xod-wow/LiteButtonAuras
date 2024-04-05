@@ -131,6 +131,12 @@ local options = {
                     width = 'full',
                     order = order(),
                 },
+                preFontPathSpacer = {
+                    name = "",
+                    type = "description",
+                    width = 0.05,
+                    order = order(),
+                },
                 fontPath = {
                     type = "select",
                     name = L["Font name"],
@@ -253,7 +259,7 @@ local options = {
                         function (_, v)
                             addAuraMap[1] = select(7, GetSpellInfo(v))
                         end,
-                    control = 'LBAInputFocus',
+                    control = 'LBAInputSpellID',
                     validate = ValidateSpellValue,
                 },
                 preOnAbilityGap = {
@@ -369,7 +375,7 @@ local options = {
                     plugins = {},
                 }
             }
-        }
+        },
     },
 }
 
