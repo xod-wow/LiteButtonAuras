@@ -33,6 +33,30 @@ local WOW_PROJECT_ID = WOW_PROJECT_ID
 
 --[[------------------------------------------------------------------------]]--
 
+-- LBA matches auras by name, but the profile auraMap is by ID so that it works
+-- in all locales. Translate it into the names at load time and when the player
+-- adds more mappings. Also invert so we don't have to loop in overlay update.
+
+LBA.AuraMap = {}
+
+function LBA.UpdateAuraMap()
+    table.wipe(LBA.AuraMap)
+
+    for fromID, fromTable in pairs(LBA.db.profile.auraMap) do
+        local fromName = GetSpellInfo(fromID)
+        for _, toID in ipairs(fromTable) do
+            local toName = GetSpellInfo(toID)
+            if fromName and toName then
+                LBA.AuraMap[toName] = LBA.AuraMap[toName] or {}
+                table.insert(LBA.AuraMap[toName], fromName)
+            end
+        end
+    end
+end
+
+
+--[[------------------------------------------------------------------------]]--
+
 LiteButtonAurasOverlayMixin = {}
 
 function LiteButtonAurasOverlayMixin:OnLoad()
@@ -137,8 +161,35 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
     self.name = nil
 end
 
-local function IsDeniedSpell(spellID)
-    return spellID and LBA.db.profile.denySpells[spellID]
+function LiteButtonAurasOverlayMixin:IsValidForDisplay()
+    if not self.name then
+        return false
+    elseif self.spellID and LBA.db.profile.denySpells[self.spellID] then
+        return false
+    else
+        return true
+    end
+end
+
+function LiteButtonAurasOverlayMixin:GetMatchingAura(t)
+    if t[self.name] then
+        return t[self.name]
+    elseif LBA.AuraMap[self.name] then
+        for _, extraAuraName in ipairs(LBA.AuraMap[self.name]) do
+            if t[extraAuraName] then
+                return t[extraAuraName]
+            end
+        end
+    end
+end
+
+function LiteButtonAurasOverlayMixin:AlreadyOverlayed()
+    if WOW_PROJECT_ID == 1 then
+        return (self.spellID and IsSpellOverlayed(self.spellID))
+    else
+        local parent = self:GetParent()
+        return (parent.overlay and parent.overlay:IsShown())
+    end
 end
 
 function LiteButtonAurasOverlayMixin:Update(stateOnly)
@@ -157,51 +208,30 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             self:SetUpAction()
         end
 
-        local state = LBA.state
-
-        if self.name and not IsDeniedSpell(self.spellID) then
+        if self:IsValidForDisplay() then
             if self:TrySetAsSoothe() then
                 show = true
             elseif self:TrySetAsInterrupt() then
                 show = true
-            elseif state.player.totems[self.name] then
-                self:SetAsTotem(state.player.totems[self.name])
+            elseif self:TrySetAsTotem() then
                 show = true
             elseif self:TrySetAsTaunt() then
                 show = true
-            elseif state.player.buffs[self.name] then
-                self:SetAsBuff(state.player.buffs[self.name])
+            elseif self:TrySetAsBuff('player') then
                 show = true
-            elseif state.pet.buffs[self.name] then
-                if LBA.PlayerPetBuffs[self.name] then
-                    self:SetAsBuff(state.pet.buffs[self.name])
-                    show = true
-                end
-            elseif state.target.debuffs[self.name] then
-                if self.name ~= LBA.state.player.channel then
-                    self:SetAsDebuff(state.target.debuffs[self.name])
-                    show = true
-                end
-            elseif state.player.weaponEnchants[self.name] then
-                self:SetAsBuff(state.player.weaponEnchants[self.name])
+            elseif LBA.PlayerPetBuffs[self.name] and self:TrySetAsBuff('pet') then
                 show = true
-            elseif self:TrySetAsDispel(self) then
+            elseif self:TrySetAsDebuff('target') then
+                show = true
+            elseif self:TrySetAsWeaponEnchant() then
+                show = true
+            elseif self:TrySetAsDispel() then
                 show = true
             end
         end
-
-        -- We want to try to avoid doubling up on buttons Blizzard are already
-        -- showing their overlay on, because it looks terrible.
-
-        if WOW_PROJECT_ID == 1 then
-            self.displayGlow = self.displayGlow and not (self.spellID and IsSpellOverlayed(self.spellID))
-        else
-            local parent = self:GetParent()
-            self.displayGlow = self.displayGlow and not (parent.overlay and parent.overlay:IsShown())
-        end
     end
 
-    self:ShowGlow(self.displayGlow)
+    self:ShowGlow(self.displayGlow and not self:AlreadyOverlayed())
     self:ShowTimer(self.expireTime ~= nil and LBA.db.profile.showTimers)
     self:ShowStacks(self.stackCount ~= nil and LBA.db.profile.showStacks)
     self:ShowSuggestion(self.displaySuggestion and LBA.db.profile.showSuggestions)
@@ -260,6 +290,28 @@ function LiteButtonAurasOverlayMixin:SetAsDebuff(auraData)
     self:SetAsAura(auraData)
 end
 
+function LiteButtonAurasOverlayMixin:TrySetAsBuff(unit)
+    local aura = self:GetMatchingAura(LBA.state[unit].buffs)
+    if aura then
+        self:SetAsBuff(aura)
+        return true
+    end
+end
+
+function LiteButtonAurasOverlayMixin:TrySetAsDebuff(unit)
+    local aura = self:GetMatchingAura(LBA.state[unit].debuffs)
+    if aura then
+        self:SetAsDebuff(aura)
+        return true
+    end
+end
+
+function LiteButtonAurasOverlayMixin:TrySetAsWeaponEnchant()
+    if LBA.state.player.weaponEnchants[self.name] then
+        self:SetAsBuff(LBA.state.player.weaponEnchants[self.name])
+        return true
+    end
+end
 
 -- Totem Config ----------------------------------------------------------------
 
@@ -269,6 +321,13 @@ function LiteButtonAurasOverlayMixin:SetAsTotem(expireTime)
     self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
     self.expireTime, self.modTime = expireTime, nil
     self.displayGlow = true
+end
+
+function LiteButtonAurasOverlayMixin:TrySetAsTotem()
+    if LBA.state.player.totems[self.name] then
+        self:SetAsTotem(LBA.state.player.totems[self.name])
+        return true
+    end
 end
 
 

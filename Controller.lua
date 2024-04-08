@@ -116,31 +116,6 @@ end
 
 --[[------------------------------------------------------------------------]]--
 
--- LBA matches auras by name, but the profile auraMap is by ID so that it works
--- in all locales. Translate it into the names at load time and when the player
--- adds more mappings.
-
-local AuraMapByName = {}
-
-function LBA.UpdateAuraMap()
-    table.wipe(AuraMapByName)
-
-    for fromID, fromTable in pairs(LBA.db.profile.auraMap) do
-        local fromName = GetSpellInfo(fromID)
-        if fromName then
-            AuraMapByName[fromName] = {}
-            for i, toID in ipairs(fromTable) do
-                if toID ~= false then
-                    AuraMapByName[fromName][i] = GetSpellInfo(toID)
-                end
-            end
-        end
-    end
-end
-
-
---[[------------------------------------------------------------------------]]--
-
 -- Load and set up dependencies for Masque support. Because we make our own
 -- frame and don't touch the ActionButton itself (avoids a LOT of taint issues)
 -- we have to make our own masque group. It's a bit weird because it lets  you
@@ -257,7 +232,6 @@ end
 --  * limit the overlay updates using a dirty/sweep
 --  * limit the aura scans by using a dirty/sweep
 --  * use the UNIT_AURA push data (as above)
---  * handle AuraMapByName in the overlay instead of here
 --  * store only the parts of the UnitAura() return the overlay wants
 --  * use C_UnitAuras.GetAuraDataBySlot which has a struct return
 --
@@ -289,11 +263,6 @@ end
 
 local function UpdateTableAura(t, auraData)
     t[auraData.name] = auraData
-    if AuraMapByName[auraData.name] then
-        for _, toName in ipairs(AuraMapByName[auraData.name]) do
-            t[toName] = auraData
-        end
-    end
 end
 
 -- Fake AuraData for weapon enchants, see BuffFrame.lua for how WoW does it
