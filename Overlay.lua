@@ -40,15 +40,18 @@ local WOW_PROJECT_ID = WOW_PROJECT_ID
 LBA.AuraMap = {}
 
 function LBA.UpdateAuraMap()
-    table.wipe(LBA.AuraMap)
-
-    for fromID, fromTable in pairs(LBA.db.profile.auraMap) do
-        local fromName = GetSpellInfo(fromID)
-        for _, toID in ipairs(fromTable) do
-            local toName = GetSpellInfo(toID)
-            if fromName and toName then
-                LBA.AuraMap[toName] = LBA.AuraMap[toName] or {}
-                table.insert(LBA.AuraMap[toName], fromName)
+    LBA.AuraMap = {}
+    for showAura, onAbilityTable in pairs(LBA.db.profile.auraMap) do
+        if type(showAura) == 'number' then
+            showAura = GetSpellInfo(showAura)
+        end
+        for _, onAbility in ipairs(onAbilityTable) do
+            if type(onAbility) == 'number' then
+                onAbiltity = GetSpellInfo(onAbility)
+            end
+            if showAura and onAbility then
+                LBA.AuraMap[onAbility] = LBA.AuraMap[onAbility] or {}
+                table.insert(LBA.AuraMap[onAbility], showAura)
             end
         end
     end

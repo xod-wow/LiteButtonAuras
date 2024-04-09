@@ -108,17 +108,21 @@ function LBA.SetOption(option, value, key)
 end
 
 function LBA.AddAuraMap(auraSpell, abilitySpell)
+    auraSpell = tonumber(auraSpell) or auraSpell
+    abilitySpell = tonumber(abilitySpell) or abilitySpell
+
     if LBA.db.profile.auraMap[auraSpell] then
         table.insert(LBA.db.profile.auraMap[auraSpell], abilitySpell)
     else
         LBA.db.profile.auraMap[auraSpell] = { abilitySpell }
     end
-    tDeleteItem(LBA.db.profile.auraMap, false)
     LBA.UpdateAuraMap()
     LBA.db.callbacks:Fire("OnModified")
 end
 
 function LBA.RemoveAuraMap(auraSpell, abilitySpell)
+    auraSpell = tonumber(auraSpell) or auraSpell
+    abilitySpell = tonumber(abilitySpell) or abilitySpell
     if not LBA.db.profile.auraMap[auraSpell] then return end
 
     tDeleteItem(LBA.db.profile.auraMap[auraSpell], abilitySpell)
@@ -141,10 +145,7 @@ function LBA.DefaultAuraMap()
 end
 
 function LBA.WipeAuraMap()
-    table.wipe(LBA.db.profile.auraMap)
-    for n in pairs(defaults.profile.auraMap) do
-        LBA.db.profile.auraMap[n] = { false }
-    end
+    LBA.db.profile.auraMap = {}
     LBA.UpdateAuraMap()
     LBA.db.callbacks:Fire("OnModified")
 end
@@ -169,31 +170,44 @@ function LBA.WipeDenySpells()
     LBA.db.callbacks:Fire("OnModified")
 end
 
-function LBA.AuraMapString(aura, auraName, ability, abilityName)
-    local c = NORMAL_FONT_COLOR
+function LBA.SpellString(spellID, spellName)
+    spellName = NORMAL_FONT_COLOR:WrapTextInColorCode(spellName)
+    if spellID then
+        return format("%s (%d)", spellName, spellID)
+    else
+        return spellName
+    end
+end
+
+function LBA.AuraMapString(auraID, auraName, abilityID, abilityName)
     return format(
-                "%s %d on %s %d",
-                c:WrapTextInColorCode(auraName),
-                aura,
-                c:WrapTextInColorCode(abilityName),
-                ability
+                "%s on %s",
+                LBA.SpellString(auraID, auraName),
+                LBA.SpellString(abilityID, abilityName)
             )
 end
 
 function LBA.GetAuraMapList()
     local out = { }
-    for aura, abilityTable in pairs(LBA.db.profile.auraMap) do
-        for _, ability in ipairs(abilityTable) do
-            if ability then -- false indicates default override
-                local auraName = GetSpellInfo(aura)
-                local abilityName = GetSpellInfo(ability)
-                if auraName and abilityName then
-                    table.insert(out, { aura, auraName, ability, abilityName })
-                end
+    for showAura, onAbilityTable in pairs(LBA.db.profile.auraMap) do
+        for _, onAbility in ipairs(onAbilityTable) do
+            local auraName, auraID, abilityName, abilityID
+            if type(showAura) == 'number' then
+                auraName, _, _, _, _, _, auraID = GetSpellInfo(showAura)
+            else
+                auraName = showAura
+            end
+            if type(onAbility) == 'number' then
+                abilityName, _, _, _, _, _, abilityID = GetSpellInfo(ability)
+            else
+                abilityName = onAbility
+            end
+            if auraName and abilityName then
+                table.insert(out, { auraID, auraName, abilityID, abilityName })
             end
         end
     end
-    sort(out, function (a, b) return a[2] < b[2] end)
+    sort(out, function (a, b) return a[2]..a[4] < b[2]..b[4] end)
     return out
 end
 

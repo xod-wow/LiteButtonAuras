@@ -386,9 +386,9 @@ local function UpdateDynamicOptions()
     for i, entry in ipairs(auraMapList) do
         auraMaps["mapAura"..i] = {
             order = 10*i,
-            name = format("%s (%d)", NORMAL_FONT_COLOR:WrapTextInColorCode(entry[2]), entry[1]),
+            name = LBA.SpellString(entry[1], entry[2]),
             type = "description",
-            image = select(3, GetSpellInfo(entry[1])),
+            image = select(3, GetSpellInfo(entry[1] or entry[2])),
             imageWidth = 22,
             imageHeight = 22,
             width = 1.4,
@@ -401,9 +401,9 @@ local function UpdateDynamicOptions()
         }
         auraMaps["mapAbility"..i] = {
             order = 10*i+3,
-            name = format("%s (%d)", NORMAL_FONT_COLOR:WrapTextInColorCode(entry[4]), entry[3]),
+            name = LBA.SpellString(entry[3], entry[4]),
             type = "description",
-            image = select(3, GetSpellInfo(entry[3])),
+            image = select(3, GetSpellInfo(entry[3] or entry[4])),
             imageWidth = 22,
             imageHeight = 22,
             width = 1.4,
