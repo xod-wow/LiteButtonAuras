@@ -198,7 +198,7 @@ function LBA.GetAuraMapList()
                 auraName = showAura
             end
             if type(onAbility) == 'number' then
-                abilityName, _, _, _, _, _, abilityID = GetSpellInfo(ability)
+                abilityName, _, _, _, _, _, abilityID = GetSpellInfo(onAbility)
             else
                 abilityName = onAbility
             end

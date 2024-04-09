@@ -47,7 +47,7 @@ function LBA.UpdateAuraMap()
         end
         for _, onAbility in ipairs(onAbilityTable) do
             if type(onAbility) == 'number' then
-                onAbiltity = GetSpellInfo(onAbility)
+                onAbility = GetSpellInfo(onAbility)
             end
             if showAura and onAbility then
                 LBA.AuraMap[onAbility] = LBA.AuraMap[onAbility] or {}
