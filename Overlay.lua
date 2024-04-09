@@ -164,18 +164,16 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
     self.name = nil
 end
 
-function LiteButtonAurasOverlayMixin:IsValidForDisplay()
-    if not self.name then
-        return false
-    elseif self.spellID and LBA.db.profile.denySpells[self.spellID] then
-        return false
-    else
+function LiteButtonAurasOverlayMixin:IsDenySpell()
+    if self.spellID and LBA.db.profile.denySpells[self.spellID] then
         return true
+    else
+        return false
     end
 end
 
 function LiteButtonAurasOverlayMixin:GetMatchingAura(t)
-    if t[self.name] then
+    if not self:IsDenySpell() and t[self.name] then
         return t[self.name]
     elseif LBA.AuraMap[self.name] then
         for _, extraAuraName in ipairs(LBA.AuraMap[self.name]) do
@@ -211,7 +209,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             self:SetUpAction()
         end
 
-        if self:IsValidForDisplay() then
+        if self.name then
             if self:TrySetAsSoothe() then
                 show = true
             elseif self:TrySetAsInterrupt() then
