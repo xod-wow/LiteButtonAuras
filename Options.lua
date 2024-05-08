@@ -47,13 +47,13 @@ local defaults = {
 
 LBA.anchorSettings = {
     TOPLEFT     = { "TOPLEFT",       1, -1,     "LEFT" },
-    TOP         = { "TOP",           0, -1,     "MIDDLE" },
+    TOP         = { "TOP",           0, -1,     "CENTER" },
     TOPRIGHT    = { "TOPRIGHT",     -1, -1,     "RIGHT" },
     LEFT        = { "LEFT",          1,  0,     "LEFT", },
-    CENTER      = { "CENTER",        0,  0,     "MIDDLE" },
+    CENTER      = { "CENTER",        0,  0,     "CENTER" },
     RIGHT       = { "RIGHT",        -1,  0,     "RIGHT" },
     BOTTOMLEFT  = { "BOTTOMLEFT",    1,  1,     "LEFT" },
-    BOTTOM      = { "BOTTOM",        0,  1,     "MIDDLE" },
+    BOTTOM      = { "BOTTOM",        0,  1,     "CENTER" },
     BOTTOMRIGHT = { "BOTTOMRIGHT",  -1,  1,     "RIGHT" },
 }
 
