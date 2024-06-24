@@ -76,7 +76,7 @@ if not ForEachAura then
             expirationTime = expirationTime,
             icon = icon,
             isBossAura = isBossDebuff,
-            isFromPlayerOrPlayerPet = castByPlayer,
+            isFromPlayerOrPlayerPet = castByPlayer, -- player = me vs player = a player?
             isHarmful = isHarmful,
             isHelpful = isHelpful,
             -- isNameplateOnly =
@@ -259,7 +259,7 @@ end
 -- ...
 -- = UnitAura(unit, index, filter)
 --
--- https://wowpedia.fandom.com/wiki/API_C_UnitAuras.GetAuraDataBySlot
+-- https://warcraft.wiki.gg/wiki/API_C_UnitAuras.GetAuraDataBySlot
 
 local function UpdateTableAura(t, auraData)
     t[auraData.name] = auraData
@@ -317,7 +317,7 @@ local function UpdateUnitAuras(unit, auraInfo)
                 UpdateTableAura(LBA.state[unit].buffs, auraData)
             end,
             true)
-        ForEachAura(unit, 'HARMFUL PLAYER', nil,
+        ForEachAura(unit, 'HARMFUL', nil,
             function (auraData)
                 UpdateTableAura(LBA.state[unit].debuffs, auraData)
             end,
