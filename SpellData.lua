@@ -78,6 +78,8 @@ LBA.Taunts = {
     [  6795] = true,                -- Growl (Druid)
     [ 17735] = true,                -- Suffering (Warlock Voidwalker Pet)
     [  2649] = true,                -- Growl (Hunter Pet)
+    [  1161] = true,                -- Challenging Shout (Warrior)
+    [386071] = true,                -- Disrupting Shout (Warrior)
 }
 
 -- Where the totem name does not match the spell name. There's few enough
