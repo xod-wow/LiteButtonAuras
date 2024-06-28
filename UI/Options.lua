@@ -458,7 +458,7 @@ local function UpdateDynamicOptions()
                                 NORMAL_FONT_COLOR:WrapTextInColorCode(spell:GetSpellName()),
                                 spell:GetSpellID()),
                     type = "description",
-                    image = spell:GetSpellTexture(),
+                    image = C_Spell.GetSpellTexture(spell.spellID),
                     imageWidth = 22,
                     imageHeight = 22,
                     width = 2.5,

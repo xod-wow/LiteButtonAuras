@@ -36,6 +36,11 @@ if not C_Spell.GetSpellInfo then
         return name
     end
 
+    function LBA.C_Spell.GetSpellTexture(spellIdentifier)
+        local _, _, iconID = GetSpellInfo(spellIdentifier)
+        return iconID
+    end
+
     function LBA.C_Spell.GetSpellCooldown(spellIdentifier)
         local startTime, duration, isEnabled, modRate = GetSpellCooldown(spellIdentifier)
         if startTime then
@@ -65,7 +70,7 @@ end
 
 if not AuraUtil.ForEachAura then
 
-    LM.AuraUtil = {}
+    LBA.AuraUtil = {}
 
     -- Turn the UnitAura returns into a facsimile of the UnitAuraInfo struct
     -- returned by C_UnitAuras.GetAuraDataBySlot(unit, slot)
@@ -106,7 +111,7 @@ if not AuraUtil.ForEachAura then
         }
     end
 
-    function LM.AuraUtil.ForEachAura(unit, filter, maxCount, func, usePackedAura)
+    function LBA.AuraUtil.ForEachAura(unit, filter, maxCount, func, usePackedAura)
         local i = 1
         while true do
             if maxCount and i > maxCount then
