@@ -196,15 +196,19 @@ function LBA.GetAuraMapList()
             local auraName, auraID, abilityName, abilityID
             if type(showAura) == 'number' then
                 local info = C_Spell.GetSpellInfo(showAura)
-                auraName = info.name
-                auraID = info.spellID
+                if info then
+                    auraName = info.name
+                    auraID = info.spellID
+                end
             else
                 auraName = showAura
             end
             if type(onAbility) == 'number' then
                 local info = C_Spell.GetSpellInfo(onAbility)
-                abilityName = info.name
-                abilityID = info.spellID
+                if info then
+                    abilityName = info.name
+                    abilityID = info.spellID
+                end
             else
                 abilityName = onAbility
             end
