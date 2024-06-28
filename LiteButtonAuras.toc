@@ -10,6 +10,7 @@
 
 embeds.xml
 
+ClassicCompat.lua
 SpellData.lua
 ColorGradient.lua
 BarIntegrations.lua

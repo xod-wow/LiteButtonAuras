@@ -8,6 +8,8 @@
 
 local addonName, LBA = ...
 
+local C_Spell = LBA.C_Spell or C_Spell
+
 local L = setmetatable({}, { __index = function (t,k) return k end })
 
 local LSM = LibStub('LibSharedMedia-3.0')
@@ -51,7 +53,9 @@ local function FontPathSetter(info, name)
 end
 
 local function ValidateSpellValue(_, v)
-    if v == "" or GetSpellInfo(v) ~= nil then
+    if v == "" then
+        return true
+    elseif v and C_Spell.GetSpellInfo(v) ~= nil then
         return true
     else
         return format(L["Invalid spell: %s.\n\nFor spells that aren't in your spell book use the spell ID number."], ORANGE_FONT_COLOR:WrapTextInColorCode(v))
@@ -251,13 +255,15 @@ local options = {
                     order = order(),
                     get =
                         function ()
-                            if not addAuraMap[1] then return end
-                            local spellName, _, _, _, _, _, spellID = GetSpellInfo(addAuraMap[1])
-                            return ("%s (%s)"):format(spellName, spellID) .. "\0" .. addAuraMap[1]
+                            if addAuraMap[1] then
+                                local info = C_Spell.GetSpellInfo(addAuraMap[1])
+                                return ("%s (%s)"):format(info.name, info.spellID) .. "\0" .. addAuraMap[1]
+                            end
                         end,
                     set =
                         function (_, v)
-                            addAuraMap[1] = select(7, GetSpellInfo(v))
+                            local info = C_Spell.GetSpellInfo(v)
+                            addAuraMap[1] = info and info.spellID or nil
                         end,
                     control = 'LBAInputSpellID',
                     validate = ValidateSpellValue,
@@ -275,13 +281,15 @@ local options = {
                     order = order(),
                     get =
                         function ()
-                            if not addAuraMap[2] then return end
-                            local spellName, _, _, _, _, _, spellID = GetSpellInfo(addAuraMap[2])
-                            return ("%s (%s)"):format(spellName, spellID) .. "\0" .. addAuraMap[2]
+                            if addAuraMap[2] then
+                                local info = C_Spell.GetSpellInfo(addAuraMap[2])
+                                return ("%s (%s)"):format(info.name, info.spellID) .. "\0" .. addAuraMap[2]
+                            end
                         end,
                     set =
                         function (_, v)
-                            addAuraMap[2] = select(7, GetSpellInfo(v))
+                            local info = C_Spell.GetSpellInfo(v)
+                            addAuraMap[2] = info and info.spellID or nil
                         end,
                     control = 'LBAInputFocus',
                     validate = ValidateSpellValue,
@@ -299,8 +307,8 @@ local options = {
                     order = order(),
                     disabled =
                         function (info, v)
-                            local auraName = GetSpellInfo(addAuraMap[1])
-                            local abilityName = GetSpellInfo(addAuraMap[2])
+                            local auraName = addAuraMap[1] and C_Spell.GetSpellName(addAuraMap[1])
+                            local abilityName = addAuraMap[2] and C_Spell.GetSpellName(addAuraMap[2])
                             if auraName and abilityName and auraName ~= abilityName then
                                 return false
                             else
@@ -309,10 +317,10 @@ local options = {
                         end,
                     func =
                         function ()
-                            local auraID = select(7, GetSpellInfo(addAuraMap[1]))
-                            local abilityID = select(7, GetSpellInfo(addAuraMap[2]))
-                            if auraID and abilityID then
-                                LBA.AddAuraMap(auraID, abilityID)
+                            local auraInfo = addAuraMap[1] and C_Spell.GetSpellInfo(addAuraMap[1])
+                            local abilityInfo = addAuraMap[2] and C_Spell.GetSpellInfo(addAuraMap[2])
+                            if auraInfo and abilityInfo then
+                                LBA.AddAuraMap(auraInfo.spellID, abilityInfo.spellID)
                                 addAuraMap[1] = nil
                                 addAuraMap[2] = nil
                             end
@@ -340,13 +348,15 @@ local options = {
                     order = order(),
                     get =
                         function ()
-                            if not addDenyAbility then return end
-                            local spellName, _, _, _, _, _, spellID = GetSpellInfo(addDenyAbility)
-                            return ("%s (%s)"):format(spellName, spellID) .. "\0" .. addDenyAbility
+                            if addDenyAbility then
+                                local info = C_Spell.GetSpellInfo(addDenyAbility)
+                                return ("%s (%s)"):format(info.name, info.spellID) .. "\0" .. addDenyAbility
+                            end
                         end,
                     set =
                         function (_, v)
-                            addDenyAbility = select(7, GetSpellInfo(v))
+                            local info = C_Spell.GetSpellInfo(v)
+                            addDenyAbility = info and info.spellID or nil
                         end,
                     control = 'LBAInputFocus',
                     validate = ValidateSpellValue,
@@ -356,12 +366,17 @@ local options = {
                     type = "execute",
                     width = 1,
                     order = order(),
-                    disabled = function () return not GetSpellInfo(addDenyAbility) end,
+                    disabled =
+                        function ()
+                            if addDenyAbility then
+                                return not C_Spell.GetSpellInfo(addDenyAbility)
+                            end
+                        end,
                     func =
                         function ()
-                            local denyAbilityID = select(7, GetSpellInfo(addDenyAbility))
-                            if denyAbilityID then
-                                LBA.AddDenySpell(denyAbilityID)
+                            local info = addDenyAbility and C_Spell.GetSpellInfo(addDenyAbility)
+                            if info then
+                                LBA.AddDenySpell(info.spellID)
                                 addDenyAbility = nil
                             end
                         end,
@@ -388,7 +403,7 @@ local function UpdateDynamicOptions()
             order = 10*i,
             name = LBA.SpellString(entry[1], entry[2]),
             type = "description",
-            image = select(3, GetSpellInfo(entry[1] or entry[2])),
+            image = C_Spell.GetSpellTexture(entry[1] or entry[2]),
             imageWidth = 22,
             imageHeight = 22,
             width = 1.4,
@@ -403,7 +418,7 @@ local function UpdateDynamicOptions()
             order = 10*i+3,
             name = LBA.SpellString(entry[3], entry[4]),
             type = "description",
-            image = select(3, GetSpellInfo(entry[3] or entry[4])),
+            image = C_Spell.GetSpellTexture(entry[3] or entry[4]),
             imageWidth = 22,
             imageHeight = 22,
             width = 1.4,
@@ -443,7 +458,7 @@ local function UpdateDynamicOptions()
                                 NORMAL_FONT_COLOR:WrapTextInColorCode(spell:GetSpellName()),
                                 spell:GetSpellID()),
                     type = "description",
-                    image = select(3, GetSpellInfo(spell:GetSpellID())),
+                    image = spell:GetSpellTexture(),
                     imageWidth = 22,
                     imageHeight = 22,
                     width = 2.5,

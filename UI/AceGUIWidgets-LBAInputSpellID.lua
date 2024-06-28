@@ -1,3 +1,7 @@
+local _, LBA = ...
+
+local C_Spell = LBA.C_Spell or C_Spell
+
 local AceGUI = LibStub("AceGUI-3.0")
 
 local Type = "LBAInputSpellID"
@@ -5,10 +9,10 @@ local Version = 1
 local PREDICTION_ROWS = 20
 
 local function GetSpellText(id)
-    local name = GetSpellInfo(id)
-    if name then
-        local idText = HIGHLIGHT_FONT_COLOR:WrapTextInColorCode(string.format('(%d)', id))
-        return string.format("%s %s", name, idText)
+    local info = C_Spell.GetSpellInfo(id or 0)
+    if info then
+        local idText = HIGHLIGHT_FONT_COLOR:WrapTextInColorCode(string.format('(%d)', info.spellID))
+        return string.format("%s %s", info.name, idText)
     else
         return ''
     end
@@ -23,13 +27,15 @@ function SpellCache.BuildCoRoutine()
     local misses = 0
     while misses < 80000 do
         id = id + 1
-        local name, _, icon = GetSpellInfo(id)
+        local info = C_Spell.GetSpellInfo(id)
 
-        if icon == 136243  then
+        if not info then
+            misses = misses + 1
+        elseif info.iconID == 136243  then
             -- 136243 is the a gear icon, we can ignore those spells
             misses = 0;
-        elseif name and name ~= "" and icon then
-            name = name:lower()
+        elseif info.name and info.name ~= "" and info.iconID then
+            local name = info.name:lower()
             SpellCache.spells[name] = SpellCache.spells[name] or {}
             table.insert(SpellCache.spells[name], id)
             if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and id == 81748 then
@@ -113,8 +119,8 @@ end
 
 function PredictSpellButtonMixin:SetSpell(id)
     self.spellID = id
-    local _, _, spellIcon = GetSpellInfo(id)
-    self:SetFormattedText("|T%s:18:18:0:0|t %s", spellIcon, GetSpellText(id))
+    local info = C_Spell.GetSpellInfo(id)
+    self:SetFormattedText("|T%s:18:18:0:0|t %s", info.iconID, GetSpellText(id))
 end
 
 function PredictSpellButtonMixin:Initialize(obj)
@@ -354,7 +360,8 @@ local methods = {
             if tonumber(value) then
                 self.value = value
             else
-                self.value = select(7, GetSpellInfo(value)) or ''
+                local info = C_Spell.GetSpellInfo(value)
+                self.value = info and info.name or ''
             end
         end,
 

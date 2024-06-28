@@ -37,7 +37,8 @@ LBA.state = {
 -- faster. Only do this for things that are called in the event loop otherwise
 -- it's just a pain to maintain.
 
-local GetSpellInfo = GetSpellInfo
+local C_Spell = LBA.C_Spell or C_Spell
+local AuraUtil = LBA.AuraUtil or AuraUtil
 local GetTotemInfo = GetTotemInfo
 local MAX_TOTEMS = MAX_TOTEMS
 local UnitAura = UnitAura
@@ -45,74 +46,6 @@ local UnitCanAttack = UnitCanAttack
 local UnitCastingInfo = UnitCastingInfo
 local UnitChannelInfo = UnitChannelInfo
 local WOW_PROJECT_ID = WOW_PROJECT_ID
-
-
---[[------------------------------------------------------------------------]]--
-
--- Classic doesn't have ForEachAura even though it has AuraUtil.
-
-local ForEachAura = AuraUtil.ForEachAura
-
-if not ForEachAura then
-    -- Turn the UnitAura returns into a facsimile of the UnitAuraInfo struct
-    -- returned by C_UnitAuras.GetAuraDataBySlot(unit, slot)
-
-    local auraInstanceID = 0
-
-    local function UnitAuraData(unit, i, filter)
-        local name, icon, count, dispelType, duration, expirationTime, source, isStealable, nameplateShowPersonal, spellId, canApplyAura, isBossDebuff, castByPlayer, nameplateShowAll, timeMod = UnitAura(unit, i, filter)
-
-        local isHarmful = filter:find('HARMFUL') and true or false
-        local isHelpful = filter:find('HELPFUL') and true or false
-
-        auraInstanceID = auraInstanceID + 1
-        return {
-            applications = count,
-            auraInstanceID = auraInstanceID,
-            canApplyAura = canApplyAura,
-            -- charges = ,
-            dispelName = dispelType,
-            duration = duration,
-            expirationTime = expirationTime,
-            icon = icon,
-            isBossAura = isBossDebuff,
-            isFromPlayerOrPlayerPet = castByPlayer, -- player = me vs player = a player?
-            isHarmful = isHarmful,
-            isHelpful = isHelpful,
-            -- isNameplateOnly =
-            -- isRaid =
-            isStealable = isStealable,
-            -- maxCharges =
-            name = name,
-            nameplateShowAll = nameplateShowAll,
-            nameplateShowPersonal = nameplateShowPersonal,
-            -- points =
-            sourceUnit = source,
-            spellId = spellId,
-            timeMod = timeMod,
-        }
-    end
-
-    ForEachAura =
-        function (unit, filter, maxCount, func, usePackedAura)
-            local i = 1
-            while true do
-                if maxCount and i > maxCount then
-                    return
-                elseif UnitAura(unit, i, filter) then
-                    if usePackedAura then
-                        func(UnitAuraData(unit, i, filter))
-                    else
-                        func(UnitAura(unit, i, filter))
-                    end
-                else
-                    return
-                end
-                i = i + 1
-            end
-        end
-end
-
 
 --[[------------------------------------------------------------------------]]--
 
@@ -312,25 +245,25 @@ local function UpdateUnitAuras(unit, auraInfo)
 
     if UnitCanAttack('player', unit) then
         -- Hostile target buffs are only for dispels
-        ForEachAura(unit, 'HELPFUL', nil,
+        AuraUtil.ForEachAura(unit, 'HELPFUL', nil,
             function (auraData)
                 UpdateTableAura(LBA.state[unit].buffs, auraData)
             end,
             true)
-        ForEachAura(unit, 'HARMFUL', nil,
+        AuraUtil.ForEachAura(unit, 'HARMFUL', nil,
             function (auraData)
                 UpdateTableAura(LBA.state[unit].debuffs, auraData)
             end,
             true)
     else
-        ForEachAura(unit, 'HELPFUL PLAYER', nil,
+        AuraUtil.ForEachAura(unit, 'HELPFUL PLAYER', nil,
             function (auraData)
                 UpdateTableAura(LBA.state[unit].buffs, auraData)
             end,
             true)
         -- Inclue long-lasting buffs we can cast even if applied
         -- by someone else, since we don't care who cast Battle Shout, etc.
-        ForEachAura(unit, 'HELPFUL RAID', nil,
+        AuraUtil.ForEachAura(unit, 'HELPFUL RAID', nil,
             function (auraData)
                 if auraData.duration >= 10*60 then
                     UpdateTableAura(LBA.state[unit].buffs, auraData)

@@ -7,6 +7,8 @@
 
 local _, LBA = ...
 
+local C_Spell = LBA.C_Spell or C_Spell
+
 local fontPath, fontSize, fontFlags = NumberFontNormal:GetFont()
 
 local defaultAdjust = ( WOW_PROJECT_ID == 1 and 5 or 2 )
@@ -193,12 +195,16 @@ function LBA.GetAuraMapList()
         for _, onAbility in ipairs(onAbilityTable) do
             local auraName, auraID, abilityName, abilityID
             if type(showAura) == 'number' then
-                auraName, _, _, _, _, _, auraID = GetSpellInfo(showAura)
+                local info = C_Spell.GetSpellInfo(showAura)
+                auraName = info.name
+                auraID = info.spellID
             else
                 auraName = showAura
             end
             if type(onAbility) == 'number' then
-                abilityName, _, _, _, _, _, abilityID = GetSpellInfo(onAbility)
+                local info = C_Spell.GetSpellInfo(onAbility)
+                abilityName = info.name
+                abilityID = info.spellID
             else
                 abilityName = onAbility
             end
@@ -214,4 +220,3 @@ end
 function LBA.ApplyDefaultSettings()
     LBA.db:ResetProfile()
 end
-

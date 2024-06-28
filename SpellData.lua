@@ -12,8 +12,7 @@
 
 local _, LBA = ...
 
--- Just to make luacheck shut up a bit
-local GetSpellInfo = GetSpellInfo
+local C_Spell = LBA.C_Spell or C_Spell
 
 -- Now these are matched by name don't worry about finding all the spell IDs
 -- for all the versions. On classic_era this is ranks, but even on live
@@ -91,22 +90,22 @@ LBA.Taunts = {
 --      local exists, name, startTime, duration, model = GetTotemInfo(i)
 
 LBA.TotemOrGuardianModels = {
-    [ 627607] = GetSpellInfo(115315),   -- Black Ox Statue (Monk)
-    [ 620831] = GetSpellInfo(115313),   -- Jade Serpent Statue (Monk)
-    [4667418] = GetSpellInfo(388686),   -- White Tiger Statue (Monk)
-    [ 620832] = GetSpellInfo(123904),   -- Xuen,the White Tiger (Monk)
-    [ 574571] = GetSpellInfo(322118),   -- Yu'lon, The Jade Serpent (Monk)
---  [ 608951] = GetSpellInfo(132578),   -- Niuzao, the Black Ox (Monk)
-    [ 877514] = GetSpellInfo(325197),   -- Chi-ji, The Red Crane (Monk)
-    [ 136024] = GetSpellInfo(198103),   -- Earth Elemental (Shaman)
-    [ 135790] = GetSpellInfo(198067),   -- Fire Elemental (Shaman)
-    [1020304] = GetSpellInfo(192249),   -- Storm Elemental (Shaman)
-    [ 237577] = GetSpellInfo(51533),    -- Feral Spirit (Shaman)
+    [ 627607] = C_Spell.GetSpellName(115315),   -- Black Ox Statue (Monk)
+    [ 620831] = C_Spell.GetSpellName(115313),   -- Jade Serpent Statue (Monk)
+    [4667418] = C_Spell.GetSpellName(388686),   -- White Tiger Statue (Monk)
+    [ 620832] = C_Spell.GetSpellName(123904),   -- Xuen,the White Tiger (Monk)
+    [ 574571] = C_Spell.GetSpellName(322118),   -- Yu'lon, The Jade Serpent (Monk)
+--  [ 608951] = C_Spell.GetSpellName(132578),   -- Niuzao, the Black Ox (Monk)
+    [ 877514] = C_Spell.GetSpellName(325197),   -- Chi-ji, The Red Crane (Monk)
+    [ 136024] = C_Spell.GetSpellName(198103),   -- Earth Elemental (Shaman)
+    [ 135790] = C_Spell.GetSpellName(198067),   -- Fire Elemental (Shaman)
+    [1020304] = C_Spell.GetSpellName(192249),   -- Storm Elemental (Shaman)
+    [ 237577] = C_Spell.GetSpellName(51533),    -- Feral Spirit (Shaman)
 }
 
 LBA.WeaponEnchantSpellID = {
-    [   5400] = GetSpellInfo(318038),   -- Flametongue Weapon
-    [   5401] = GetSpellInfo(33757),    -- Windfury Weapon
+    [   5400] = C_Spell.GetSpellName(318038),   -- Flametongue Weapon
+    [   5401] = C_Spell.GetSpellName(33757),    -- Windfury Weapon
 }
 
 -- The main reason for this is that Classic Era still has spell ranks,
@@ -116,7 +115,7 @@ LBA.WeaponEnchantSpellID = {
 
 -- Note: due to https://github.com/Stanzilla/WoWUIBugs/issues/373 it's not
 -- safe to use ContinueOnSpellLoad as it taints the spellbook if we're the
--- first to query the spell. Fingers crossed that GetSpellInfo always
+-- first to query the spell. Fingers crossed that C_Spell.GetSpellName always
 -- return true for spellbook spells, even at load time. Otherwise I'll have
 -- to build my own SpellEventListener.
 
@@ -124,7 +123,7 @@ do
     local function AddSpellNames(t)
         local spellIDs = GetKeysArray(t)
         for _, spellID in ipairs(spellIDs) do
-            local name = GetSpellInfo(spellID)
+            local name = C_Spell.GetSpellName(spellID)
             if name then
                 t[name] = t[spellID]
 --@debug@
