@@ -161,11 +161,8 @@ end
 -- going to try to improve then measure it. Potentials for performance
 -- improvement (but measure!):
 --
---  * limit the overlay updates using a dirty/sweep
 --  * limit the aura scans by using a dirty/sweep
 --  * use the UNIT_AURA push data (as above)
---  * store only the parts of the UnitAura() return the overlay wants
---  * use C_UnitAuras.GetAuraDataBySlot which has a struct return
 --
 -- Overall the 10.0 changes are not that helpful for matching by name.
 --
@@ -289,24 +286,24 @@ local function UpdatePlayerTotems()
     end
 end
 
-local function UpdateTargetCast()
+local function UpdateUnitInterupt(unit)
     local name, endTime, cantInterrupt, _
 
-    if UnitCanAttack('player', 'target') then
-        name, _, _, _, endTime, _, _, cantInterrupt = UnitCastingInfo('target')
+    if UnitCanAttack('player', unit) then
+        name, _, _, _, endTime, _, _, cantInterrupt = UnitCastingInfo(unit)
         if name and not cantInterrupt then
-            LBA.state.target.interrupt = endTime / 1000
+            LBA.state[unit].interrupt = endTime / 1000
             return
         end
 
-        name, _, _, _, endTime, _, cantInterrupt = UnitChannelInfo('target')
+        name, _, _, _, endTime, _, cantInterrupt = UnitChannelInfo(unit)
         if name and not cantInterrupt then
-            LBA.state.target.interrupt = endTime / 1000
+            LBA.state[unit].interrupt = endTime / 1000
             return
         end
     end
 
-    LBA.state.target.interrupt = nil
+    LBA.state[unit].interrupt = nil
 end
 
 
@@ -325,6 +322,14 @@ function LiteButtonAurasControllerMixin:OnUpdate()
     end
 end
 
+function LiteButtonAurasControllerMixin:IsTrackedUnit(unit)
+    if unit == 'player' or unit == 'pet' or unit == 'target' then
+        return true
+    else
+        return false
+    end
+end
+
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     if event == 'PLAYER_LOGIN' then
         self:Initialize()
@@ -333,8 +338,8 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         return
     elseif event == 'PLAYER_ENTERING_WORLD' then
         UpdateUnitAuras('target')
+        UpdateUnitInterupt('target')
         UpdateWeaponEnchants()
-        UpdateTargetCast()
         UpdateUnitAuras('player')
         UpdateUnitAuras('pet')
         UpdatePlayerChannel()
@@ -342,14 +347,14 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         self:MarkOverlaysDirty()
     elseif event == 'PLAYER_TARGET_CHANGED' then
         UpdateUnitAuras('target')
-        UpdateTargetCast()
+        UpdateUnitInterupt('target')
         self:MarkOverlaysDirty(true)
     elseif event == 'UNIT_AURA' then
         -- This fires a lot. Be careful. In DF, UNIT_AURA seems to tick every
-        -- second for 'player' with no updates, but it's not worth optimizing.
-        local unit, auraInfo = ...
-        if unit == 'player' or unit == 'pet' or unit == 'target' then
-            UpdateUnitAuras(unit, auraInfo)
+        -- second for 'player' with no updates
+        local unit, unitAuraUpdateInfo = ...
+        if self:IsTrackedUnit(unit) then
+            UpdateUnitAuras(unit, unitAuraUpdateInfo)
             -- Shouldn't be needed but weapon enchant duration is returned
             -- wrongly as 0 at PLAYER_LOGIN. This is how Blizzard works around
             -- it too. Their server code must be a nightmare.
@@ -365,11 +370,11 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
         -- This fires a lot too, same applies as UNIT_AURA.
         local unit = ...
-        if unit == 'target' then
-            UpdateTargetCast()
-            self:MarkOverlaysDirty(true)
-        elseif unit == 'player' then
+        if unit == 'player' then
             UpdatePlayerChannel()
+            self:MarkOverlaysDirty(true)
+        elseif self:IsTrackedUnit(unit) then
+            UpdateUnitInterupt(unit)
             self:MarkOverlaysDirty(true)
         end
     end
