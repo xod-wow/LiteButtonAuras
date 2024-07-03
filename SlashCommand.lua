@@ -87,9 +87,17 @@ end
 
 local function ParseAuraMap(cmdarg)
     local aura, ability = cmdarg:match('^(.+) on (.+)$')
-    local auraName, _, _, _, _, _, auraID = GetSpellInfo(aura)
-    local abilityName, _, _, _, _, _, abilityID = GetSpellInfo(ability)
-    return auraID, auraName or aura, abilityID, abilityName or ability
+    local auraInfo = C_Spell.GetSpellInfo(aura)
+    local abilityInfo = C_Spell.GetSpellInfo(ability)
+    if not auraInfo or not abilityInfo then
+        return
+    else
+        return
+            auraInfo.spellID,
+            auraInfo.name or aura,
+            abilityInfo.spellID,
+            abilityInfo.name or ability
+    end
 end
 
 local function PrintAuraMapList()
@@ -157,16 +165,16 @@ local function DenyCommand(argstr)
     elseif cmd == 'wipe' then
         LBA.WipeDenySpells()
     elseif cmd == 'add' and spell then
-        local id = select(7, GetSpellInfo(spell))
-        if id then
-            LBA.AddDenySpell(id)
+        local info = C_Spell.GetSpellInfo(spell)
+        if info then
+            LBA.AddDenySpell(info.spellID)
         else
             printf("Error: unknown spell: " .. spell)
         end
     elseif cmd == 'remove' and spell then
-        local id = select(7, GetSpellInfo(spell))
-        if id then
-            LBA.RemoveDenySpell(id)
+        local info = C_Spell.GetSpellInfo(spell)
+        if info then
+            LBA.RemoveDenySpell(info.spellID)
         else
             printf("Error: unknown spell: " .. spell)
         end

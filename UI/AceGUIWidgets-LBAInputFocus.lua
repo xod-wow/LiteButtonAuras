@@ -22,17 +22,17 @@ local function Constructor()
     frame.editbox:SetScript("OnEditFocusGained", OnEditFocusGained)
 
     local oldSetText = frame.SetText
-    frame.SetText = function(frame, text)
+    frame.SetText = function(self, text)
         text = text or ""
         local pos = string.find(text, "\0", nil, true)
         if pos then
-            frame.textWithoutFocus = text:sub(1, pos -1)
-            frame.textWithFocus = text:sub(pos + 1)
-            oldSetText(frame, frame.textWithoutFocus)
+            self.textWithoutFocus = text:sub(1, pos -1)
+            self.textWithFocus = text:sub(pos + 1)
+            oldSetText(self, self.textWithoutFocus)
         else
-            frame.textWithFocus = nil
-            frame.textWithoutFocus = nil
-            oldSetText(frame, text)
+            self.textWithFocus = nil
+            self.textWithoutFocus = nil
+            oldSetText(self, text)
         end
     end
 

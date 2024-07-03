@@ -177,14 +177,14 @@ local function ABPGetActionInfo(overlay)
     local type = button:GetAttribute("type")
     if type == 'spell' then
         local spell = button:GetAttribute('spell')
-        local id = select(7, GetSpellInfo(spell))
-        if id then return type, id end
+        local info = C_Spell.GetSpellInfo(spell)
+        if info then return type, info.spellID end
     elseif type == 'macro' then
         local id = button:GetAttribute('macro')
         if id then return type, id end
     elseif type == 'item' then
         local item = button:GetAttribute('item')
-        local id = GetItemInfoInstant(item)
+        local id = C_Item.GetItemInfoInstant(item)
         if id then return type, id end
     end
 end

@@ -189,7 +189,7 @@ function PredictFrameMixin:Initialize(obj)
         end
 
         self.buttons[i] = button
-    end		
+    end
 end
 
 function PredictFrameMixin:UpdateSearch(name)
