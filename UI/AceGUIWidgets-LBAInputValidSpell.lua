@@ -1,4 +1,8 @@
+local _, LBA = ...
+
 local AceGUI = LibStub("AceGUI-3.0")
+
+local C_Spell = LBA.C_Spell or C_Spell
 
 local Type = "LBAInputValidSpell"
 local Version = 1
@@ -12,13 +16,15 @@ function SpellCache.BuildCoRoutine()
     local misses = 0
     while misses < 80000 do
         id = id + 1
-        local name, _, icon = GetSpellInfo(id)
+        local info = C_Spell.GetSpellInfo(id)
 
-        if icon == 136243  then
+        if not info then
+            misses = misses + 1
+        elseif info.iconID == 136243  then
             -- 136243 is the a gear icon, we can ignore those spells
             misses = 0;
-        elseif name and name ~= "" and icon then
-            name = name:lower()
+        elseif info.name and info.name ~= "" and info.iconID then
+            local name = info.name:lower()
             SpellCache.spells[name] = SpellCache.spells[name] or {}
             table.insert(SpellCache.spells[name], id)
             if WOW_PROJECT_ID == WOW_PROJECT_CLASSIC and id == 81748 then
@@ -58,7 +64,7 @@ function SpellCache:Build()
 end
 
 function SpellCache:IsValidSpell(v)
-    if GetSpellInfo(v) then
+    if C_Spell.GetSpellName(v) then
         return true
     elseif type(v) == 'string' then
         v = v:lower()
