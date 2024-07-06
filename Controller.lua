@@ -246,7 +246,7 @@ local function UpdateUnitAuras(unit, auraInfo)
                 UpdateTableAura(LBA.state[unit].buffs, auraData)
             end,
             true)
-        AuraUtil.ForEachAura(unit, 'HARMFUL', nil,
+        AuraUtil.ForEachAura(unit, 'HARMFUL PLAYER', nil,
             function (auraData)
                 UpdateTableAura(LBA.state[unit].debuffs, auraData)
             end,

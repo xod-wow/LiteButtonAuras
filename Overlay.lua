@@ -216,8 +216,8 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
                 show = true
             elseif self:TrySetAsTotem() then
                 show = true
-            elseif self:TrySetAsTaunt('target') then
-                show = true
+            -- elseif self:TrySetAsTaunt('target') then
+            --     show = true
             elseif self:TrySetAsBuff('player') then
                 show = true
             elseif LBA.PlayerPetBuffs[self.name] and self:TrySetAsBuff('pet') then
@@ -301,7 +301,7 @@ end
 
 function LiteButtonAurasOverlayMixin:TrySetAsDebuff(unit)
     local aura = self:GetMatchingAura(LBA.state[unit].debuffs)
-    if aura and aura.sourceUnit == 'player' then
+    if aura then
         self:SetAsDebuff(aura)
         return true
     end
@@ -386,17 +386,26 @@ end
 
 -- Taunt Config ----------------------------------------------------------------
 
+--[[
+-- To work this would require capturing other player debuffs, and would need
+-- an different storage for the state auras since at the moment they all assume
+-- they are unique by name which is not true once you introduce other units.
 function LiteButtonAurasOverlayMixin:TrySetAsTaunt(unit)
     if not self.name or not LBA.Taunts[self.name] then return end
     if UnitIsFriend('player', unit) then return end
 
     for _, auraData in pairs(LBA.state.target.debuffs) do
         if LBA.Taunts[auraData.name] then
-            self:SetAsDebuff(auraData)
+            if auraData.sourceUnit == 'player' then
+                self:SetAsBuff(auraData)
+            else
+                self:SetAsDebuff(auraData)
+            end
             return true
         end
     end
 end
+]]
 
 -- Dispel Config ---------------------------------------------------------------
 
