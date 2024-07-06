@@ -419,10 +419,11 @@ function LiteButtonAurasOverlayMixin:TrySetAsDispel()
 
     local dispels = LBA.HostileDispels[self.name]
     if dispels then
-        for k in pairs(dispels) do
+        for dispelName in pairs(dispels) do
             for _, auraData in pairs(LBA.state.target.buffs) do
-                if auraData.dispelName == k then
+                if auraData.dispelName == dispelName then
                     self:SetAsDispel(auraData)
+                    self.displaySuggestion = true
                     return true
                 end
             end
