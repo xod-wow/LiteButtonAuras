@@ -173,14 +173,14 @@ function LiteButtonAurasOverlayMixin:IsDenySpell()
 end
 
 function LiteButtonAurasOverlayMixin:GetMatchingAura(t)
-    if not self:IsDenySpell() and t[self.name] then
-        return t[self.name]
-    elseif LBA.AuraMap[self.name] then
+    if LBA.AuraMap[self.name] then
         for _, extraAuraName in ipairs(LBA.AuraMap[self.name]) do
             if t[extraAuraName] then
                 return t[extraAuraName]
             end
         end
+    elseif not self:IsDenySpell() and t[self.name] then
+        return t[self.name]
     end
 end
 
