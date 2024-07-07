@@ -13,6 +13,9 @@ local _, LBA = ...
 
 LBA.BarIntegrations = {}
 
+local C_Item = LBA.C_Item or C_Item
+local C_Spell = LBA.C_Spell or C_Spell
+
 local GetActionInfo = GetActionInfo
 local HasAction = HasAction
 

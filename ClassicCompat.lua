@@ -60,15 +60,9 @@ if not C_Spell.GetSpellInfo then
 end
 
 if not C_Item or not C_Item.GetItemInfoInstant then
-
-    local GetItemSpell = _G.GetItemSpell
-    local GetItemInfoInstant = _G.GetItemInfoInstant
-
     LBA.C_Item = {}
-
-    LBA.C_Item.GetItemInfoInstant = GetItemInfoInstant
-    LBA.C_Item.GetItemSpell = GetItemSpell
-
+    LBA.C_Item.GetItemInfoInstant = _G.GetItemInfoInstant
+    LBA.C_Item.GetItemSpell = _G.GetItemSpell
 end
 
 

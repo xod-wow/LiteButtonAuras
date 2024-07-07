@@ -10,6 +10,8 @@
 
 local addonName, LBA = ...
 
+local C_Spell = LBA.C_Spell or C_Spell
+
 local function TrueStr(x)
     return x and "on" or "off"
 end

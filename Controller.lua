@@ -37,7 +37,6 @@ LBA.state = {
 -- faster. Only do this for things that are called in the event loop otherwise
 -- it's just a pain to maintain.
 
-local C_Spell = LBA.C_Spell or C_Spell
 local AuraUtil = LBA.AuraUtil or AuraUtil
 local GetTotemInfo = GetTotemInfo
 local MAX_TOTEMS = MAX_TOTEMS
