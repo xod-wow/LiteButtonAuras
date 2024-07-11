@@ -342,8 +342,8 @@ function LiteButtonAurasOverlayMixin:ReadyBefore(endTime)
         -- Indefinite enrage, such as from the Raging M+ affix
         return true
     else
-        local start, duration = C_Spell.GetSpellCooldown(self.spellID)
-        return start + duration < endTime
+        local info = C_Spell.GetSpellCooldown(self.spellID)
+        return info and info.startTime + info.duration < endTime
     end
 end
 

@@ -55,8 +55,6 @@ if not C_Spell.GetSpellInfo then
             }
         end
     end
-
-    LBA.C_Spell.GetSpellCooldown = GetSpellCooldown
 end
 
 if not C_Item or not C_Item.GetItemInfoInstant then
