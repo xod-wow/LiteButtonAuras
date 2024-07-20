@@ -15,6 +15,8 @@ local C_Spell = LBA.C_Spell or C_Spell
 
 local L = LBA.L
 
+local AlwaysTrackedUnits = { player=true, pet=true, target=true }
+
 LBA.state = {
     player = {
         buffs = {},
@@ -22,15 +24,6 @@ LBA.state = {
         totems = {},
         weaponEnchants = {},
         channel = nil,
-    },
-    pet = {
-        buffs = {},
-        debuffs = {},
-    },
-    target = {
-        buffs = {},
-        debuffs = {},
-        interrupt = nil,
     },
 }
 
@@ -85,14 +78,21 @@ function LiteButtonAurasControllerMixin:Initialize()
     -- list all possible LibActionButton derivatives in the TOC dependencies?
     LBA.BarIntegrations:Initialize()
 
-    self:RegisterEvent('UNIT_AURA')
     self:RegisterEvent('PLAYER_ENTERING_WORLD')
-    self:RegisterEvent('PLAYER_TARGET_CHANGED')
+    self:RegisterEvent('UNIT_AURA')
     self:RegisterEvent('PLAYER_TOTEM_UPDATE')
     if WOW_PROJECT_ID == 1 then
         self:RegisterEvent('WEAPON_ENCHANT_CHANGED')
         self:RegisterEvent('WEAPON_SLOT_CHANGED')
     end
+
+    -- These are for noticing that the unit changed
+    self:RegisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')    -- @bossN
+    self:RegisterEvent('ARENA_OPPONENT_UPDATE')             -- @arenaN
+    self:RegisterEvent('GROUP_ROSTER_UPDATE')               -- @partyN
+    self:RegisterEvent('PLAYER_TARGET_CHANGED')             -- @target
+    self:RegisterEvent('PLAYER_FOCUS_CHANGED')              -- @focus
+    self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')             -- @mouseover
 
     -- All of these are for the interrupt and player channel detection
     self:RegisterEvent('UNIT_SPELLCAST_START')
@@ -106,6 +106,11 @@ function LiteButtonAurasControllerMixin:Initialize()
     self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE')
     self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE')
     self:RegisterEvent('ITEM_DATA_LOAD_RESULT')
+
+    -- These are for tracking that we need to rescan the current overlays to
+    -- find what extra units we are tracking.
+    self:RegisterEvent('ACTIONBAR_SLOT_CHANGED')
+    self:RegisterEvent('UPDATE_MACROS')
 
     LBA.db.RegisterCallback(self, 'OnModified', 'StyleAllOverlays')
 end
@@ -152,6 +157,17 @@ function LiteButtonAurasControllerMixin:DumpAllOverlays()
         overlay:Dump()
     end
 end
+
+function LiteButtonAurasControllerMixin:UpdateTrackedUnits()
+    self.trackedUnits = CopyTable(AlwaysTrackedUnits)
+    for _, overlay in pairs(self.overlayFrames) do
+        Mixin(self.trackedUnits, overlay:GetTrackedUnits())
+    end
+    for unit in pairs(self.trackedUnits) do
+        LBA.state[unit] = LBA.state[unit] or { buffs = {}, debuffs = {} }
+    end
+end
+
 
 --[[------------------------------------------------------------------------]]--
 
@@ -321,7 +337,7 @@ local function UpdatePlayerTotems()
     end
 end
 
-local function UpdateUnitInterupt(unit)
+local function UpdateUnitInterrupt(unit)
     local name, endTime, cantInterrupt, _
 
     if UnitCanAttack('player', unit) then
@@ -358,11 +374,7 @@ function LiteButtonAurasControllerMixin:OnUpdate()
 end
 
 function LiteButtonAurasControllerMixin:IsTrackedUnit(unit)
-    if unit == 'player' or unit == 'pet' or unit == 'target' then
-        return true
-    else
-        return false
-    end
+    return self.trackedUnits[unit] == true
 end
 
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
@@ -372,8 +384,9 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         self:MarkOverlaysDirty()
         return
     elseif event == 'PLAYER_ENTERING_WORLD' then
+        self:UpdateTrackedUnits()
         UpdateUnitAuras('target')
-        UpdateUnitInterupt('target')
+        UpdateUnitInterrupt('target')
         UpdateWeaponEnchants()
         UpdateUnitAuras('player')
         UpdateUnitAuras('pet')
@@ -382,8 +395,47 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         self:MarkOverlaysDirty()
     elseif event == 'PLAYER_TARGET_CHANGED' then
         UpdateUnitAuras('target')
-        UpdateUnitInterupt('target')
+        UpdateUnitInterrupt('target')
         self:MarkOverlaysDirty(true)
+    elseif event == 'PLAYER_FOCUS_CHANGED' then
+        if self:IsTrackedUnit('focus') then
+            UpdateUnitAuras('focus')
+            UpdateUnitInterrupt('focus')
+            self:MarkOverlaysDirty(true)
+        end
+    elseif event == 'UPDATE_MOUSEOVER_UNIT' then
+        if self:IsTrackedUnit('mouseover') then
+            UpdateUnitAuras('mouseover')
+            UpdateUnitInterrupt('mouseover')
+            self:MarkOverlaysDirty(true)
+        end
+    elseif event == 'GROUP_ROSTER_UPDATE' then
+        for i = 1, GetNumGroupMembers() do
+            local unit = "party"..i
+            if self:IsTrackedUnit(unit) then
+                UpdateUnitAuras(unit)
+                UpdateUnitInterrupt(unit)
+                self:MarkOverlaysDirty(true)
+            end
+        end
+    elseif event == 'INSTANCE_ENCOUNTER_ENGAGE_UNIT' then
+        for i = 1, MAX_BOSS_FRAMES do
+            local unit = "boss"..i
+            if self:IsTrackedUnit(unit) then
+                UpdateUnitAuras(unit)
+                UpdateUnitInterrupt(unit)
+                self:MarkOverlaysDirty(true)
+            end
+        end
+    elseif event == 'ARENA_OPPONENT_UPDATE' then
+        for i = 1, GetNumArenaOpponents() do
+            local unit = "arena"..i
+            if self:IsTrackedUnit(unit) then
+                UpdateUnitAuras(unit)
+                UpdateUnitInterrupt(unit)
+                self:MarkOverlaysDirty(true)
+            end
+        end
     elseif event == 'UNIT_AURA' then
         -- This fires a lot. Be careful. In DF, UNIT_AURA seems to tick every
         -- second for 'player' with no updates
@@ -409,13 +461,18 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
             UpdatePlayerChannel()
             self:MarkOverlaysDirty(true)
         elseif self:IsTrackedUnit(unit) then
-            UpdateUnitInterupt(unit)
+            UpdateUnitInterrupt(unit)
             self:MarkOverlaysDirty(true)
         end
     elseif event == 'ITEM_DATA_LOAD_RESULT' then
         local itemID, success = ...
         if LBA.buttonItemIDs[itemID] then
             self:MarkOverlaysDirty()
+    elseif event == 'ACTIONBAR_SLOT_CHANGED' or event == 'UPDATE_MACROS' then
+        self:UpdateTrackedUnits()
+        for unit in pairs(self.trackedUnits) do
+            UpdateUnitAuras(unit)
+            UpdateUnitInterrupt(unit)
         end
     end
 end

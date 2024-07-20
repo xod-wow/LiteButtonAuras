@@ -24,6 +24,8 @@ local LibBG = LibStub("LibButtonGlow-1.0")
 -- it's a pain to maintain.
 
 local DebuffTypeColor = DebuffTypeColor
+local GetActionText = GetActionText
+local GetMacroBody = GetMacroBody
 local GetMacroItem = GetMacroItem
 local GetMacroSpell = GetMacroSpell
 local GetTime = GetTime
@@ -55,6 +57,24 @@ function LBA.UpdateAuraMap()
             end
         end
     end
+end
+
+
+--[[------------------------------------------------------------------------]]--
+
+-- I tried caching the gmatch split but it wasn't any faster.
+
+local function GetMacroUnit(macroIdentifier)
+    local macroBody = GetMacroBody(macroIdentifier)
+    if macroBody then
+        for _, conditionsAndArgs in gmatch(macroBody, "/(%w+)%s+([^\n]+)") do
+            local result, unit = SecureCmdOptionParse(conditionsAndArgs)
+            if result then
+                return unit or 'target'
+            end
+        end
+    end
+    return 'target'
 end
 
 
@@ -93,6 +113,47 @@ function LiteButtonAurasOverlayMixin:Style()
     self.Stacks:SetJustifyH(justifyH)
 end
 
+-- From: https://warcraft.wiki.gg/wiki/UnitId
+-- Not all units make sense to care about, nobody is going to write [@raid23]
+-- The soft targeting isn't really valid either, all of the cases I think we
+-- care about are just covered by @target.
+
+local ValidTrackedUnits = {
+    "arena1", "arena2", "arena3", "arena4", "arena5",
+    "boss1", "boss2", "boss3", "boss4", "boss5", "boss6", "boss7", "boss8",
+    "focus",
+    "mouseover",
+    "party1", "party2", "party3", "party4",
+}
+
+-- Assumes player, pet and target are already watched.  This is slow don't call
+-- this very often.
+
+function LiteButtonAurasOverlayMixin:GetTrackedUnits()
+    local type = self:GetActionInfo()
+    local trackedUnits = {}
+    if type == 'macro' then
+        local macroName = GetActionText(self:GetActionID())
+        local macroBody = GetMacroBody(macroName)
+        if macroBody then
+            for conditionExpr in macroBody:gmatch('%[(.-)%]') do
+                for condition in conditionExpr:gmatch('[^,]+') do
+                    local unit
+                    if condition:sub(1,1) == '@' then
+                       unit = condition:sub(2)
+                    elseif condition:sub(1,7) == 'target=' then
+                        unit = condition:sub(8)
+                    end
+                    if unit and tContains(ValidTrackedUnits, unit) then
+                        trackedUnits[unit] = true
+                    end
+               end
+            end
+        end
+    end
+    return trackedUnits
+end
+
 -- This could be optimized (?) slightly be checking if type, id, subType
 -- are all the same as before and doing nothing
 --
@@ -112,6 +173,8 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
 
     local type, id, subType = self:GetActionInfo()
 
+    self.unit = 'target'
+
     if type == 'spell' then
         self.name = C_Spell.GetSpellName(id)
         self.spellID = id
@@ -127,6 +190,8 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
     end
 
     if type == 'macro' then
+        local macroName = GetActionText(self:GetActionID())
+        self.unit = GetMacroUnit(macroName)
         if subType == 'spell' then
             self.spellID = id
             self.name = C_Spell.GetSpellName(self.spellID)
@@ -239,24 +304,24 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             self:SetUpAction()
         end
 
-        if self:IsKnown() then
-            if self:TrySetAsSoothe('target') then
+        if self:IsKnown()  and LBA.state[self.unit] then
+            if self:TrySetAsSoothe(self.unit) then
                 show = true
-            elseif self:TrySetAsInterrupt('target') then
+            elseif self:TrySetAsInterrupt(self.unit) then
                 show = true
             elseif self:TrySetAsTotem() then
                 show = true
-            -- elseif self:TrySetAsTaunt('target') then
+            -- elseif self:TrySetAsTaunt(self.unit) then
             --     show = true
             elseif self:TrySetAsBuff('player') then
                 show = true
-            elseif self:TrySetAsDebuff('target') then
+            elseif self:TrySetAsDebuff(self.unit) then
                 show = true
             elseif self:TrySetAsPetBuff('pet') then
                 show = true
             elseif self:TrySetAsWeaponEnchant() then
                 show = true
-            elseif self:TrySetAsDispel('target') then
+            elseif self:TrySetAsDispel(self.unit) then
                 show = true
             end
         end
@@ -482,7 +547,7 @@ function LiteButtonAurasOverlayMixin:TrySetAsDispel(unit)
         return
     end
 
-    if not UnitCanAttack('player', unit) then
+    if not UnitCanAttack('player', self.unit) then
         return
     end
 
