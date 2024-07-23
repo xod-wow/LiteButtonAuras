@@ -67,7 +67,7 @@ end
 local function GetMacroUnit(macroIdentifier)
     local macroBody = GetMacroBody(macroIdentifier)
     if macroBody then
-        for _, conditionsAndArgs in gmatch(macroBody, "/(%w+)%s+([^\n]+)") do
+        for _, conditionsAndArgs in macroBody:gmatch("/(%w+)%s+([^\n]+)") do
             local result, unit = SecureCmdOptionParse(conditionsAndArgs)
             if result then
                 return unit or 'target'
