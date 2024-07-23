@@ -15,11 +15,11 @@ local locale = GetLocale()
 
 -- :r! sh fetchlocale.sh -------------------------------------------------------
 
-
 -- deDE ------------------------------------------------------------------------
 
 if locale == "deDE" then
     L                     = L or {}
+    L["Abilities"]        = "Fähigkeiten"
     L["Bottom"]           = "Unten"
     L["Bottom Left"]      = "Unten Links"
     L["Bottom Right"]     = "Unten Rechts"
@@ -36,6 +36,7 @@ end
 
 if locale == "esES" or locale == "esMX" then
     L                     = L or {}
+    L["Abilities"]        = "Habilidades"
     L["Bottom"]           = "Abajo"
     L["Bottom Left"]      = "Abajo Izquierda"
     L["Bottom Right"]     = "Abajo Derecha"
@@ -52,6 +53,7 @@ end
 
 if locale == "frFR" then
     L                     = L or {}
+    L["Abilities"]        = "Capacités"
     L["Bottom"]           = "Bas"
     L["Bottom Left"]      = "Bas Gauche"
     L["Bottom Right"]     = "Bas Droite"
@@ -68,6 +70,7 @@ end
 
 if locale == "itIT" then
     L                     = L or {}
+    L["Abilities"]        = "Abilità"
     L["Bottom"]           = "Basso"
     L["Bottom Left"]      = "Basso a sinistra"
     L["Bottom Right"]     = "Basso a destra"
@@ -83,6 +86,7 @@ end
 
 if locale == "koKR" then
     L                     = L or {}
+    L["Abilities"]        = "스킬"
     L["Bottom"]           = "아래"
     L["Bottom Left"]      = "왼쪽 아래"
     L["Bottom Right"]     = "오른쪽 아래"
@@ -100,6 +104,7 @@ end
 
 if locale == "ptBR" then
     L                     = L or {}
+    L["Abilities"]        = "Habilidades"
     L["Bottom"]           = "Embaixo"
     L["Bottom Left"]      = "Embaixo à esquerda"
     L["Bottom Right"]     = "Embaixo à direita"
@@ -115,6 +120,7 @@ end
 
 if locale == "ruRU" then
     L                     = L or {}
+    L["Abilities"]        = "Способности"
     L["Bottom"]           = "Снизу"
     L["Bottom Left"]      = "Снизу слева"
     L["Bottom Right"]     = "Снизу справа"
@@ -132,6 +138,7 @@ end
 
 if locale == "zhCN" then
     L                     = L or {}
+    L["Abilities"]        = "技能"
     L["Bottom"]           = "下"
     L["Bottom Left"]      = "左下"
     L["Bottom Right"]     = "右下"
@@ -149,6 +156,7 @@ end
 
 if locale == "zhTW" then
     L                     = L or {}
+    L["Abilities"]        = "技能"
     L["Bottom"]           = "下"
     L["Bottom Left"]      = "左下"
     L["Bottom Right"]     = "右下"
