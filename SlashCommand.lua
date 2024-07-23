@@ -91,15 +91,11 @@ local function ParseAuraMap(cmdarg)
     local aura, ability = cmdarg:match('^(.+) on (.+)$')
     local auraInfo = C_Spell.GetSpellInfo(aura)
     local abilityInfo = C_Spell.GetSpellInfo(ability)
-    if not auraInfo or not abilityInfo then
-        return
-    else
-        return
-            auraInfo.spellID,
-            auraInfo.name or aura,
-            abilityInfo.spellID,
-            abilityInfo.name or ability
-    end
+    return
+        auraInfo and auraInfo.spellID,
+        auraInfo and auraInfo.name or aura,
+        abilityInfo and abilityInfo.spellID,
+        abilityInfo and abilityInfo.name or ability
 end
 
 local function PrintAuraMapList()
