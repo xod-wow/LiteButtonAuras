@@ -1,6 +1,6 @@
 --[[----------------------------------------------------------------------------
 
-  LiteBag/Options.lua
+  LiteButtonAuras/Options.lua
 
   Copyright 2015 Mike Battersby
 
@@ -58,7 +58,11 @@ local function ValidateSpellValue(_, v)
     elseif v and C_Spell.GetSpellInfo(v) ~= nil then
         return true
     else
-        return format(L["Invalid spell: %s.\n\nFor spells that aren't in your spell book use the spell ID number."], ORANGE_FONT_COLOR:WrapTextInColorCode(v))
+        return format(
+                L["Invalid spell: %s."] ..
+                 "\n\n" ..
+                 L["For spells that aren't in your spell book use the spell ID number."],
+                ORANGE_FONT_COLOR:WrapTextInColorCode(v))
     end
 end
 

@@ -10,6 +10,7 @@
 
 embeds.xml
 
+Localization.lua
 ClassicCompat.lua
 SpellData.lua
 ColorGradient.lua
