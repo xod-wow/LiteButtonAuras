@@ -5,9 +5,11 @@
 
 ----------------------------------------------------------------------------]]--
 
-local _, LBA = ...
+local addonName, LBA = ...
 
 local C_Spell = LBA.C_Spell or C_Spell
+
+local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
 local fontPath, fontSize, fontFlags = NumberFontNormal:GetFont()
 
@@ -85,6 +87,13 @@ function LBA.InitializeOptions()
             p.font = nil
         end
     end
+    -- Profile change hooks, would be needed to change profiles outside gui
+    --[[
+    local function notify () AceConfigRegistry:NotifyChange(addonName) end
+    LBA.db.RegisterCallback(LBA, "OnProfileChanged", notify)
+    LBA.db.RegisterCallback(LBA, "OnProfileCopied", notify)
+    LBA.db.RegisterCallback(LBA, "OnProfileReset", notify
+    ]]
 end
 
 function LBA.SetOption(option, value, key)
@@ -106,7 +115,7 @@ function LBA.SetOption(option, value, key)
     else
         LBA.db[key][option] = value
     end
-    LBA.db.callbacks:Fire("OnModified")
+    AceConfigRegistry:NotifyChange(addonName)
 end
 
 function LBA.AddAuraMap(auraSpell, abilitySpell)
@@ -119,7 +128,7 @@ function LBA.AddAuraMap(auraSpell, abilitySpell)
         LBA.db.profile.auraMap[auraSpell] = { abilitySpell }
     end
     LBA.UpdateAuraMap()
-    LBA.db.callbacks:Fire("OnModified")
+    AceConfigRegistry:NotifyChange(addonName)
 end
 
 function LBA.RemoveAuraMap(auraSpell, abilitySpell)
@@ -137,39 +146,39 @@ function LBA.RemoveAuraMap(auraSpell, abilitySpell)
         end
     end
     LBA.UpdateAuraMap()
-    LBA.db.callbacks:Fire("OnModified")
+    AceConfigRegistry:NotifyChange(addonName)
 end
 
 function LBA.DefaultAuraMap()
     LBA.db.profile.auraMap = CopyTable(defaults.profile.auraMap)
     LBA.UpdateAuraMap()
-    LBA.db.callbacks:Fire("OnModified")
+    AceConfigRegistry:NotifyChange(addonName)
 end
 
 function LBA.WipeAuraMap()
     LBA.db.profile.auraMap = {}
     LBA.UpdateAuraMap()
-    LBA.db.callbacks:Fire("OnModified")
+    AceConfigRegistry:NotifyChange(addonName)
 end
 
 function LBA.AddIgnoreSpell(auraID)
     LBA.db.profile.denySpells[auraID] = true
-    LBA.db.callbacks:Fire("OnModified")
+    AceConfigRegistry:NotifyChange(addonName)
 end
 
 function LBA.RemoveIgnoreSpell(auraID)
     LBA.db.profile.denySpells[auraID] = nil
-    LBA.db.callbacks:Fire("OnModified")
+    AceConfigRegistry:NotifyChange(addonName)
 end
 
 function LBA.DefaultIgnoreSpells()
     LBA.db.profile.denySpells = CopyTable(defaults.profile.denySpells)
-    LBA.db.callbacks:Fire("OnModified")
+    AceConfigRegistry:NotifyChange(addonName)
 end
 
 function LBA.WipeIgnoreSpells()
     table.wipe(LBA.db.profile.denySpells)
-    LBA.db.callbacks:Fire("OnModified")
+    AceConfigRegistry:NotifyChange(addonName)
 end
 
 function LBA.SpellString(spellID, spellName)
@@ -223,4 +232,5 @@ end
 
 function LBA.ApplyDefaultSettings()
     LBA.db:ResetProfile()
+    AceConfigRegistry:NotifyChange(addonName)
 end

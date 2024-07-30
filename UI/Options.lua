@@ -399,7 +399,7 @@ local options = {
 }
 
 
-local function UpdateDynamicOptions()
+local function GenerateOptions()
     local auraMapList = LBA.GetAuraMapList()
     local auraMaps = {}
     for i, entry in ipairs(auraMapList) do
@@ -478,6 +478,7 @@ local function UpdateDynamicOptions()
             end
             options.args.IgnoreGroup.args.Abilities.plugins.ignoreAbilites = ignoreAbilities
         end)
+    return options
 end
 
 -- The sheer amount of crap required here is ridiculous. I bloody well hate
@@ -494,18 +495,13 @@ local AceDBOptions =  LibStub("AceDBOptions-3.0")
 -- added, not sorted by name. In order to mostly get them to
 -- appear in the right order, add the main panel when loaded.
 
-AceConfig:RegisterOptionsTable(addonName, options, { "litebuttonauras", "lba" })
+AceConfig:RegisterOptionsTable(addonName, GenerateOptions, { "litebuttonauras", "lba" })
 local optionsPanel, category = AceConfigDialog:AddToBlizOptions(addonName)
 
 function LBA.InitializeGUIOptions()
     local profileOptions = AceDBOptions:GetOptionsTable(LBA.db)
     AceConfig:RegisterOptionsTable(addonName.."Profiles", profileOptions)
     AceConfigDialog:AddToBlizOptions(addonName.."Profiles", profileOptions.name, addonName)
-    LBA.db.RegisterCallback(LBA, "OnProfileChanged", UpdateDynamicOptions)
-    LBA.db.RegisterCallback(LBA, "OnProfileCopied", UpdateDynamicOptions)
-    LBA.db.RegisterCallback(LBA, "OnProfileReset", UpdateDynamicOptions)
-    LBA.db.RegisterCallback(LBA, "OnModified", UpdateDynamicOptions)
-    UpdateDynamicOptions()
 end
 
 function LBA.OpenOptions()
