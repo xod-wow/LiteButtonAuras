@@ -163,7 +163,9 @@ function LBA.BarIntegrations:DominosInit()
 end
 
 
--- ActionbarPlus which is all SecureActionButton without any actionID
+-- ActionBarPlus ---------------------------------------------------------------
+
+-- All SecureActionButton without any actionID
 
 -- I'm not 100% convinced about the wisdom of supporting this. The addon is
 -- overengineered and still doesn't support basic things like putting a pet
