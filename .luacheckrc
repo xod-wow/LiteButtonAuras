@@ -50,6 +50,7 @@ read_globals =  {
     "GetActionInfo",
     "GetActionText",
     "GetKeysArray",
+    "GetLocale",
     "GetMacroIndexByName",
     "GetMacroItem",
     "GetMacroSpell",
