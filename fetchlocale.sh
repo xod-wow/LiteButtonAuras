@@ -10,7 +10,11 @@ header () {
 }
 
 fetch () {
-    curl -s -H "X-Api-Token: $APIKEY" "https://wow.curseforge.com/api/projects/526431/localization/export?export-type=TableAdditions&lang=$1&unlocalized=ShowPrimaryAsComment" | awk -F' = ' '{ printf("    %-21s = %s\n", $1, $2) }'
+    curl \
+        -s -H "X-Api-Token: $APIKEY" \
+        "https://wow.curseforge.com/api/projects/526431/localization/export?export-type=TableAdditions&lang=$1&unlocalized=ShowBlankAsComment" \
+        | grep -v 'Translation missing' \
+        | sed -e 's/^/    /; s/ *$//;'
 }
 
 for locale in "deDE" "esES" "frFR" "itIT" "koKR" "ptBR" "ruRU" "zhCN" "zhTW"; do

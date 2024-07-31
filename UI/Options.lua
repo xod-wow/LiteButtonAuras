@@ -248,9 +248,10 @@ local options = {
             },
         },
         MappingGroup = {
-            name = L["Extra aura displays"],
             type = "group",
+            name = L["Extra aura displays"],
             inline = false,
+            order = order(),
             args = {
                 showAura = {
                     name = L["Show aura"],
@@ -341,12 +342,13 @@ local options = {
             }
         },
         IgnoreGroup = {
-            name = L["Ignored abilities"],
             type = "group",
+            name = L["Ignored abilities"],
+            order = order(),
             inline = false,
             args = {
                 ignoreAbility = {
-                    name = L["Ignored abilities"],
+                    name = L["Add ability"],
                     type = "input",
                     width = 1,
                     order = order(),
@@ -398,13 +400,12 @@ local options = {
     },
 }
 
-
 local function GenerateOptions()
     local auraMapList = LBA.GetAuraMapList()
-    local auraMaps = {}
+    local auraMaps = { }
     for i, entry in ipairs(auraMapList) do
         auraMaps["mapAura"..i] = {
-            order = 10*i,
+            order = 10*i+1,
             name = LBA.SpellString(entry[1], entry[2]),
             type = "description",
             image = C_Spell.GetSpellTexture(entry[1] or entry[2]),
@@ -428,7 +429,7 @@ local function GenerateOptions()
             width = 1.4,
         }
         auraMaps["delete"..i] = {
-            order = 10*i+5,
+            order = 10*i+4,
             name = DELETE,
             type = "execute",
             func = function () LBA.RemoveAuraMap(entry[1], entry[3]) end,
@@ -466,14 +467,14 @@ local function GenerateOptions()
                     imageWidth = 22,
                     imageHeight = 22,
                     width = 2.5,
-                    order = 10*i,
+                    order = 10*i+1,
                 }
                 ignoreAbilities["delete"..i] = {
-                    order = 10*i+5,
                     name = DELETE,
                     type = "execute",
                     func = function () LBA.RemoveIgnoreSpell(spell:GetSpellID()) end,
                     width = 0.5,
+                    order = 10*i+2,
                 }
             end
             options.args.IgnoreGroup.args.Abilities.plugins.ignoreAbilites = ignoreAbilities

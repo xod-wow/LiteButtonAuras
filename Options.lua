@@ -7,6 +7,8 @@
 
 local addonName, LBA = ...
 
+local L = LBA.L
+
 local C_Spell = LBA.C_Spell or C_Spell
 
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
@@ -192,8 +194,9 @@ end
 
 function LBA.AuraMapString(auraID, auraName, abilityID, abilityName)
     return format(
-                "%s on %s",
+                "%s %s %s",
                 LBA.SpellString(auraID, auraName),
+                L["on"],
                 LBA.SpellString(abilityID, abilityName)
             )
 end

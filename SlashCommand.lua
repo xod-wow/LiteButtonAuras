@@ -29,11 +29,11 @@ local function PrintUsage()
     printf(GAMEMENU_HELP .. ":")
     printf("  /lba options")
     printf("  /lba stack on|off|default")
-    printf("  /lba stackanchor point [offset]")
+    printf("  /lba stackposition point [offset]")
     printf("  /lba timer on|off|default")
     printf("  /lba colortimer on|off|default")
     printf("  /lba decimaltimer on|off|default")
-    printf("  /lba timeranchor point [offset]")
+    printf("  /lba timerposition point [offset]")
     printf("  /lba font FontName|default")
     printf("  /lba font path [ size [ flags ] ]")
     printf("  /lba aura help")
@@ -61,11 +61,11 @@ local function PrintOptions()
     local p = LBA.db.profile
     printf(SETTINGS .. ':')
     printf("  stack = " .. TrueStr(p.showStacks))
-    printf("  stackAnchor = %s %d", p.stacksAnchor, p.stacksAdjust)
+    printf("  stackPosition = %s %d", p.stacksAnchor, p.stacksAdjust)
     printf("  timer = " .. TrueStr(p.showTimers))
     printf("  colorTimer = " .. TrueStr(p.colorTimers))
     printf("  decimalTimer = " .. TrueStr(p.decimalTimers))
-    printf("  timerAnchor = %s %d", p.timerAnchor, p.timerAdjust)
+    printf("  timerPosition = %s %d", p.timerAnchor, p.timerAdjust)
     printf("  font = [ '%s', %.1f, '%s' ]", p.fontPath, p.fontSize, p.fontFlags)
 end
 
@@ -193,9 +193,9 @@ local function SlashCommand(argstr)
         PrintOptions()
     elseif cmd == ('options'):sub(1,n) then
         LBA.OpenOptions()
-    elseif cmd:lower() == 'stacks' and #args == 1 then
+    elseif cmd:lower() == 'stack' and #args == 1 then
         LBA.SetOption('showStacks', args[1])
-    elseif cmd:lower() == 'stacksanchor' and WithinRange(#args, 1, 2) then
+    elseif cmd:lower() == 'stackposition' and WithinRange(#args, 1, 2) then
         LBA.SetOption('stacksAnchor', args[1])
         if args[2] then LBA.SetOption('stacksAdjust', args[2]) end
     elseif cmd:lower() == 'timer' and #args == 1 then
@@ -206,7 +206,7 @@ local function SlashCommand(argstr)
         LBA.SetOption('decimalTimers', args[1])
     elseif cmd:lower() == 'font' and WithinRange(#args, 1, 3) then
         SetFont(args)
-    elseif cmd:lower() == 'timeranchor' and WithinRange(#args, 1, 2) then
+    elseif cmd:lower() == 'timerposition' and WithinRange(#args, 1, 2) then
         LBA.SetOption('timerAnchor', args[1])
         if args[2] then LBA.SetOption('timerAdjust', args[2]) end
     elseif cmd:lower() == 'aura' then
