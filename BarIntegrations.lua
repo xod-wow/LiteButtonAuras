@@ -107,7 +107,7 @@ end
 -- bugs that the new style does with item macros.
 -- See LiteButtonAurasOverlayMixin:SetUpAction() where type == "macro"
 
-local function ButtonForgetGetActionInfo(overlay)
+local function ButtonForgeGetActionInfo(overlay)
     local widget = overlay:GetParent()
     return ButtonForge_API1.GetButtonActionInfo(widget:GetName())
 end
@@ -117,8 +117,8 @@ end
 local function ButtonForgeInitButton(widget)
     local overlay = LiteButtonAurasController:CreateOverlay(widget)
     overlay.GetActionID = ButtonForgeGetActionID
-    overlay.GetActionInfo = ButtonForgetGetActionInfo
-    overlay.HasAction = ButtonForgetGetActionInfo
+    overlay.GetActionInfo = ButtonForgeGetActionInfo
+    overlay.HasAction = ButtonForgeGetActionInfo
     hooksecurefunc(widget.icon, 'SetTexture', function () overlay:Update() end)
 end
 
