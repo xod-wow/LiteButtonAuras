@@ -31,7 +31,7 @@ local defaults = {
         glowAlpha = 0.5,
         minAuraDuration = 1.5,
         showTimers = true,
-        showStacks = false,
+        showStacks = true,
         showSuggestions = true,
         colorTimers = true,
         decimalTimers = true,
@@ -152,22 +152,22 @@ function LBA.WipeAuraMap()
     LBA.db.callbacks:Fire("OnModified")
 end
 
-function LBA.AddDenySpell(auraID)
+function LBA.AddIgnoreSpell(auraID)
     LBA.db.profile.denySpells[auraID] = true
     LBA.db.callbacks:Fire("OnModified")
 end
 
-function LBA.RemoveDenySpell(auraID)
+function LBA.RemoveIgnoreSpell(auraID)
     LBA.db.profile.denySpells[auraID] = nil
     LBA.db.callbacks:Fire("OnModified")
 end
 
-function LBA.DefaultDenySpells()
+function LBA.DefaultIgnoreSpells()
     LBA.db.profile.denySpells = CopyTable(defaults.profile.denySpells)
     LBA.db.callbacks:Fire("OnModified")
 end
 
-function LBA.WipeDenySpells()
+function LBA.WipeIgnoreSpells()
     table.wipe(LBA.db.profile.denySpells)
     LBA.db.callbacks:Fire("OnModified")
 end

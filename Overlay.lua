@@ -166,7 +166,7 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
     self.name = nil
 end
 
-function LiteButtonAurasOverlayMixin:IsDenySpell()
+function LiteButtonAurasOverlayMixin:IsIgnoreSpell()
     if self.spellID and LBA.db.profile.denySpells[self.spellID] then
         return true
     else
@@ -181,7 +181,7 @@ function LiteButtonAurasOverlayMixin:GetMatchingAura(t)
                 return t[extraAuraName]
             end
         end
-    elseif not self:IsDenySpell() and t[self.name] then
+    elseif not self:IsIgnoreSpell() and t[self.name] then
         return t[self.name]
     end
 end

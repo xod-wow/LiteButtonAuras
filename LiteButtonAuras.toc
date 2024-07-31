@@ -1,10 +1,13 @@
-## Interface: 110002, 110000, 100207, 40400, 11503
+## Interface: 110002, 110000, 40400, 11503
+
 ## Title: LiteButtonAuras
+## IconTexture: Interface\Icons\achievement_guild_timeoff
 ## Version: @project-version@
 ## Author: Xodiv-Nagrand
 ## Email: mib@post.com
 ## OptionalDeps: Bartender4, Dominos, ElvUI, Masque
 ## SavedVariables: LiteButtonAurasDB
+## X-Category: Interface
 ## X-Curse-Project-ID: 526431
 ## X-WoWI-ID: 26528
 

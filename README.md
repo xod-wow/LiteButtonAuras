@@ -105,8 +105,8 @@ example, to show a debuff on the ability that triggers it).
 
 ```
 /lba aura list - list current extra aura mappings
-/lba aura show <auraSpellID> on <ability>
-/lba aura hide <auraSpellID> on <ability>
+/lba aura add <auraSpellID> on <ability>
+/lba aura remove <auraSpellID> on <ability>
 ```
 
 If an ability is in your spell book you can use it by name otherwise by spell ID.
@@ -119,9 +119,9 @@ change the default behaviour of showing buffs/debuffs that match the ability nam
 You can stop an ability from ever getting highlighted due to the default name matching.
 
 ```
-/lba deny list - list abilities never to highlight
-/lba deny add <ability>
-/lba deny remove <ability>
+/lba ignore list - list abilities never to highlight
+/lba ignore add <ability>
+/lba ignore remove <ability>
 ```
 
 If ability is in your spell book you can use it by name otherwise spell ID.
