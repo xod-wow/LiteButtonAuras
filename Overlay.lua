@@ -152,9 +152,11 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
                 self.spellID = spellID
                 self.name = name or itemName
                 return
-            else
-                self.spellID = GetMacroSpell(id)
-                self.name = C_Spell.GetSpellName(self.spellID)
+            end
+            local spellID = GetMacroSpell(id)
+            if spellID then
+                self.spellID = spellID
+                self.name = C_Spell.GetSpellName(spellID)
                 return
             end
         end
