@@ -118,7 +118,7 @@ local function AuraCommand(argstr)
         elseif not ability then
             printf(L["Error: unknown ability spell: %s"], NORMAL_FONT_COLOR:WrapTextInColorCode(abilityName))
         else
-            printf(REMOVE.." %s", LBA.AuraMapString(aura, auraName, ability, abilityName))
+            printf(ADD.." %s", LBA.AuraMapString(aura, auraName, ability, abilityName))
             LBA.AddAuraMap(aura, ability)
         end
     elseif cmd == 'remove' and cmdarg then
@@ -128,7 +128,7 @@ local function AuraCommand(argstr)
         elseif not ability then
             printf(L["Error: unknown ability spell: %s"], NORMAL_FONT_COLOR:WrapTextInColorCode(abilityName))
         else
-            printf(ADD.." %s", LBA.AuraMapString(aura, auraName, ability, abilityName))
+            printf(REMOVE.." %s", LBA.AuraMapString(aura, auraName, ability, abilityName))
             LBA.RemoveAuraMap(aura, ability)
         end
     elseif cmd == 'wipe' then
