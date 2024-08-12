@@ -270,7 +270,7 @@ local options = {
                             local info = C_Spell.GetSpellInfo(v)
                             addAuraMap[1] = info and info.spellID or nil
                         end,
-                    control = 'LBAInputSpellID',
+                    control = 'LBAInputFocus',
                     validate = ValidateSpellValue,
                 },
                 preOnAbilityGap = {
