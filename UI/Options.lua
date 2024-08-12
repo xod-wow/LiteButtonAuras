@@ -59,7 +59,7 @@ local function ValidateSpellValue(_, v)
         return true
     else
         return format(
-                L["Error: unknown spell: %s."] ..
+                L["Error: unknown spell: %s"] ..
                  "\n\n" ..
                  L["For spells that aren't in your spell book use the spell ID number."],
                 ORANGE_FONT_COLOR:WrapTextInColorCode(v))
