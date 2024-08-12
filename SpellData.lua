@@ -106,6 +106,8 @@ LBA.TotemOrGuardianModels = {
 LBA.WeaponEnchantSpellID = {
     [   5400] = C_Spell.GetSpellName(318038),   -- Flametongue Weapon
     [   5401] = C_Spell.GetSpellName(33757),    -- Windfury Weapon
+    [   6498] = C_Spell.GetSpellName(382021),   -- Earthliving Weapon
+    [   7587] = C_Spell.GetSpellName(462757),   -- Thunderstrike Ward
 }
 
 -- The main reason for this is that Classic Era still has spell ranks,
