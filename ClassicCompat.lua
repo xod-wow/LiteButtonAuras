@@ -55,6 +55,10 @@ if not C_Spell.GetSpellInfo then
             }
         end
     end
+
+    function LBA.C_Spell.GetOverrideSpell(spellIdentifier, spec, onlyKnown, ignoreOverrideSpellID)
+        return tonumber(spellIdentifier) or 0
+    end
 end
 
 if not C_Item or not C_Item.GetItemInfoInstant then

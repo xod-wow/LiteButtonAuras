@@ -170,29 +170,52 @@ end
 -- It's worth noting that the 10.0 BuffFrame still uses the same mechanism
 -- as used here, but both the CompactUnitFrame and the TargetFrame have
 -- switched to using the new ways.
-
--- [ 1] name,
--- [ 2] icon,
--- [ 3] count,
--- [ 4] debuffType,
--- [ 5] duration,
--- [ 6] expirationTime,
--- [ 7] source,
--- [ 8] isStealable,
--- [ 9] nameplateShowPersonal,
--- [10] spellId,
--- [11] canApplyAura,
--- [12] isBossDebuff,
--- [13] castByPlayer,
--- [14] nameplateShowAll,
--- [15] timeMod,
--- ...
--- = UnitAura(unit, index, filter)
+--
+--  {
+--    applications = 0,
+--    auraInstanceID = 154047,
+--    canApplyAura = true,
+--    duration = 3600,
+--    expirationTime = 9109.109,
+--    icon = 136051,
+--    isBossAura = false,
+--    isFromPlayerOrPlayerPet = true,
+--    isHarmful = false,
+--    isHelpful = true,
+--    isNameplateOnly = false,
+--    isRaid = false,
+--    isStealable = false
+--    name = "Lightning Shield",
+--    nameplateShowAll = false,
+--    nameplateShowPersonal = false,
+--    points = { },
+--    sourceUnit = "player",
+--    spellId = 192106,
+--    timeMod = 1,
+--  }
 --
 -- https://warcraft.wiki.gg/wiki/API_C_UnitAuras.GetAuraDataBySlot
 
+-- Also add a duplicate with any override name. This is awkward but there's no
+-- inverse of C_Spell.GetOverrideSpell.
+--
+-- C_Spell.GetOverrideSpell returns the same ID if passed in an ID that's not
+-- overridden (seems like no check is done if it's a valid spell or not).
+--
+-- It will return 0 if given a string that doesn't match to an ID (and not nil
+-- like all the other C_Spell.GetX functions).
+--
+-- We call it with auraData.name because some of our faked up auraData (like
+-- for weapon enchants) doesn't have a spellId in it.
+
 local function UpdateTableAura(t, auraData)
     t[auraData.name] = auraData
+    local overrideID = C_Spell.GetOverrideSpell(auraData.name)
+    local overrideName = C_Spell.GetSpellName(overrideID)
+    if overrideName and overrideName ~= auraData.name then
+        -- Doesn't update the spell name in the auraData only the index name
+        t[overrideName] = auraData
+    end
 end
 
 -- Fake AuraData for weapon enchants, see BuffFrame.lua for how WoW does it
