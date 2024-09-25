@@ -1,5 +1,4 @@
-## Interface: 110002, 110000, 40400, 11503
-
+## Interface: 110002, 40400, 11504
 ## Title: LiteButtonAuras
 ## IconTexture: Interface\Icons\achievement_guild_timeoff
 ## Version: @project-version@

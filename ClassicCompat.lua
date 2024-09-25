@@ -12,12 +12,13 @@
 
 local _, LBA = ...
 
-if not C_Spell.GetSpellInfo then
 
+-- C_Spell ---------------------------------------------------------------------
+
+LBA.C_Spell = CopyTable(C_Spell or {})
+
+if not LBA.C_Spell.GetSpellInfo then
     local GetSpellInfo = _G.GetSpellInfo
-    local GetSpellCooldown = _G.GetSpellCooldown
-
-    LBA.C_Spell = {}
 
     function LBA.C_Spell.GetSpellInfo(spellIdentifier)
         local name, _, iconID, castTime, minRange, maxRange, spellID, originalIconID = GetSpellInfo(spellIdentifier)
@@ -33,16 +34,24 @@ if not C_Spell.GetSpellInfo then
             }
         end
     end
+end
 
+if not LBA.C_Spell.GetSpellName then
     function LBA.C_Spell.GetSpellName(spellIdentifier)
         local name = GetSpellInfo(spellIdentifier)
         return name
     end
+end
 
+if not LBA.C_Spell.GetSpellTexture then
     function LBA.C_Spell.GetSpellTexture(spellIdentifier)
         local _, _, iconID = GetSpellInfo(spellIdentifier)
         return iconID
     end
+end
+
+if not LBA.C_Spell.GetSpellCooldown then
+    local GetSpellCooldown = _G.GetSpellCooldown
 
     function LBA.C_Spell.GetSpellCooldown(spellIdentifier)
         local startTime, duration, isEnabled, modRate = GetSpellCooldown(spellIdentifier)
@@ -55,26 +64,31 @@ if not C_Spell.GetSpellInfo then
             }
         end
     end
-
-    function LBA.C_Spell.GetOverrideSpell(spellIdentifier, spec, onlyKnown, ignoreOverrideSpellID)
-        return tonumber(spellIdentifier) or 0
-    end
 end
 
-if not C_Item or not C_Item.GetItemInfoInstant then
-    LBA.C_Item = {}
+
+-- C_Item ----------------------------------------------------------------------
+
+LBA.C_Item = CopyTable(C_Item or {})
+
+if not LBA.C_Item.GetItemInfoInstant then
     LBA.C_Item.GetItemInfoInstant = _G.GetItemInfoInstant
+end
+
+if not LBA.C_Item.GetItemSpell then
     LBA.C_Item.GetItemSpell = _G.GetItemSpell
 end
 
 
+-- AuraUtil --------------------------------------------------------------------
+
 -- Classic doesn't have ForEachAura even though it has AuraUtil.
+
+LBA.AuraUtil = CopyTable(AuraUtil or {})
 
 if not AuraUtil.ForEachAura then
 
     local UnitAura = _G.UnitAura
-
-    LBA.AuraUtil = {}
 
     -- Turn the UnitAura returns into a facsimile of the UnitAuraInfo struct
     -- returned by C_UnitAuras.GetAuraDataBySlot(unit, slot)

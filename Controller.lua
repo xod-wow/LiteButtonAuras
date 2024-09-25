@@ -212,11 +212,13 @@ end
 
 local function UpdateTableAura(t, auraData)
     t[auraData.name] = auraData
-    local overrideID = C_Spell.GetOverrideSpell(auraData.name)
-    local overrideName = C_Spell.GetSpellName(overrideID)
-    if overrideName and overrideName ~= auraData.name then
-        -- Doesn't update the spell name in the auraData only the index name
-        t[overrideName] = auraData
+    if C_Spell.GetOverrideSpell then
+        local overrideID = C_Spell.GetOverrideSpell(auraData.name)
+        local overrideName = C_Spell.GetSpellName(overrideID)
+        if overrideName and overrideName ~= auraData.name then
+            -- Doesn't update the spell name in the auraData only the index name
+            t[overrideName] = auraData
+        end
     end
 end
 
