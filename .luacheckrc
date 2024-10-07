@@ -71,6 +71,7 @@ read_globals =  {
     "NumberFontNormal",
     "OKAY",
     "ORANGE_FONT_COLOR",
+    "REMOVE",
     "SELECTED_CHAT_FRAME",
     "SETTINGS",
     "Settings",

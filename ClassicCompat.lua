@@ -37,6 +37,8 @@ if not LBA.C_Spell.GetSpellInfo then
 end
 
 if not LBA.C_Spell.GetSpellName then
+    local GetSpellInfo = _G.GetSpellInfo
+
     function LBA.C_Spell.GetSpellName(spellIdentifier)
         local name = GetSpellInfo(spellIdentifier)
         return name
@@ -44,6 +46,8 @@ if not LBA.C_Spell.GetSpellName then
 end
 
 if not LBA.C_Spell.GetSpellTexture then
+    local GetSpellInfo = _G.GetSpellInfo
+
     function LBA.C_Spell.GetSpellTexture(spellIdentifier)
         local _, _, iconID = GetSpellInfo(spellIdentifier)
         return iconID
