@@ -327,7 +327,7 @@ function LiteButtonAurasOverlayMixin:SetAsTotem(expireTime)
 end
 
 function LiteButtonAurasOverlayMixin:TrySetAsTotem()
-    if LBA.state.player.totems[self.name] then
+    if LBA.state.player.totems[self.name] and not self:IsIgnoreSpell() then
         self:SetAsTotem(LBA.state.player.totems[self.name])
         return true
     end
