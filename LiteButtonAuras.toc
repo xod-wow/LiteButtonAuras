@@ -1,6 +1,7 @@
 ## Interface: 110005, 40400, 11504
 ## Title: LiteButtonAuras
-## IconTexture: Interface\Icons\achievement_guild_timeoff
+## IconTexture: Interface\Icons\ability_deathknight_heartstopaura
+## AddonCompartmentFunc: LiteButtonAuras_AddonCompartmentFunc
 ## Version: @project-version@
 ## Author: Xodiv-Nagrand
 ## Email: mib@post.com
