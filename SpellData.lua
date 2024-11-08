@@ -42,6 +42,9 @@ LBA.Soothes = {
     [  2908] = true,                -- Soothe (Druid)
     [ 19801] = true,                -- Tranquilizing Shot (Hunter)
     [  5938] = true,                -- Shiv (Rogue)
+    [115078] = function ()          -- Paralysis (Monk) with Pressure Points
+        return IsPlayerSpell(450432)
+    end,
 }
 
 LBA.HostileDispels = {

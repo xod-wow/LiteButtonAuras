@@ -373,8 +373,18 @@ function LiteButtonAurasOverlayMixin:SetAsSoothe(auraData)
 end
 ]]
 
+function LiteButtonAurasOverlayMixin:IsSoothe()
+    -- Note this is handling self.name == nil case as well
+    local v = LBA.Soothes[self.name]
+    if type(v) == 'function' then
+        return not not v()
+    else
+        return not not v
+    end
+end
+
 function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
-    if not self.name or not LBA.Soothes[self.name] then return end
+    if not self:IsSoothe() then return end
     if UnitIsFriend('player', 'target') then return end
 
     for _, auraData in pairs(LBA.state.target.buffs) do
