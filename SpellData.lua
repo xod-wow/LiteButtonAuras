@@ -104,6 +104,11 @@ LBA.TotemOrGuardianModels = {
     [ 135790] = C_Spell.GetSpellName(198067),   -- Fire Elemental (Shaman)
     [1020304] = C_Spell.GetSpellName(192249),   -- Storm Elemental (Shaman)
     [ 237577] = C_Spell.GetSpellName(51533),    -- Feral Spirit (Shaman)
+    [ 237562] = C_Spell.GetSpellName(111898),   -- Grimoire: Felguard (Warlock)
+    [1378282] = C_Spell.GetSpellName(104316),   -- Call Dreadstalkers (Warlock)
+    [1616211] = C_Spell.GetSpellName(264119),   -- Summon Vilefiend (Warlock)
+    [1709931] = C_Spell.GetSpellName(455476),   -- Summon Charhound (Warlock)
+    [1709932] = C_Spell.GetSpellName(455465),   -- Summon Gloomhound (Warlock)
 }
 
 LBA.WeaponEnchantSpellID = {
