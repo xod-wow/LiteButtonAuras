@@ -25,10 +25,12 @@ local defaults = {
             [116]       = true, -- Frostbolt (Mage)
             [152175]    = true, -- Whirling Dragon Punch (Monk)
             [190356]    = true, -- Blizzard (Mage)
+            [425782]    = true, -- Second Wind (Warrior passive / Skyriding)
         },
         auraMap = { },
         color = {
             buff    = { r=0.00, g=0.70, b=0.00 },
+            petBuff = { r=0.00, g=0.00, b=0.70 },
             debuff  = { r=1.00, g=0.00, b=0.00 },
             enrage  = { r=1.00, g=0.25, b=0.00 }, -- unused
         },

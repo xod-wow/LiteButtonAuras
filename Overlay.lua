@@ -222,9 +222,9 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             --     show = true
             elseif self:TrySetAsBuff('player') then
                 show = true
-            elseif LBA.PlayerPetBuffs[self.name] and self:TrySetAsBuff('pet') then
-                show = true
             elseif self:TrySetAsDebuff('target') then
+                show = true
+            elseif self:TrySetAsPetBuff('pet') then
                 show = true
             elseif self:TrySetAsWeaponEnchant() then
                 show = true
@@ -285,6 +285,14 @@ function LiteButtonAurasOverlayMixin:SetAsBuff(auraData)
     self:SetAsAura(auraData)
 end
 
+function LiteButtonAurasOverlayMixin:SetAsPetBuff(auraData)
+    local color = LBA.db.profile.color.petBuff
+    local alpha = LBA.db.profile.glowAlpha
+    self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
+    -- self.Stacks:SetTextColor(color.r, color.g, color.b, 1.0)
+    self:SetAsAura(auraData)
+end
+
 function LiteButtonAurasOverlayMixin:SetAsDebuff(auraData)
     local color = LBA.db.profile.color.debuff
     local alpha = LBA.db.profile.glowAlpha
@@ -297,6 +305,14 @@ function LiteButtonAurasOverlayMixin:TrySetAsBuff(unit)
     local aura = self:GetMatchingAura(LBA.state[unit].buffs)
     if aura then
         self:SetAsBuff(aura)
+        return true
+    end
+end
+
+function LiteButtonAurasOverlayMixin:TrySetAsPetBuff(unit)
+    local aura = self:GetMatchingAura(LBA.state[unit].buffs)
+    if aura and aura.sourceUnit == 'player' then
+        self:SetAsPetBuff(aura)
         return true
     end
 end

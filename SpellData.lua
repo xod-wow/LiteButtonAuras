@@ -67,10 +67,6 @@ LBA.HostileDispels = {
 --  [232633] = { Magic = true },    -- Arcane Torrent (Blood Elf Priest)
 }
 
-LBA.PlayerPetBuffs = {
-    [   136] = true,                -- Mend Pet
-}
-
 LBA.Taunts = {
     [   355] = true,                -- Taunt (Warrior)
     [ 51399] = true,                -- Death Grip (Death Knight)
@@ -149,7 +145,6 @@ do
     AddSpellNames(LBA.Interrupts)
     AddSpellNames(LBA.Soothes)
     AddSpellNames(LBA.HostileDispels)
-    AddSpellNames(LBA.PlayerPetBuffs)
     AddSpellNames(LBA.Taunts)
 end
 
