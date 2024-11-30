@@ -25,6 +25,7 @@ if locale == "deDE" then
     L = L or {}
     --[[ L["Add ability"] = ""--]]
     --[[ L["Aura list"] = ""--]]
+    --[[ L["Automatically match auras to abilities by name."] = ""--]]
     L["Bottom"] = "Unten"
     L["Bottom left"] = "Unten Links"
     L["Bottom right"] = "Unten Rechts"
@@ -39,6 +40,7 @@ if locale == "deDE" then
     L["Font size"] = "Schriftgröße"
     L["For spells that aren't in your spell book use the spell ID number."] = "Verwenden Sie für Zaubersprüche, die nicht in Ihrem Zauberbuch enthalten sind, die Zauber-ID-Nummer."
     L["Highlight buttons for interrupt and soothe."] = "Markieren Sie die Schaltflächen zum Tritt und Besänftigen"
+    --[[ L["If you disable this option, only auras explicitly configured under \"Extra aura displays\" will be shown."] = ""--]]
     L["Ignored abilities"] = "Ignorierte Fähigkeiten"
     L["Left"] = "Links"
     --[[ L["on"] = ""--]]
@@ -64,6 +66,7 @@ if locale == "esES" or locale == "esMX" then
     L = L or {}
     --[[ L["Add ability"] = ""--]]
     --[[ L["Aura list"] = ""--]]
+    --[[ L["Automatically match auras to abilities by name."] = ""--]]
     L["Bottom"] = "Abajo"
     L["Bottom left"] = "Abajo Izquierda"
     L["Bottom right"] = "Abajo Derecha"
@@ -78,6 +81,7 @@ if locale == "esES" or locale == "esMX" then
     L["Font size"] = "Tamaño de fuente"
     --[[ L["For spells that aren't in your spell book use the spell ID number."] = ""--]]
     --[[ L["Highlight buttons for interrupt and soothe."] = ""--]]
+    --[[ L["If you disable this option, only auras explicitly configured under \"Extra aura displays\" will be shown."] = ""--]]
     --[[ L["Ignored abilities"] = ""--]]
     L["Left"] = "Izquierda"
     --[[ L["on"] = ""--]]
@@ -103,6 +107,7 @@ if locale == "frFR" then
     L = L or {}
     --[[ L["Add ability"] = ""--]]
     --[[ L["Aura list"] = ""--]]
+    --[[ L["Automatically match auras to abilities by name."] = ""--]]
     L["Bottom"] = "Bas"
     L["Bottom left"] = "Bas Gauche"
     L["Bottom right"] = "Bas Droite"
@@ -117,6 +122,7 @@ if locale == "frFR" then
     L["Font size"] = "Taille de Police"
     --[[ L["For spells that aren't in your spell book use the spell ID number."] = ""--]]
     --[[ L["Highlight buttons for interrupt and soothe."] = ""--]]
+    --[[ L["If you disable this option, only auras explicitly configured under \"Extra aura displays\" will be shown."] = ""--]]
     --[[ L["Ignored abilities"] = ""--]]
     L["Left"] = "Gauche"
     --[[ L["on"] = ""--]]
@@ -142,6 +148,7 @@ if locale == "itIT" then
     L = L or {}
     --[[ L["Add ability"] = ""--]]
     --[[ L["Aura list"] = ""--]]
+    --[[ L["Automatically match auras to abilities by name."] = ""--]]
     L["Bottom"] = "Basso"
     L["Bottom left"] = "Basso a sinistra"
     L["Bottom right"] = "Basso a destra"
@@ -156,6 +163,7 @@ if locale == "itIT" then
     --[[ L["Font size"] = ""--]]
     --[[ L["For spells that aren't in your spell book use the spell ID number."] = ""--]]
     --[[ L["Highlight buttons for interrupt and soothe."] = ""--]]
+    --[[ L["If you disable this option, only auras explicitly configured under \"Extra aura displays\" will be shown."] = ""--]]
     --[[ L["Ignored abilities"] = ""--]]
     L["Left"] = "Left"
     --[[ L["on"] = ""--]]
@@ -181,6 +189,7 @@ if locale == "koKR" then
     L = L or {}
     --[[ L["Add ability"] = ""--]]
     --[[ L["Aura list"] = ""--]]
+    --[[ L["Automatically match auras to abilities by name."] = ""--]]
     L["Bottom"] = "아래"
     L["Bottom left"] = "왼쪽 아래"
     L["Bottom right"] = "오른쪽 아래"
@@ -195,6 +204,7 @@ if locale == "koKR" then
     L["Font size"] = "글꼴 크기"
     --[[ L["For spells that aren't in your spell book use the spell ID number."] = ""--]]
     --[[ L["Highlight buttons for interrupt and soothe."] = ""--]]
+    --[[ L["If you disable this option, only auras explicitly configured under \"Extra aura displays\" will be shown."] = ""--]]
     --[[ L["Ignored abilities"] = ""--]]
     L["Left"] = "왼쪽"
     --[[ L["on"] = ""--]]
@@ -220,6 +230,7 @@ if locale == "ptBR" then
     L = L or {}
     --[[ L["Add ability"] = ""--]]
     --[[ L["Aura list"] = ""--]]
+    --[[ L["Automatically match auras to abilities by name."] = ""--]]
     L["Bottom"] = "Embaixo"
     L["Bottom left"] = "Embaixo à esquerda"
     L["Bottom right"] = "Embaixo à direita"
@@ -234,6 +245,7 @@ if locale == "ptBR" then
     --[[ L["Font size"] = ""--]]
     --[[ L["For spells that aren't in your spell book use the spell ID number."] = ""--]]
     --[[ L["Highlight buttons for interrupt and soothe."] = ""--]]
+    --[[ L["If you disable this option, only auras explicitly configured under \"Extra aura displays\" will be shown."] = ""--]]
     --[[ L["Ignored abilities"] = ""--]]
     L["Left"] = "Esquerda"
     --[[ L["on"] = ""--]]
@@ -259,6 +271,7 @@ if locale == "ruRU" then
     L = L or {}
     --[[ L["Add ability"] = ""--]]
     --[[ L["Aura list"] = ""--]]
+    --[[ L["Automatically match auras to abilities by name."] = ""--]]
     L["Bottom"] = "Снизу"
     L["Bottom left"] = "Снизу слева"
     L["Bottom right"] = "Снизу справа"
@@ -273,6 +286,7 @@ if locale == "ruRU" then
     L["Font size"] = "Размер шрифта"
     --[[ L["For spells that aren't in your spell book use the spell ID number."] = ""--]]
     --[[ L["Highlight buttons for interrupt and soothe."] = ""--]]
+    --[[ L["If you disable this option, only auras explicitly configured under \"Extra aura displays\" will be shown."] = ""--]]
     --[[ L["Ignored abilities"] = ""--]]
     L["Left"] = "Слева"
     --[[ L["on"] = ""--]]
@@ -298,6 +312,7 @@ if locale == "zhCN" then
     L = L or {}
     L["Add ability"] = "添加技能"
     L["Aura list"] = "光环清单"
+    --[[ L["Automatically match auras to abilities by name."] = ""--]]
     L["Bottom"] = "下"
     L["Bottom left"] = "左下"
     L["Bottom right"] = "右下"
@@ -312,6 +327,7 @@ if locale == "zhCN" then
     L["Font size"] = "文字大小"
     L["For spells that aren't in your spell book use the spell ID number."] = "不在你的法术书里面的法术请使用法术 ID 数字"
     L["Highlight buttons for interrupt and soothe."] = "断法和安抚按钮发光"
+    --[[ L["If you disable this option, only auras explicitly configured under \"Extra aura displays\" will be shown."] = ""--]]
     L["Ignored abilities"] = "忽略技能"
     L["Left"] = "左"
     L["on"] = "于"
@@ -337,6 +353,7 @@ if locale == "zhTW" then
     L = L or {}
     L["Add ability"] = "添加技能"
     L["Aura list"] = "光環清單"
+    --[[ L["Automatically match auras to abilities by name."] = ""--]]
     L["Bottom"] = "下"
     L["Bottom left"] = "左下"
     L["Bottom right"] = "右下"
@@ -351,6 +368,7 @@ if locale == "zhTW" then
     L["Font size"] = "文字大小"
     L["For spells that aren't in your spell book use the spell ID number."] = "不在你的法術書裡面的法術請使用法術 ID 數字"
     L["Highlight buttons for interrupt and soothe."] = "斷法和安撫按鈕發光"
+    --[[ L["If you disable this option, only auras explicitly configured under \"Extra aura displays\" will be shown."] = ""--]]
     L["Ignored abilities"] = "忽略技能"
     L["Left"] = "左"
     L["on"] = "於"

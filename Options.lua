@@ -21,6 +21,7 @@ local defaults = {
     global = {
     },
     profile = {
+        defaultNameMatching = true,
         denySpells = {
             [116]       = true, -- Frostbolt (Mage)
             [152175]    = true, -- Whirling Dragon Punch (Monk)

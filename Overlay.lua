@@ -181,7 +181,9 @@ function LiteButtonAurasOverlayMixin:GetMatchingAura(t)
                 return t[extraAuraName]
             end
         end
-    elseif not self:IsIgnoreSpell() and t[self.name] then
+    elseif self:IsIgnoreSpell() then
+        return
+    elseif LBA.db.profile.defaultNameMatching and t[self.name] then
         return t[self.name]
     end
 end
@@ -343,7 +345,9 @@ function LiteButtonAurasOverlayMixin:SetAsTotem(expireTime)
 end
 
 function LiteButtonAurasOverlayMixin:TrySetAsTotem()
-    if LBA.state.player.totems[self.name] and not self:IsIgnoreSpell() then
+    if self:IsIgnoreSpell() or not LBA.db.profile.defaultNameMatching then
+        return
+    elseif LBA.state.player.totems[self.name] then
         self:SetAsTotem(LBA.state.player.totems[self.name])
         return true
     end
