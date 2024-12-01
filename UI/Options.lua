@@ -99,6 +99,12 @@ local options = {
                     order = order(),
                     width = "full",
                 },
+                playerPetBuffs = {
+                    type = "toggle",
+                    name = L["Display buffs cast by you on your pet."],
+                    order = order(),
+                    width = "full",
+                },
                 showTimers = {
                     type = "toggle",
                     name = L["Display aura duration timers."],

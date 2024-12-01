@@ -32,6 +32,7 @@ if locale == "deDE" then
     L["Center"] = "Mitte"
     L["Color aura duration timers based on remaining time."] = "Timer für die Dauer der Farbaura basierend auf der verbleibenden Zeit."
     L["Display aura duration timers."] = "Zeigt Timer für die Dauer der Aura an."
+    --[[ L["Display buffs cast by you on your pet."] = ""--]]
     --[[ L["Error: unknown ability spell: %s"] = ""--]]
     --[[ L["Error: unknown aura spell: %s"] = ""--]]
     --[[ L["Error: unknown spell: %s"] = ""--]]
@@ -73,6 +74,7 @@ if locale == "esES" or locale == "esMX" then
     L["Center"] = "Centro"
     --[[ L["Color aura duration timers based on remaining time."] = ""--]]
     --[[ L["Display aura duration timers."] = ""--]]
+    --[[ L["Display buffs cast by you on your pet."] = ""--]]
     --[[ L["Error: unknown ability spell: %s"] = ""--]]
     --[[ L["Error: unknown aura spell: %s"] = ""--]]
     --[[ L["Error: unknown spell: %s"] = ""--]]
@@ -114,6 +116,7 @@ if locale == "frFR" then
     L["Center"] = "Centre"
     --[[ L["Color aura duration timers based on remaining time."] = ""--]]
     --[[ L["Display aura duration timers."] = ""--]]
+    --[[ L["Display buffs cast by you on your pet."] = ""--]]
     --[[ L["Error: unknown ability spell: %s"] = ""--]]
     --[[ L["Error: unknown aura spell: %s"] = ""--]]
     --[[ L["Error: unknown spell: %s"] = ""--]]
@@ -155,6 +158,7 @@ if locale == "itIT" then
     L["Center"] = "Centro"
     --[[ L["Color aura duration timers based on remaining time."] = ""--]]
     --[[ L["Display aura duration timers."] = ""--]]
+    --[[ L["Display buffs cast by you on your pet."] = ""--]]
     --[[ L["Error: unknown ability spell: %s"] = ""--]]
     --[[ L["Error: unknown aura spell: %s"] = ""--]]
     --[[ L["Error: unknown spell: %s"] = ""--]]
@@ -196,6 +200,7 @@ if locale == "koKR" then
     L["Center"] = "중앙"
     L["Color aura duration timers based on remaining time."] = "남은 시간을 기준으로 오라 지속 시간 타이머에 색상을 지정합니다."
     L["Display aura duration timers."] = "오라 지속 시간 타이머를 표시합니다."
+    --[[ L["Display buffs cast by you on your pet."] = ""--]]
     --[[ L["Error: unknown ability spell: %s"] = ""--]]
     --[[ L["Error: unknown aura spell: %s"] = ""--]]
     --[[ L["Error: unknown spell: %s"] = ""--]]
@@ -237,6 +242,7 @@ if locale == "ptBR" then
     L["Center"] = "Centro"
     --[[ L["Color aura duration timers based on remaining time."] = ""--]]
     --[[ L["Display aura duration timers."] = ""--]]
+    --[[ L["Display buffs cast by you on your pet."] = ""--]]
     --[[ L["Error: unknown ability spell: %s"] = ""--]]
     --[[ L["Error: unknown aura spell: %s"] = ""--]]
     --[[ L["Error: unknown spell: %s"] = ""--]]
@@ -278,6 +284,7 @@ if locale == "ruRU" then
     L["Center"] = "Центр"
     --[[ L["Color aura duration timers based on remaining time."] = ""--]]
     --[[ L["Display aura duration timers."] = ""--]]
+    --[[ L["Display buffs cast by you on your pet."] = ""--]]
     --[[ L["Error: unknown ability spell: %s"] = ""--]]
     --[[ L["Error: unknown aura spell: %s"] = ""--]]
     --[[ L["Error: unknown spell: %s"] = ""--]]
@@ -319,6 +326,7 @@ if locale == "zhCN" then
     L["Center"] = "中间"
     L["Color aura duration timers based on remaining time."] = "依据剩余时间变化文字颜色"
     L["Display aura duration timers."] = "显示光环持续时间"
+    --[[ L["Display buffs cast by you on your pet."] = ""--]]
     L["Error: unknown ability spell: %s"] = "错误: 未知的技能法术: %s"
     L["Error: unknown aura spell: %s"] = "错误: 未知的光环法术: %s"
     L["Error: unknown spell: %s"] = "错误: 未知的法术: %s"
@@ -360,6 +368,7 @@ if locale == "zhTW" then
     L["Center"] = "中間"
     L["Color aura duration timers based on remaining time."] = "依據剩餘時間變化文字顏色"
     L["Display aura duration timers."] = "顯示光環持續時間"
+    --[[ L["Display buffs cast by you on your pet."] = ""--]]
     L["Error: unknown ability spell: %s"] = "錯誤: 未知的技能法術: %s"
     L["Error: unknown aura spell: %s"] = "錯誤: 未知的光環法術: %s"
     L["Error: unknown spell: %s"] = "錯誤: 未知的法術: %s"

@@ -312,10 +312,12 @@ function LiteButtonAurasOverlayMixin:TrySetAsBuff(unit)
 end
 
 function LiteButtonAurasOverlayMixin:TrySetAsPetBuff(unit)
-    local aura = self:GetMatchingAura(LBA.state[unit].buffs)
-    if aura and aura.sourceUnit == 'player' then
-        self:SetAsPetBuff(aura)
-        return true
+    if LBA.db.profile.playerPetBuffs then
+        local aura = self:GetMatchingAura(LBA.state[unit].buffs)
+        if aura and aura.sourceUnit == 'player' then
+            self:SetAsPetBuff(aura)
+            return true
+        end
     end
 end
 
