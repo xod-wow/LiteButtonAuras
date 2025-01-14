@@ -90,6 +90,7 @@ LBA.Taunts = {
 --      local exists, name, startTime, duration, model = GetTotemInfo(i)
 
 LBA.TotemOrGuardianModels = {
+    [ 136119] = C_Spell.GetSpellName(46584),    -- Raise Dead (DK)
     [ 627607] = C_Spell.GetSpellName(115315),   -- Black Ox Statue (Monk)
     [ 620831] = C_Spell.GetSpellName(115313),   -- Jade Serpent Statue (Monk)
     [4667418] = C_Spell.GetSpellName(388686),   -- White Tiger Statue (Monk)
