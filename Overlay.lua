@@ -363,7 +363,10 @@ end
 -- https://wowpedia.fandom.com/wiki/API_GetSpellCooldown
 
 function LiteButtonAurasOverlayMixin:ReadyBefore(endTime)
-    if endTime == 0 then
+    if not IsPlayerSpell(self.spellID) then
+        -- You can have spells on your bars you don't know
+        return false
+    elseif endTime == 0 then
         -- Indefinite enrage, such as from the Raging M+ affix
         return true
     else
