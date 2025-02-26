@@ -71,6 +71,11 @@ end
 
 function LiteButtonAurasControllerMixin:Initialize()
 
+    -- At init time C_Item.GetItemSpell might not work because they are not
+    -- in the cache. I think the actionbar will keep them in the cache the rest
+    -- of the time. Relies on ITEM_DATA_LOAD_RESULT.
+    LBA.buttonItemIDs = {}
+
     LBA.InitializeOptions()
     LBA.InitializeGUIOptions()
     LBA.SetupSlashCommand()
@@ -100,11 +105,6 @@ function LiteButtonAurasControllerMixin:Initialize()
     self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
     self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE')
     self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE')
-
-    -- At init time C_Item.GetItemSpell might not work because they are not
-    -- in the cache. I think the actionbar will keep them in the cache the rest
-    -- of the time.
-    LBA.buttonItemIDs = {}
     self:RegisterEvent('ITEM_DATA_LOAD_RESULT')
 
     LBA.db.RegisterCallback(self, 'OnModified', 'StyleAllOverlays')
