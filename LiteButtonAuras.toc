@@ -10,6 +10,7 @@
 ## X-Category: Interface
 ## X-Curse-Project-ID: 526431
 ## X-WoWI-ID: 26528
+## X-Wago-ID: QNlq296e
 
 embeds.xml
 
