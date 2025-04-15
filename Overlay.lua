@@ -28,7 +28,7 @@ local GetMacroItem = GetMacroItem
 local GetMacroSpell = GetMacroSpell
 local GetTime = GetTime
 local IsSpellOverlayed = IsSpellOverlayed
-local UnitIsFriend = UnitIsFriend
+local UnitCanAttack = UnitCanAttack
 local WOW_PROJECT_ID = WOW_PROJECT_ID
 
 --[[------------------------------------------------------------------------]]--
@@ -422,7 +422,7 @@ end
 
 function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
     if not self:IsSoothe() then return end
-    if UnitIsFriend('player', 'target') then return end
+    if not UnitCanAttack('player', 'target') then return end
 
     for _, auraData in pairs(LBA.state.target.buffs) do
         if auraData.isStealable and auraData.dispelName == "" and self:ReadyBefore(auraData.expirationTime) then
@@ -441,7 +441,7 @@ end
 -- they are unique by name which is not true once you introduce other units.
 function LiteButtonAurasOverlayMixin:TrySetAsTaunt(unit)
     if not self.name or not LBA.Taunts[self.name] then return end
-    if UnitIsFriend('player', unit) then return end
+    if not UnitCanAttack('player', unit) then return end
 
     for _, auraData in pairs(LBA.state.target.debuffs) do
         if LBA.Taunts[auraData.name] then
@@ -471,7 +471,7 @@ function LiteButtonAurasOverlayMixin:TrySetAsDispel()
         return
     end
 
-    if UnitIsFriend('player', 'target') then
+    if not UnitCanAttack('player', 'target') then
         return
     end
 
