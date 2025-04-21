@@ -84,9 +84,9 @@ local function SetFont(args)
             flags = arg
         end
     end
-    if path then LBA.SetOption('fontPath', path) end
-    if size then LBA.SetOption('fontSize', size) end
-    if flags then LBA.SetOption('fontFlags', flags) end
+    if path then LBA.SetOptionOutsideUI('fontPath', path) end
+    if size then LBA.SetOptionOutsideUI('fontSize', size) end
+    if flags then LBA.SetOptionOutsideUI('fontFlags', flags) end
 end
 
 local function ParseAuraMap(cmdarg)
@@ -194,21 +194,21 @@ local function SlashCommand(argstr)
     elseif cmd == ('options'):sub(1,n) then
         LBA.OpenOptions()
     elseif cmd:lower() == 'stack' and #args == 1 then
-        LBA.SetOption('showStacks', args[1])
+        LBA.SetOptionOutsideUI('showStacks', args[1])
     elseif cmd:lower() == 'stackposition' and WithinRange(#args, 1, 2) then
-        LBA.SetOption('stacksAnchor', args[1])
-        if args[2] then LBA.SetOption('stacksAdjust', args[2]) end
+        LBA.SetOptionOutsideUI('stacksAnchor', args[1])
+        if args[2] then LBA.SetOptionOutsideUI('stacksAdjust', args[2]) end
     elseif cmd:lower() == 'timer' and #args == 1 then
-        LBA.SetOption('showTimers', args[1])
+        LBA.SetOptionOutsideUI('showTimers', args[1])
     elseif cmd:lower() == 'colortimer' and #args == 1 then
-        LBA.SetOption('colorTimers', args[1])
+        LBA.SetOptionOutsideUI('colorTimers', args[1])
     elseif cmd:lower() == 'decimaltimer' and #args == 1 then
-        LBA.SetOption('decimalTimers', args[1])
+        LBA.SetOptionOutsideUI('decimalTimers', args[1])
     elseif cmd:lower() == 'font' and WithinRange(#args, 1, 3) then
         SetFont(args)
     elseif cmd:lower() == 'timerposition' and WithinRange(#args, 1, 2) then
-        LBA.SetOption('timerAnchor', args[1])
-        if args[2] then LBA.SetOption('timerAdjust', args[2]) end
+        LBA.SetOptionOutsideUI('timerAnchor', args[1])
+        if args[2] then LBA.SetOptionOutsideUI('timerAdjust', args[2]) end
     elseif cmd:lower() == 'aura' then
         AuraCommand(argstr)
     elseif cmd:lower() == 'ignore' then

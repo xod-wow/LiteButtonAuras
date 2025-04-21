@@ -121,6 +121,11 @@ function LBA.SetOption(option, value, key)
     else
         LBA.db[key][option] = value
     end
+    LBA.db.callbacks:Fire('OnModified')
+end
+
+function LBA.SetOptionOutsideUI(option, value, key)
+    LBA.Setoption(option, value, key)
     AceConfigRegistry:NotifyChange(addonName)
 end
 
