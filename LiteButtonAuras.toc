@@ -1,4 +1,4 @@
-## Interface: 110105, 110100, 40402, 11507
+## Interface: 110105, 40402, 11507
 ## Title: LiteButtonAuras
 ## IconTexture: Interface\Icons\ability_deathknight_heartstopaura
 ## AddonCompartmentFunc: LiteButtonAuras_AddonCompartmentFunc
@@ -11,7 +11,17 @@
 ## X-Curse-Project-ID: 526431
 ## X-WoWI-ID: 26528
 ## X-Wago-ID: QNlq296e
-
+## Category: Buffs & Debuffs
+## Category-deDE: Buffs & Debuffs
+## Category-esES: Beneficios y Perjuicios
+## Category-esMX: Beneficios y Perjuicios
+## Category-frFR: Améliorations et Affaiblissements
+## Category-itIT: Benefici e penalità
+## Category-koKR: 강화 및 약화 효과
+## Category-ptBR: Bônus e Penalidades
+## Category-ruRU: Баффы и дебаффы
+## Category-zhCN: 增益和减益
+## Category-zhTW: 增益與減益
 embeds.xml
 
 Localization.lua
