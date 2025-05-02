@@ -497,7 +497,15 @@ end
 
 -- Suggestion Display-----------------------------------------------------------
 
-if WOW_PROJECT_ID == 1 then
+if ActionButtonSpellAlertManager then
+    function LiteButtonAurasOverlayMixin:ShowSuggestion(isShown)
+        if isShown then
+            ActionButtonSpellAlertManager:ShowAlert(self)
+        else
+            ActionButtonSpellAlertManager:HideAlert(self)
+        end
+    end
+elseif ActionButton_SetupOverlayGlow then
     function LiteButtonAurasOverlayMixin:ShowSuggestion(isShown)
         if isShown then
             -- Taken from ActionButton_ShowOverlayGlow(self) but we don't want the
