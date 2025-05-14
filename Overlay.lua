@@ -171,7 +171,9 @@ function LiteButtonAurasOverlayMixin:IsPlayerOrPetSpell()
     -- This is trying to account for Pet spells as well which don't count
     -- as IsPlayerSpell() or IsSpellKnown(). I am very much hoping this is not
     -- super slow.
-    if C_SpellBook and C_SpellBook.FindSpellBookSlotForSpell then
+    if not self.spellID then
+        return false
+    elseif C_SpellBook and C_SpellBook.FindSpellBookSlotForSpell then
         return C_SpellBook.FindSpellBookSlotForSpell(self.spellID) ~= nil
     else
         return true
@@ -225,10 +227,10 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             self:SetUpAction()
         end
 
-        if self.name then
-            if self:TrySetAsSoothe() then
+        if self:IsPlayerOrPetSpell() then
+            if self:TrySetAsSoothe('target') then
                 show = true
-            elseif self:TrySetAsInterrupt() then
+            elseif self:TrySetAsInterrupt('target') then
                 show = true
             elseif self:TrySetAsTotem() then
                 show = true
@@ -242,7 +244,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
                 show = true
             elseif self:TrySetAsWeaponEnchant() then
                 show = true
-            elseif self:TrySetAsDispel() then
+            elseif self:TrySetAsDispel('target') then
                 show = true
             end
         end
@@ -374,10 +376,7 @@ end
 -- https://wowpedia.fandom.com/wiki/API_GetSpellCooldown
 
 function LiteButtonAurasOverlayMixin:ReadyBefore(endTime)
-    if not self:IsPlayerOrPetSpell() then
-        -- You can have spells on your bars you don't know
-        return false
-    elseif endTime == 0 then
+    if endTime == 0 then
         -- Indefinite enrage, such as from the Raging M+ affix
         return true
     else
@@ -386,10 +385,10 @@ function LiteButtonAurasOverlayMixin:ReadyBefore(endTime)
     end
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsInterrupt()
-    if LBA.state.target.interrupt then
+function LiteButtonAurasOverlayMixin:TrySetAsInterrupt(unit)
+    if LBA.state[unit].interrupt then
         if self.name and LBA.Interrupts[self.name] then
-            local castEnds = LBA.state.target.interrupt
+            local castEnds = LBA.state[unit].interrupt
             if self:ReadyBefore(castEnds) then
                 self.expireTime = castEnds
                 self.displaySuggestion = true
@@ -420,11 +419,11 @@ function LiteButtonAurasOverlayMixin:IsSoothe()
     end
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
+function LiteButtonAurasOverlayMixin:TrySetAsSoothe(unit)
     if not self:IsSoothe() then return end
-    if not UnitCanAttack('player', 'target') then return end
+    if not UnitCanAttack('player', unit) then return end
 
-    for _, auraData in pairs(LBA.state.target.buffs) do
+    for _, auraData in pairs(LBA.state[unit].buffs) do
         if auraData.isStealable and auraData.dispelName == "" and self:ReadyBefore(auraData.expirationTime) then
             self.expireTime = auraData.expirationTime
             self.displaySuggestion = true
@@ -443,7 +442,7 @@ function LiteButtonAurasOverlayMixin:TrySetAsTaunt(unit)
     if not self.name or not LBA.Taunts[self.name] then return end
     if not UnitCanAttack('player', unit) then return end
 
-    for _, auraData in pairs(LBA.state.target.debuffs) do
+    for _, auraData in pairs(LBA.state[unit].debuffs) do
         if LBA.Taunts[auraData.name] then
             if auraData.sourceUnit == 'player' then
                 self:SetAsBuff(auraData)
@@ -466,19 +465,19 @@ function LiteButtonAurasOverlayMixin:SetAsDispel(auraData)
     self:SetAsAura(auraData)
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsDispel()
+function LiteButtonAurasOverlayMixin:TrySetAsDispel(unit)
     if not self.name then
         return
     end
 
-    if not UnitCanAttack('player', 'target') then
+    if not UnitCanAttack('player', unit) then
         return
     end
 
     local dispels = LBA.HostileDispels[self.name]
     if dispels then
         for dispelName in pairs(dispels) do
-            for _, auraData in pairs(LBA.state.target.buffs) do
+            for _, auraData in pairs(LBA.state[unit].buffs) do
                 if auraData.dispelName == dispelName then
                     self:SetAsDispel(auraData)
                     self.displaySuggestion = true
