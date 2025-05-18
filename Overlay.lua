@@ -115,12 +115,14 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
     if type == 'spell' then
         self.name = C_Spell.GetSpellName(id)
         self.spellID = id
+        self.type = type
         return
     end
 
     if type == 'item' then
         LBA.buttonItemIDs[id] = true
         self.name, self.spellID = C_Item.GetItemSpell(id)
+        self.type = type
         return
     end
 
@@ -128,6 +130,7 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
         if subType == 'spell' then
             self.spellID = id
             self.name = C_Spell.GetSpellName(self.spellID)
+            self.type = subType
             return
         elseif subType == 'item' then
             -- 10.2 GetActionInfo() seems bugged for this case. In an ideal
@@ -144,20 +147,23 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
                         self.name, self.spellID = C_Item.GetItemSpell(itemLink)
                     end
                 end
+                self.type = subType
+                return
             end
-            return
         elseif not subType then
             local itemName = GetMacroItem(id)
             if itemName then
                 local name, spellID = C_Item.GetItemSpell(itemName)
                 self.spellID = spellID
                 self.name = name or itemName
+                self.type = 'item'
                 return
             end
             local spellID = GetMacroSpell(id)
             if spellID then
                 self.spellID = spellID
                 self.name = C_Spell.GetSpellName(spellID)
+                self.type = 'spell'
                 return
             end
         end
@@ -165,15 +171,21 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
 
     self.spellID = nil
     self.name = nil
+    self.type = nil
 end
 
-function LiteButtonAurasOverlayMixin:IsPlayerOrPetSpell()
-    -- This is trying to account for Pet spells as well which don't count
-    -- as IsPlayerSpell() or IsSpellKnown(). I am very much hoping this is not
-    -- super slow.
-    if not self.spellID then
+function LiteButtonAurasOverlayMixin:IsKnown()
+    if self.type == 'item' then
+        -- Assume if you have an item on your bars you know it. Could check
+        -- the owned item count but it would only matter if an item was an
+        -- interrupt or soothe, which is always false.
+        return true
+    elseif not self.spellID then
         return false
     elseif C_SpellBook and C_SpellBook.FindSpellBookSlotForSpell then
+        -- This is trying to account for Pet spells as well which don't count
+        -- as IsPlayerSpell() or IsSpellKnown(). I am very much hoping this is not
+        -- super slow.
         return C_SpellBook.FindSpellBookSlotForSpell(self.spellID) ~= nil
     else
         return true
@@ -227,7 +239,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             self:SetUpAction()
         end
 
-        if self:IsPlayerOrPetSpell() then
+        if self:IsKnown() then
             if self:TrySetAsSoothe('target') then
                 show = true
             elseif self:TrySetAsInterrupt('target') then
