@@ -15,7 +15,13 @@ local C_Spell = LBA.C_Spell or C_Spell
 
 local L = LBA.L
 
-local AlwaysTrackedUnits = { player=true, pet=true, target=true }
+local AlwaysTrackedUnits = {
+    focus = true,
+    mouseover = true,
+    pet = true,
+    player = true,
+    target = true,
+}
 
 LBA.state = {
     player = {
@@ -468,6 +474,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         local itemID, success = ...
         if LBA.buttonItemIDs[itemID] then
             self:MarkOverlaysDirty()
+        end
     elseif event == 'ACTIONBAR_SLOT_CHANGED' or event == 'UPDATE_MACROS' then
         self:UpdateTrackedUnitList()
         for unit in pairs(self.trackedUnitList) do

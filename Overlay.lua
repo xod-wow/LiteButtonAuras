@@ -23,14 +23,20 @@ local LibBG = LibStub("LibButtonGlow-1.0")
 -- faster. Only do this for things that are called in the event loop otherwise
 -- it's a pain to maintain.
 
+local C_ActionBar = C_ActionBar
 local DebuffTypeColor = DebuffTypeColor
 local GetActionText = GetActionText
+local GetCVarBool = GetCVarBool
 local GetMacroBody = GetMacroBody
 local GetMacroItem = GetMacroItem
 local GetMacroSpell = GetMacroSpell
+local GetModifiedClick = GetModifiedClick
 local GetTime = GetTime
+local IsModifiedClick = IsModifiedClick
 local IsSpellOverlayed = IsSpellOverlayed
 local UnitCanAttack = UnitCanAttack
+local UnitExists = UnitExists
+local UnitIsFriend = UnitIsFriend
 local WOW_PROJECT_ID = WOW_PROJECT_ID
 
 --[[------------------------------------------------------------------------]]--
@@ -121,13 +127,11 @@ end
 local ValidTrackedUnits = {
     "arena1", "arena2", "arena3", "arena4", "arena5",
     "boss1", "boss2", "boss3", "boss4", "boss5", "boss6", "boss7", "boss8",
-    "focus",
-    "mouseover",
     "party1", "party2", "party3", "party4",
 }
 
--- Assumes player, pet and target are already watched.  This is slow don't call
--- this very often.
+-- Assumes player, pet, mouseover, focus and target are already watched.  This
+-- is slow don't call this very often.
 
 function LiteButtonAurasOverlayMixin:GetTrackedUnits()
     local type = self:GetActionInfo()
@@ -154,26 +158,55 @@ function LiteButtonAurasOverlayMixin:GetTrackedUnits()
     return trackedUnits
 end
 
+-- In an ideal world GetActionInfo would return the unit as well. Or there
+-- would be a GetActionUnit function. This is a hack to try to figure it
+-- out in a limited fashion. If this returns something that's not in
+-- self:GetTrackedUnits() we could be in trouble.
+
+function LiteButtonAurasOverlayMixin:GetActionUnit(type, id, subType)
+
+    local useMouseoverCasting = GetCVarBool('enableMouseoverCast') and
+                                (GetModifiedClick('MOUSEOVERCAST') == "NONE" or IsModifiedClick('MOUSEOVERCAST'))
+
+    local actionID = self:GetActionID()
+
+    if type == 'macro' then
+        local macroName = GetActionText(self:GetActionID())
+        local unit = GetMacroUnit(macroName)
+        if unit then
+            return unit
+        end
+    end
+
+    -- From SecureButton_GetModifiedUnit
+    if useMouseoverCasting and UnitExists('mouseover') then
+        local isFriend = UnitIsFriend('mouseover')
+        if isFriend and C_ActionBar.IsHelpfulAction(actionID, true) then
+            return 'mouseover'
+        elseif not isFriend and C_ActionBar.IsHarmfulAction(actionID, true) then
+            return 'mouseover'
+        end
+    end
+
+    if IsModifiedClick('SELFCAST') then
+        return 'player'
+    end
+
+    if IsModifiedClick('FOCUSCAST') then
+        self.unit = 'focus'
+    end
+
+    return 'target'
+end
+
 -- This could be optimized (?) slightly be checking if type, id, subType
 -- are all the same as before and doing nothing
---
--- In an ideal world GetActionInfo would return the unit as well. Or there
--- would be a GetActionUnit function. If we could find the unit then it
--- would make sense to change LBA.state to be unit-indexed and to collect
--- state for all the units we are interested in rather than a hard coded
--- player and target set. Exactly how to do that efficiently would be a
--- bit of a challenge but I think it's still faster than not keeping the
--- state and each overlay doing its own UnitAura calls.
---
--- Realistically speaking we could scan all the macros for @ and target=
--- and add them to a "wanted units" list. I don't think it would be worth
--- trying to handle auto-self-cast or the new blizzard mouseover cast.
 
 function LiteButtonAurasOverlayMixin:SetUpAction()
 
     local type, id, subType = self:GetActionInfo()
 
-    self.unit = 'target'
+    self.unit = self:GetActionUnit(type, id, subType)
 
     if type == 'spell' then
         self.name = C_Spell.GetSpellName(id)
@@ -190,8 +223,6 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
     end
 
     if type == 'macro' then
-        local macroName = GetActionText(self:GetActionID())
-        self.unit = GetMacroUnit(macroName)
         if subType == 'spell' then
             self.spellID = id
             self.name = C_Spell.GetSpellName(self.spellID)
@@ -304,7 +335,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             self:SetUpAction()
         end
 
-        if self:IsKnown()  and LBA.state[self.unit] then
+        if self:IsKnown() and LBA.state[self.unit] then
             if self:TrySetAsSoothe(self.unit) then
                 show = true
             elseif self:TrySetAsInterrupt(self.unit) then
