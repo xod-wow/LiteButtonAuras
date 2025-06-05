@@ -23,15 +23,7 @@ local AlwaysTrackedUnits = {
     target = true,
 }
 
-LBA.state = {
-    player = {
-        buffs = {},
-        debuffs = {},
-        totems = {},
-        weaponEnchants = {},
-        channel = nil,
-    },
-}
+LBA.state = { }
 
 
 --[[------------------------------------------------------------------------]]--
@@ -46,6 +38,7 @@ local MAX_TOTEMS = MAX_TOTEMS
 local UnitCanAttack = UnitCanAttack
 local UnitCastingInfo = UnitCastingInfo
 local UnitChannelInfo = UnitChannelInfo
+local UnitIsUnit = UnitIsUnit
 local WOW_PROJECT_ID = WOW_PROJECT_ID
 
 --[[------------------------------------------------------------------------]]--
@@ -61,123 +54,7 @@ local MasqueGroup = Masque and Masque:Group(addonName)
 
 --[[------------------------------------------------------------------------]]--
 
-LiteButtonAurasControllerMixin = {}
-
-function LiteButtonAurasControllerMixin:OnLoad()
-    self.overlayFrames = {}
-    self:RegisterEvent('PLAYER_LOGIN')
-end
-
-function LiteButtonAurasControllerMixin:Initialize()
-
-    -- At init time C_Item.GetItemSpell might not work because they are not
-    -- in the cache. I think the actionbar will keep them in the cache the rest
-    -- of the time. Relies on ITEM_DATA_LOAD_RESULT.
-    LBA.buttonItemIDs = {}
-
-    LBA.InitializeOptions()
-    LBA.InitializeGUIOptions()
-    LBA.SetupSlashCommand()
-    LBA.UpdateAuraMap()
-
-    -- Now this is be delayed until PLAYER_LOGIN do we still need to list
-    -- list all possible LibActionButton derivatives in the TOC dependencies?
-    LBA.BarIntegrations:Initialize()
-
-    self:RegisterEvent('PLAYER_ENTERING_WORLD')
-    self:RegisterEvent('UNIT_AURA')
-    self:RegisterEvent('PLAYER_TOTEM_UPDATE')
-    if WOW_PROJECT_ID == 1 then
-        self:RegisterEvent('WEAPON_ENCHANT_CHANGED')
-        self:RegisterEvent('WEAPON_SLOT_CHANGED')
-    end
-
-    -- These are for noticing that the unit changed
-    self:RegisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')    -- @bossN
-    self:RegisterEvent('ARENA_OPPONENT_UPDATE')             -- @arenaN
-    self:RegisterEvent('GROUP_ROSTER_UPDATE')               -- @partyN
-    self:RegisterEvent('PLAYER_TARGET_CHANGED')             -- @target
-    self:RegisterEvent('PLAYER_FOCUS_CHANGED')              -- @focus
-    self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')             -- @mouseover
-
-    -- All of these are for the interrupt and player channel detection
-    self:RegisterEvent('UNIT_SPELLCAST_START')
-    self:RegisterEvent('UNIT_SPELLCAST_STOP')
-    self:RegisterEvent('UNIT_SPELLCAST_DELAYED')
-    self:RegisterEvent('UNIT_SPELLCAST_FAILED')
-    self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTED')
-    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START')
-    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP')
-    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
-    self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE')
-    self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE')
-    self:RegisterEvent('ITEM_DATA_LOAD_RESULT')
-
-    -- These are for tracking that we need to rescan the current overlays to
-    -- find what extra units we are tracking.
-    self:RegisterEvent('ACTIONBAR_SLOT_CHANGED')
-    self:RegisterEvent('UPDATE_MACROS')
-
-    LBA.db.RegisterCallback(self, 'OnModified', 'StyleAllOverlays')
-end
-
-function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
-    if not self.overlayFrames[actionButton] then
-        local name = actionButton:GetName() .. "LiteButtonAurasOverlay"
-        local overlay = CreateFrame('Frame', name, actionButton, "LiteButtonAurasOverlayTemplate")
-        self.overlayFrames[actionButton] = overlay
-        if MasqueGroup then
-            MasqueGroup:AddButton(overlay, {
-                SpellHighlight = overlay.Glow,
-                Normal = false,
-                -- Duration = overlay.Timer,
-                -- Count = overlay.Count,
-            })
-        end
-    end
-    return self.overlayFrames[actionButton]
-end
-
-function LiteButtonAurasControllerMixin:GetOverlay(actionButton)
-    return self.overlayFrames[actionButton]
-end
-
-function LiteButtonAurasControllerMixin:UpdateAllOverlays(stateOnly)
-    for _, overlay in pairs(self.overlayFrames) do
-        overlay:Update(stateOnly)
-    end
-end
-
-function LiteButtonAurasControllerMixin:StyleAllOverlays()
-    for _, overlay in pairs(self.overlayFrames) do
-        overlay:Style()
-        overlay:Update()
-    end
-end
-
-function LiteButtonAurasControllerMixin:DumpAllOverlays()
-    self:UpdateAllOverlays()
-    local sortedOverlays = GetValuesArray(self.overlayFrames)
-    table.sort(sortedOverlays, function (a, b) return a:GetActionID() < b:GetActionID() end)
-    for _, overlay in pairs(sortedOverlays) do
-        overlay:Dump()
-    end
-end
-
-function LiteButtonAurasControllerMixin:UpdateTrackedUnitList()
-    self.trackedUnitList = CopyTable(AlwaysTrackedUnits)
-    for _, overlay in pairs(self.overlayFrames) do
-        Mixin(self.trackedUnitList, overlay:GetTrackedUnits())
-    end
-    for unit in pairs(self.trackedUnitList) do
-        LBA.state[unit] = LBA.state[unit] or { buffs = {}, debuffs = {} }
-    end
-end
-
-
---[[------------------------------------------------------------------------]]--
-
--- State updating local functions
+-- State updating functions
 
 -- This could be made (probably) more efficient by using the 10.0 event
 -- argument auraUpdateInfo at the price of losing classic compatibility.
@@ -266,101 +143,242 @@ local function WeaponEnchantAuraData(duration, charges, id)
     end
 end
 
-local function UpdateWeaponEnchants()
-    -- Classic doesn't have the events to do this efficiently
-    if WOW_PROJECT_ID ~= 1 then return end
+local UnitState = {}
 
-    LBA.state.player.weaponEnchants = {}
-
-    local mhEnchant, mhDuration, mhCharges, mhID,
-          ohEnchant, ohDuration, ohCharges, ohID = GetWeaponEnchantInfo()
-
-    if mhEnchant then
-        local auraData = WeaponEnchantAuraData(mhDuration, mhCharges, mhID)
-        if auraData then
-            UpdateTableAura(LBA.state.player.weaponEnchants, auraData)
-        end
-    end
-    if ohEnchant then
-        local auraData = WeaponEnchantAuraData(ohDuration, ohCharges, ohID)
-        if auraData then
-            UpdateTableAura(LBA.state.player.weaponEnchants, auraData)
-        end
-    end
+function UnitState:Create(unit)
+    local unitState = {
+        unit = unit,
+        buffs = {},
+        debuffs = {},
+        weaponEnchants = {},
+        totems = {},
+        channel = nil,
+    }
+    setmetatable(unitState, { __index=self })
+    return unitState
 end
 
-local function UpdateUnitAuras(unit, auraInfo)
+function UnitState:UpdateAuras(auraInfo)
 
     -- XXX TODO handle auraInfo for efficiency
 
-    LBA.state[unit].buffs = {}
-    LBA.state[unit].debuffs = {}
+    self.buffs = {}
+    self.debuffs = {}
 
-    if UnitCanAttack('player', unit) then
+    if UnitCanAttack('player', self.unit) then
         -- Hostile target buffs are only for dispels
-        AuraUtil.ForEachAura(unit, 'HELPFUL', nil,
+        AuraUtil.ForEachAura(self.unit, 'HELPFUL', nil,
             function (auraData)
-                UpdateTableAura(LBA.state[unit].buffs, auraData)
+                UpdateTableAura(self.buffs, auraData)
             end,
             true)
-        AuraUtil.ForEachAura(unit, 'HARMFUL PLAYER', nil,
+        AuraUtil.ForEachAura(self.unit, 'HARMFUL PLAYER', nil,
             function (auraData)
-                UpdateTableAura(LBA.state[unit].debuffs, auraData)
+                UpdateTableAura(self.debuffs, auraData)
             end,
             true)
     else
-        AuraUtil.ForEachAura(unit, 'HELPFUL PLAYER', nil,
+        AuraUtil.ForEachAura(self.unit, 'HELPFUL PLAYER', nil,
             function (auraData)
-                UpdateTableAura(LBA.state[unit].buffs, auraData)
+                UpdateTableAura(self.buffs, auraData)
             end,
             true)
         -- Inclue long-lasting buffs we can cast even if applied
         -- by someone else, since we don't care who cast Battle Shout, etc.
-        AuraUtil.ForEachAura(unit, 'HELPFUL RAID', nil,
+        AuraUtil.ForEachAura(self.unit, 'HELPFUL RAID', nil,
             function (auraData)
                 if auraData.duration >= 10*60 then
-                    UpdateTableAura(LBA.state[unit].buffs, auraData)
+                    UpdateTableAura(self.buffs, auraData)
                 end
             end,
             true)
     end
 end
 
-local function UpdatePlayerChannel()
-    LBA.state.player.channel = UnitChannelInfo('player')
-end
+function UnitState:UpdateWeaponEnchants()
+    -- Classic doesn't have the events to do this efficiently
+    if WOW_PROJECT_ID ~= 1 then return end
 
-local function UpdatePlayerTotems()
-    LBA.state.player.totems = {}
-    for i = 1, MAX_TOTEMS do
-        local exists, name, startTime, duration, model = GetTotemInfo(i)
-        if exists and name then
-            if model then
-                name = LBA.TotemOrGuardianModels[model] or name
+    if self.unit == 'player' then
+        self.weaponEnchants = {}
+
+        local mhEnchant, mhDuration, mhCharges, mhID,
+              ohEnchant, ohDuration, ohCharges, ohID = GetWeaponEnchantInfo()
+
+        if mhEnchant then
+            local auraData = WeaponEnchantAuraData(mhDuration, mhCharges, mhID)
+            if auraData then
+                UpdateTableAura(self.weaponEnchants, auraData)
             end
-            LBA.state.player.totems[name] = startTime + duration
+        end
+        if ohEnchant then
+            local auraData = WeaponEnchantAuraData(ohDuration, ohCharges, ohID)
+            if auraData then
+                UpdateTableAura(self.weaponEnchants, auraData)
+            end
         end
     end
 end
 
-local function UpdateUnitInterrupt(unit)
+function UnitState:UpdateChannel()
+    self.channel = UnitChannelInfo(self.unit)
+end
+
+function UnitState:UpdateTotems()
+    if self.unit == 'player' then
+        self.totems = {}
+        for i = 1, MAX_TOTEMS do
+            local exists, name, startTime, duration, model = GetTotemInfo(i)
+            if exists and name then
+                if model then
+                    name = LBA.TotemOrGuardianModels[model] or name
+                end
+                self.totems[name] = startTime + duration
+            end
+        end
+    end
+end
+
+function UnitState:UpdateInterrupt()
     local name, endTime, cantInterrupt, _
 
-    if UnitCanAttack('player', unit) then
-        name, _, _, _, endTime, _, _, cantInterrupt = UnitCastingInfo(unit)
+    if UnitCanAttack('player', self.unit) then
+        name, _, _, _, endTime, _, _, cantInterrupt = UnitCastingInfo(self.unit)
         if name and not cantInterrupt then
-            LBA.state[unit].interrupt = endTime / 1000
+            self.interrupt = endTime / 1000
             return
         end
 
-        name, _, _, _, endTime, _, cantInterrupt = UnitChannelInfo(unit)
+        name, _, _, _, endTime, _, cantInterrupt = UnitChannelInfo(self.unit)
         if name and not cantInterrupt then
-            LBA.state[unit].interrupt = endTime / 1000
+            self.interrupt = endTime / 1000
             return
         end
     end
 
-    LBA.state[unit].interrupt = nil
+    self.interrupt = nil
+end
+
+-- Overlay is reading the states directly but we could add some accessors
+-- here and/or move some of the matching logic here as well.
+
+
+--[[------------------------------------------------------------------------]]--
+
+LiteButtonAurasControllerMixin = {}
+
+function LiteButtonAurasControllerMixin:OnLoad()
+    self.overlayFrames = {}
+    self:RegisterEvent('PLAYER_LOGIN')
+end
+
+function LiteButtonAurasControllerMixin:Initialize()
+
+    -- At init time C_Item.GetItemSpell might not work because they are not
+    -- in the cache. I think the actionbar will keep them in the cache the rest
+    -- of the time. Relies on ITEM_DATA_LOAD_RESULT.
+    LBA.buttonItemIDs = {}
+
+    LBA.InitializeOptions()
+    LBA.InitializeGUIOptions()
+    LBA.SetupSlashCommand()
+    LBA.UpdateAuraMap()
+
+    -- Now this is be delayed until PLAYER_LOGIN do we still need to list
+    -- list all possible LibActionButton derivatives in the TOC dependencies?
+    LBA.BarIntegrations:Initialize()
+    self:UpdateTrackedUnitList()
+
+    self:RegisterEvent('PLAYER_ENTERING_WORLD')
+    self:RegisterEvent('UNIT_AURA')
+    self:RegisterEvent('PLAYER_TOTEM_UPDATE')
+    if WOW_PROJECT_ID == 1 then
+        self:RegisterEvent('WEAPON_ENCHANT_CHANGED')
+        self:RegisterEvent('WEAPON_SLOT_CHANGED')
+    end
+
+    -- These are for noticing that the unit changed
+    self:RegisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')    -- @bossN
+    self:RegisterEvent('ARENA_OPPONENT_UPDATE')             -- @arenaN
+    self:RegisterEvent('GROUP_ROSTER_UPDATE')               -- @partyN
+    self:RegisterEvent('PLAYER_TARGET_CHANGED')             -- @target
+    self:RegisterEvent('PLAYER_FOCUS_CHANGED')              -- @focus
+    self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')             -- @mouseover
+
+    -- All of these are for the interrupt and player channel detection
+    self:RegisterEvent('UNIT_SPELLCAST_START')
+    self:RegisterEvent('UNIT_SPELLCAST_STOP')
+    self:RegisterEvent('UNIT_SPELLCAST_DELAYED')
+    self:RegisterEvent('UNIT_SPELLCAST_FAILED')
+    self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTED')
+    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_START')
+    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_STOP')
+    self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
+    self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE')
+    self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE')
+    self:RegisterEvent('ITEM_DATA_LOAD_RESULT')
+
+    -- These are for tracking that we need to rescan the current overlays to
+    -- find what extra units we are tracking.
+    self:RegisterEvent('ACTIONBAR_SLOT_CHANGED')
+    self:RegisterEvent('UPDATE_MACROS')
+
+    LBA.db.RegisterCallback(self, 'OnModified', 'StyleAllOverlays')
+end
+
+function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
+    if not self.overlayFrames[actionButton] then
+        local name = actionButton:GetName() .. "LiteButtonAurasOverlay"
+        local overlay = CreateFrame('Frame', name, actionButton, "LiteButtonAurasOverlayTemplate")
+        self.overlayFrames[actionButton] = overlay
+        if MasqueGroup then
+            MasqueGroup:AddButton(overlay, {
+                SpellHighlight = overlay.Glow,
+                Normal = false,
+                -- Duration = overlay.Timer,
+                -- Count = overlay.Count,
+            })
+        end
+    end
+    return self.overlayFrames[actionButton]
+end
+
+function LiteButtonAurasControllerMixin:GetOverlay(actionButton)
+    return self.overlayFrames[actionButton]
+end
+
+function LiteButtonAurasControllerMixin:UpdateAllOverlays(stateOnly)
+    for _, overlay in pairs(self.overlayFrames) do
+        overlay:Update(stateOnly)
+    end
+end
+
+function LiteButtonAurasControllerMixin:StyleAllOverlays()
+    for _, overlay in pairs(self.overlayFrames) do
+        overlay:Style()
+        overlay:Update()
+    end
+end
+
+function LiteButtonAurasControllerMixin:DumpAllOverlays()
+    self:UpdateAllOverlays()
+    local sortedOverlays = GetValuesArray(self.overlayFrames)
+    table.sort(sortedOverlays, function (a, b) return a:GetActionID() < b:GetActionID() end)
+    for _, overlay in pairs(sortedOverlays) do
+        overlay:Dump()
+    end
+end
+
+function LiteButtonAurasControllerMixin:UpdateTrackedUnitList()
+    self.trackedUnitList = CopyTable(AlwaysTrackedUnits)
+    for _, overlay in pairs(self.overlayFrames) do
+        Mixin(self.trackedUnitList, overlay:GetTrackedUnits())
+    end
+    local newState = {}
+    for unit in pairs(self.trackedUnitList) do
+        newState[unit] = LBA.state[unit] or UnitState:Create(unit)
+    end
+    LBA.state = newState
 end
 
 
@@ -388,39 +406,38 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         self:Initialize()
         self:UnregisterEvent('PLAYER_LOGIN')
         self:MarkOverlaysDirty()
-        return
     elseif event == 'PLAYER_ENTERING_WORLD' then
         self:UpdateTrackedUnitList()
-        UpdateUnitAuras('target')
-        UpdateUnitInterrupt('target')
-        UpdateWeaponEnchants()
-        UpdateUnitAuras('player')
-        UpdateUnitAuras('pet')
-        UpdatePlayerChannel()
-        UpdatePlayerTotems()
+        for unit in pairs(self.trackedUnitList) do
+            LBA.state[unit]:UpdateAuras()
+            LBA.state[unit]:UpdateInterrupt()
+        end
+        LBA.state.player:UpdateWeaponEnchants()
+        LBA.state.player:UpdateChannel()
+        LBA.state.player:UpdateTotems()
         self:MarkOverlaysDirty()
     elseif event == 'PLAYER_TARGET_CHANGED' then
-        UpdateUnitAuras('target')
-        UpdateUnitInterrupt('target')
+        LBA.state.target:UpdateAuras()
+        LBA.state.target:UpdateInterrupt()
         self:MarkOverlaysDirty(true)
     elseif event == 'PLAYER_FOCUS_CHANGED' then
         if self:IsTrackedUnit('focus') then
-            UpdateUnitAuras('focus')
-            UpdateUnitInterrupt('focus')
+            LBA.state.focus:UpdateAuras()
+            LBA.state.focus:UpdateInterrupt()
             self:MarkOverlaysDirty(true)
         end
     elseif event == 'UPDATE_MOUSEOVER_UNIT' then
         if self:IsTrackedUnit('mouseover') then
-            UpdateUnitAuras('mouseover')
-            UpdateUnitInterrupt('mouseover')
+            LBA.state.mouseover:UpdateAuras()
+            LBA.state.mouseover:UpdateInterrupt()
             self:MarkOverlaysDirty(true)
         end
     elseif event == 'GROUP_ROSTER_UPDATE' then
         for i = 1, GetNumGroupMembers() do
             local unit = "party"..i
             if self:IsTrackedUnit(unit) then
-                UpdateUnitAuras(unit)
-                UpdateUnitInterrupt(unit)
+                LBA.state[unit]:UpdateAuras()
+                LBA.state[unit]:UpdateInterrupt()
                 self:MarkOverlaysDirty(true)
             end
         end
@@ -428,8 +445,8 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         for i = 1, MAX_BOSS_FRAMES do
             local unit = "boss"..i
             if self:IsTrackedUnit(unit) then
-                UpdateUnitAuras(unit)
-                UpdateUnitInterrupt(unit)
+                LBA.state[unit]:UpdateAuras()
+                LBA.state[unit]:UpdateInterrupt()
                 self:MarkOverlaysDirty(true)
             end
         end
@@ -437,8 +454,8 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         for i = 1, GetNumArenaOpponents() do
             local unit = "arena"..i
             if self:IsTrackedUnit(unit) then
-                UpdateUnitAuras(unit)
-                UpdateUnitInterrupt(unit)
+                LBA.state[unit]:UpdateAuras()
+                LBA.state[unit]:UpdateInterrupt()
                 self:MarkOverlaysDirty(true)
             end
         end
@@ -447,28 +464,42 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         -- second for 'player' with no updates
         local unit, unitAuraUpdateInfo = ...
         if self:IsTrackedUnit(unit) then
-            UpdateUnitAuras(unit, unitAuraUpdateInfo)
+            LBA.state[unit]:UpdateAuras(unitAuraUpdateInfo)
             -- Shouldn't be needed but weapon enchant duration is returned
             -- wrongly as 0 at PLAYER_LOGIN. This is how Blizzard works around
             -- it too. Their server code must be a nightmare.
-            if unit == 'player' then UpdateWeaponEnchants() end
+            if unit == 'player' then
+                LBA.state.player:UpdateWeaponEnchants()
+            end
+            self:MarkOverlaysDirty(true)
+        end
+        -- There are no separate UNIT_AURA events for mouseover (there are for
+        -- focus though).
+        if UnitIsUnit(unit, 'mouseover') and self:IsTrackedUnit('mouseover') then
+            LBA.state.mouseover:UpdateAuras(unitAuraUpdateInfo)
             self:MarkOverlaysDirty(true)
         end
     elseif event == 'PLAYER_TOTEM_UPDATE' then
-        UpdatePlayerTotems()
+        LBA.state.player:UpdateTotems()
         self:MarkOverlaysDirty(true)
     elseif event == 'WEAPON_ENCHANT_CHANGED' or event == 'WEAPON_SLOT_CHANGED' then
-        UpdateWeaponEnchants()
+        LBA.state.player:UpdateWeaponEnchants()
         self:MarkOverlaysDirty(true)
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
         -- This fires a lot too, same applies as UNIT_AURA.
         local unit = ...
         if unit == 'player' then
-            UpdatePlayerChannel()
+            LBA.state.player:UpdateChannel()
             self:MarkOverlaysDirty(true)
-        elseif self:IsTrackedUnit(unit) then
-            UpdateUnitInterrupt(unit)
-            self:MarkOverlaysDirty(true)
+        else
+            if self:IsTrackedUnit(unit) then
+                LBA.state[unit]:UpdateInterrupt()
+                self:MarkOverlaysDirty(true)
+            end
+            if UnitIsUnit(unit, 'mouseover') and self:IsTrackedUnit('mouseover') then
+                LBA.state.mouseover:UpdateInterrupt()
+                self:MarkOverlaysDirty(true)
+            end
         end
     elseif event == 'ITEM_DATA_LOAD_RESULT' then
         local itemID, success = ...
@@ -478,8 +509,9 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     elseif event == 'ACTIONBAR_SLOT_CHANGED' or event == 'UPDATE_MACROS' then
         self:UpdateTrackedUnitList()
         for unit in pairs(self.trackedUnitList) do
-            UpdateUnitAuras(unit)
-            UpdateUnitInterrupt(unit)
+            LBA.state[unit]:UpdateAuras()
+            LBA.state[unit]:UpdateInterrupt()
+            self:MarkOverlaysDirty()
         end
     end
 end
