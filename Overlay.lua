@@ -542,7 +542,7 @@ end
 -- Taunt Config ----------------------------------------------------------------
 
 function LiteButtonAurasOverlayMixin:TrySetAsTaunt(unit)
-    if LBA.state[unit].taunt then
+    if self.name and LBA.Taunts[self.name] and LBA.state[unit].taunt then
         self:SetAsDebuff(LBA.state[unit].taunt)
         return true
     end
