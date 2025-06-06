@@ -23,7 +23,7 @@ local AlwaysTrackedUnits = {
     target = true,
 }
 
-LBA.state = { }
+LBA.state = {}
 
 
 --[[------------------------------------------------------------------------]]--
@@ -153,6 +153,7 @@ function UnitState:Create(unit)
         weaponEnchants = {},
         totems = {},
         channel = nil,
+        taunt = nil,
     }
     setmetatable(unitState, { __index=self })
     return unitState
@@ -164,6 +165,7 @@ function UnitState:UpdateAuras(auraInfo)
 
     self.buffs = {}
     self.debuffs = {}
+    self.taunt = nil
 
     if UnitCanAttack('player', self.unit) then
         -- Hostile target buffs are only for dispels
@@ -175,6 +177,15 @@ function UnitState:UpdateAuras(auraInfo)
         AuraUtil.ForEachAura(self.unit, 'HARMFUL PLAYER', nil,
             function (auraData)
                 UpdateTableAura(self.debuffs, auraData)
+            end,
+            true)
+        AuraUtil.ForEachAura(self.unit, 'HARMFUL', nil,
+            function (auraData)
+                if LBA.Taunts[auraData.spellId] and auraData.expirationTime then
+                    if not self.taunt or auraData.expirationTime > self.taunt.expirationTime  then
+                        self.taunt = auraData
+                    end
+                end
             end,
             true)
     else

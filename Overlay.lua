@@ -342,8 +342,8 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
                 show = true
             elseif self:TrySetAsTotem() then
                 show = true
-            -- elseif self:TrySetAsTaunt(self.unit) then
-            --     show = true
+            elseif self:TrySetAsTaunt(self.unit) then
+                show = true
             elseif self:TrySetAsBuff('player') then
                 show = true
             elseif self:TrySetAsDebuff(self.unit) then
@@ -542,26 +542,12 @@ end
 
 -- Taunt Config ----------------------------------------------------------------
 
---[[
--- To work this would require capturing other player debuffs, and would need
--- an different storage for the state auras since at the moment they all assume
--- they are unique by name which is not true once you introduce other units.
 function LiteButtonAurasOverlayMixin:TrySetAsTaunt(unit)
-    if not self.name or not LBA.Taunts[self.name] then return end
-    if not UnitCanAttack('player', unit) then return end
-
-    for _, auraData in pairs(LBA.state[unit].debuffs) do
-        if LBA.Taunts[auraData.name] then
-            if auraData.sourceUnit == 'player' then
-                self:SetAsBuff(auraData)
-            else
-                self:SetAsDebuff(auraData)
-            end
-            return true
-        end
+    if LBA.state[unit].taunt then
+        self:SetAsDebuff(LBA.state[unit].taunt)
+        return true
     end
 end
-]]
 
 -- Dispel Config ---------------------------------------------------------------
 
