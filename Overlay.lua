@@ -76,11 +76,10 @@ local function GetMacroUnit(macroIdentifier)
         for _, conditionsAndArgs in macroBody:gmatch("/(%w+)%s+([^\n]+)") do
             local result, unit = SecureCmdOptionParse(conditionsAndArgs)
             if result then
-                return unit or 'target'
+                return unit
             end
         end
     end
-    return 'target'
 end
 
 
@@ -165,11 +164,6 @@ end
 
 function LiteButtonAurasOverlayMixin:GetActionUnit(type, id, subType)
 
-    local useMouseoverCasting = GetCVarBool('enableMouseoverCast') and
-                                (GetModifiedClick('MOUSEOVERCAST') == "NONE" or IsModifiedClick('MOUSEOVERCAST'))
-
-    local actionID = self:GetActionID()
-
     if type == 'macro' then
         local macroName = GetActionText(self:GetActionID())
         local unit = GetMacroUnit(macroName)
@@ -179,7 +173,12 @@ function LiteButtonAurasOverlayMixin:GetActionUnit(type, id, subType)
     end
 
     -- From SecureButton_GetModifiedUnit
+
+    local useMouseoverCasting = GetCVarBool('enableMouseoverCast') and
+                                (GetModifiedClick('MOUSEOVERCAST') == "NONE" or IsModifiedClick('MOUSEOVERCAST'))
+
     if useMouseoverCasting and UnitExists('mouseover') then
+        local actionID = self:GetActionID()
         local isFriend = UnitIsFriend('mouseover')
         if isFriend and C_ActionBar.IsHelpfulAction(actionID, true) then
             return 'mouseover'
