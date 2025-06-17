@@ -285,11 +285,6 @@ end
 
 function LiteButtonAurasControllerMixin:Initialize()
 
-    -- At init time C_Item.GetItemSpell might not work because they are not
-    -- in the cache. I think the actionbar will keep them in the cache the rest
-    -- of the time. Relies on ITEM_DATA_LOAD_RESULT.
-    LBA.buttonItemIDs = {}
-
     LBA.InitializeOptions()
     LBA.InitializeGUIOptions()
     LBA.SetupSlashCommand()
@@ -327,6 +322,11 @@ function LiteButtonAurasControllerMixin:Initialize()
     self:RegisterEvent('UNIT_SPELLCAST_CHANNEL_UPDATE')
     self:RegisterEvent('UNIT_SPELLCAST_INTERRUPTIBLE')
     self:RegisterEvent('UNIT_SPELLCAST_NOT_INTERRUPTIBLE')
+
+    -- At init time C_Item.GetItemSpell might not work because they are not
+    -- in the cache. I think the actionbar will keep them in the cache the rest
+    -- of the time. Mark overlays as dirty when item results come in (overkill
+    -- but easier than tracking our itemIDs and rare enough).
     self:RegisterEvent('ITEM_DATA_LOAD_RESULT')
 
     -- These are for tracking that we need to rescan the current overlays to
@@ -513,10 +513,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
             end
         end
     elseif event == 'ITEM_DATA_LOAD_RESULT' then
-        local itemID, success = ...
-        if LBA.buttonItemIDs[itemID] then
-            self:MarkOverlaysDirty()
-        end
+        self:MarkOverlaysDirty()
     elseif event == 'ACTIONBAR_SLOT_CHANGED' or event == 'UPDATE_MACROS' then
         self:UpdateTrackedUnitList()
         for unit in pairs(self.trackedUnitList) do

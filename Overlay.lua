@@ -215,7 +215,6 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
     end
 
     if type == 'item' then
-        LBA.buttonItemIDs[id] = true
         self.name, self.spellID = C_Item.GetItemSpell(id)
         self.type = type
         return
