@@ -52,7 +52,8 @@ LBA.HostileDispels = {
     [278326] = { Magic = true },    -- Consume Magic (Demon Hunter)
     [ 19801] = { Magic = true },    -- Tranquilizing Shot (Hunter)
     [ 30449] = { Magic = true },    -- Spellsteal (Mage)
-    [   528] = { Magic = true },    -- Dispel Magic (Priest)
+    [   527] = { Magic = true },    -- Dispel Magic (Priest) Classic to Cata
+    [   528] = { Magic = true },    -- Dispel Magic (Priest) Mists and onwards
     [ 32375] = { Magic = true },    -- Mass Dispel (Priest)
     [   370] = { Magic = true },    -- Purge (Shaman)
     [ 19505] = { Magic = true },    -- Devour Magic (Warlock)
@@ -66,6 +67,14 @@ LBA.HostileDispels = {
 --  [202719] = { Magic = true },    -- Arcane Torrent (Blood Elf Demon Hunter)
 --  [232633] = { Magic = true },    -- Arcane Torrent (Blood Elf Priest)
 }
+
+if LE_EXPANSION_LEVEL_CURRENT >= 4 then
+    -- Remove Classic-Cataclysm version of Dispel Magic
+    LBA.HostileDispels[527] = nil
+else
+    -- Remove Mists of Pandaria and onwards Dispel Magic
+    LBA.HostileDispels[528] = nil
+end
 
 LBA.Taunts = {
     [   355] = true,                -- Taunt (Warrior)
