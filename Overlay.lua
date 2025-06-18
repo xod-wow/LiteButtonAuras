@@ -512,6 +512,9 @@ if ActionButtonSpellAlertManager then
     function LiteButtonAurasOverlayMixin:ShowSuggestion(isShown)
         if isShown then
             ActionButtonSpellAlertManager:ShowAlert(self)
+            self.SpellActivationAlert.ProcStartFlipbook:SetAlpha(0)
+            self.SpellActivationAlert.ProcLoop:Play()
+            self.SpellActivationAlert:Show()
         else
             ActionButtonSpellAlertManager:HideAlert(self)
         end
