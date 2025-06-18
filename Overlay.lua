@@ -34,6 +34,7 @@ local GetModifiedClick = GetModifiedClick
 local GetTime = GetTime
 local IsModifiedClick = IsModifiedClick
 local IsSpellOverlayed = IsSpellOverlayed
+local SecureCmdOptionParse = SecureCmdOptionParse
 local UnitCanAttack = UnitCanAttack
 local UnitExists = UnitExists
 local UnitIsFriend = UnitIsFriend
@@ -68,12 +69,21 @@ end
 
 --[[------------------------------------------------------------------------]]--
 
+-- This is wrong for any kind of complex macro that contains multiple commands
+-- that execute, or one command that executes and has no conditions but then
+-- subsequent commands with conditions that don't. But it should be good enough
+-- for basic macros that do CC and interrupts, and a full macro parser would be
+-- complex. And not significantly better since you can't tell what spell is
+-- going to end the macro from the client.
+
 -- I tried caching the gmatch split but it wasn't any faster.
 
 local function GetMacroUnit(macroIdentifier)
     local macroBody = GetMacroBody(macroIdentifier)
-    if macroBody then
-        for _, conditionsAndArgs in macroBody:gmatch("/(%w+)%s+([^\n]+)") do
+    if macroBody == nil then return end
+
+    for cmd, conditionsAndArgs in macroBody:gmatch("/(%w+)%s+([^\n]+)") do
+        if cmd == "cast" or cmd == "use" then
             local result, unit = SecureCmdOptionParse(conditionsAndArgs)
             if result then
                 return unit
