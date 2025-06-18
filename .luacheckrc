@@ -18,6 +18,7 @@ ignore = {
 
 globals = {
     "LiteButtonAuras_AddonCompartmentFunc",
+    "LiteButtonAurasController",
     "LiteButtonAurasControllerMixin",
     "LiteButtonAurasOverlayMixin",
     "SlashCmdList",
@@ -74,8 +75,8 @@ read_globals =  {
     "IsMouseButtonDown",
     "IsPlayerSpell",
     "IsSpellOverlayed",
+    "LE_EXPANSION_LEVEL_CURRENT",
     "LibStub",
-    "LiteButtonAurasController",
     "MAX_BOSS_FRAMES",
     "MAX_TOTEMS",
     "Mixin",
@@ -96,6 +97,7 @@ read_globals =  {
     "UnitChannelInfo",
     "UnitExists",
     "UnitIsFriend",
+    "UnitIsUnit",
     "WOW_PROJECT_CLASSIC",
     "WOW_PROJECT_ID",
     "WithinRange",
