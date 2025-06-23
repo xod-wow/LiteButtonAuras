@@ -215,7 +215,7 @@ function LiteButtonAurasOverlayMixin:SetUpAction()
 
     local type, id, subType = self:GetActionInfo()
 
-    self.unit = self:GetActionUnit(type, id, subType)
+    self.destUnit = self:GetActionUnit(type, id, subType)
 
     if type == 'spell' then
         self.name = C_Spell.GetSpellName(id)
@@ -343,29 +343,30 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             self:SetUpAction()
         end
 
-        -- self.unit is the destination unit (usually 'target'). We could omit
-        -- passing it as arg here if we handled source unit (usually 'player')
-        -- separately. Is that a good idea? Dunno. But it's worth keeping in
-        -- mind that there are two units per spell, source and destination.
+        -- It's worth keeping in mind that there are two units per spell, source
+        -- and dest. Source is nearly always player.
 
-        if self:IsKnown() and LBA.state[self.unit] then
-            if self:TrySetAsSoothe(self.unit) then
+        if self:IsKnown() then
+            local destOk = LBA.state[self.destUnit] ~= nil
+            -- These are theoretically in priority order but I haven't put a
+            -- lot of thought into it because the overlap cases are super rare.
+            if destOk and self:TrySetAsSoothe() then
                 show = true
-            elseif self:TrySetAsInterrupt(self.unit) then
+            elseif destOk and self:TrySetAsInterrupt() then
                 show = true
-            elseif self:TrySetAsTotem() then
+            elseif self:TrySetAsPlayerTotem() then
                 show = true
-            elseif self:TrySetAsTaunt(self.unit) then
+            elseif destOk and self:TrySetAsTaunt() then
                 show = true
-            elseif self:TrySetAsBuff('player') then
+            elseif self:TrySetAsPlayerBuff() then
                 show = true
-            elseif self:TrySetAsDebuff(self.unit) then
+            elseif destOk and self:TrySetAsDebuff() then
                 show = true
-            elseif self:TrySetAsPetBuff('pet') then
+            elseif self:TrySetAsPetBuff() then
                 show = true
             elseif self:TrySetAsWeaponEnchant() then
                 show = true
-            elseif self:TrySetAsDispel(self.unit) then
+            elseif destOk and self:TrySetAsHostileDispel() then
                 show = true
             end
         end
@@ -381,25 +382,30 @@ end
 
 -- Aura Config -----------------------------------------------------------------
 
--- [ 1] name,
--- [ 2] icon,
--- [ 3] count,
--- [ 4] debuffType,
--- [ 5] duration,
--- [ 6] expirationTime,
--- [ 7] source,
--- [ 8] isStealable,
--- [ 9] nameplateShowPersonal,
--- [10] spellId,
--- [11] canApplyAura,
--- [12] isBossDebuff,
--- [13] castByPlayer,
--- [14] nameplateShowAll,
--- [15] timeMod,
---      ...
---  = UnitAura(unit, index, filter)
+--  auraData = {
+--    applications = 0,
+--    auraInstanceID = 154047,
+--    canApplyAura = true,
+--    duration = 3600,
+--    expirationTime = 9109.109,
+--    icon = 136051,
+--    isBossAura = false,
+--    isFromPlayerOrPlayerPet = true,
+--    isHarmful = false,
+--    isHelpful = true,
+--    isNameplateOnly = false,
+--    isRaid = false,
+--    isStealable = false
+--    name = "Lightning Shield",
+--    nameplateShowAll = false,
+--    nameplateShowPersonal = false,
+--    points = { },
+--    sourceUnit = "player",
+--    spellId = 192106,
+--    timeMod = 1,
+--  }
 
-function LiteButtonAurasOverlayMixin:SetAsAura(auraData)
+function LiteButtonAurasOverlayMixin:SetAsAuraCommon(auraData)
     -- Anything that's too short is just annoying
     if auraData.duration > 0 and auraData.duration < LBA.db.profile.minAuraDuration then
         return
@@ -414,41 +420,31 @@ function LiteButtonAurasOverlayMixin:SetAsAura(auraData)
     end
 end
 
-function LiteButtonAurasOverlayMixin:SetAsBuff(auraData)
+function LiteButtonAurasOverlayMixin:SetAsPlayerBuff(auraData)
     local color = LBA.db.profile.color.buff
     local alpha = LBA.db.profile.glowAlpha
     self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
-    -- self.Stacks:SetTextColor(color.r, color.g, color.b, 1.0)
-    self:SetAsAura(auraData)
+    self:SetAsAuraCommon(auraData)
+end
+
+function LiteButtonAurasOverlayMixin:TrySetAsPlayerBuff()
+    local aura = self:GetMatchingAura(LBA.state.player.buffs)
+    if aura then
+        self:SetAsPlayerBuff(aura)
+        return true
+    end
 end
 
 function LiteButtonAurasOverlayMixin:SetAsPetBuff(auraData)
     local color = LBA.db.profile.color.petBuff
     local alpha = LBA.db.profile.glowAlpha
     self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
-    -- self.Stacks:SetTextColor(color.r, color.g, color.b, 1.0)
-    self:SetAsAura(auraData)
+    self:SetAsAuraCommon(auraData)
 end
 
-function LiteButtonAurasOverlayMixin:SetAsDebuff(auraData)
-    local color = LBA.db.profile.color.debuff
-    local alpha = LBA.db.profile.glowAlpha
-    self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
-    -- self.Stacks:SetTextColor(color.r, color.g, color.b, 1.0)
-    self:SetAsAura(auraData)
-end
-
-function LiteButtonAurasOverlayMixin:TrySetAsBuff(unit)
-    local aura = self:GetMatchingAura(LBA.state[unit].buffs)
-    if aura then
-        self:SetAsBuff(aura)
-        return true
-    end
-end
-
-function LiteButtonAurasOverlayMixin:TrySetAsPetBuff(unit)
+function LiteButtonAurasOverlayMixin:TrySetAsPetBuff()
     if LBA.db.profile.playerPetBuffs then
-        local aura = self:GetMatchingAura(LBA.state[unit].buffs)
+        local aura = self:GetMatchingAura(LBA.state.pet.buffs)
         if aura and aura.sourceUnit == 'player' then
             self:SetAsPetBuff(aura)
             return true
@@ -456,8 +452,16 @@ function LiteButtonAurasOverlayMixin:TrySetAsPetBuff(unit)
     end
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsDebuff(unit)
-    local aura = self:GetMatchingAura(LBA.state[unit].debuffs)
+function LiteButtonAurasOverlayMixin:SetAsDebuff(auraData)
+    local color = LBA.db.profile.color.debuff
+    local alpha = LBA.db.profile.glowAlpha
+    self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
+    -- self.Stacks:SetTextColor(color.r, color.g, color.b, 1.0)
+    self:SetAsAuraCommon(auraData)
+end
+
+function LiteButtonAurasOverlayMixin:TrySetAsDebuff()
+    local aura = self:GetMatchingAura(LBA.state[self.destUnit].debuffs)
     if aura then
         self:SetAsDebuff(aura)
         return true
@@ -466,14 +470,14 @@ end
 
 function LiteButtonAurasOverlayMixin:TrySetAsWeaponEnchant()
     if LBA.state.player.weaponEnchants[self.name] then
-        self:SetAsBuff(LBA.state.player.weaponEnchants[self.name])
+        self:SetAsPlayerBuff(LBA.state.player.weaponEnchants[self.name])
         return true
     end
 end
 
 -- Totem Config ----------------------------------------------------------------
 
-function LiteButtonAurasOverlayMixin:SetAsTotem(expireTime)
+function LiteButtonAurasOverlayMixin:SetAsPlayerTotem(expireTime)
     local color = LBA.db.profile.color.buff
     local alpha = LBA.db.profile.glowAlpha
     self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
@@ -481,11 +485,11 @@ function LiteButtonAurasOverlayMixin:SetAsTotem(expireTime)
     self.displayGlow = true
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsTotem()
+function LiteButtonAurasOverlayMixin:TrySetAsPlayerTotem()
     if self:IsIgnoreSpell() or not LBA.db.profile.defaultNameMatching then
         return
     elseif LBA.state.player.totems[self.name] then
-        self:SetAsTotem(LBA.state.player.totems[self.name])
+        self:SetAsPlayerTotem(LBA.state.player.totems[self.name])
         return true
     end
 end
@@ -506,10 +510,10 @@ function LiteButtonAurasOverlayMixin:ReadyBefore(endTime)
     end
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsInterrupt(unit)
-    if LBA.state[unit].interrupt then
-        if self.name and LBA.Interrupts[self.name] then
-            local castEnds = LBA.state[unit].interrupt
+function LiteButtonAurasOverlayMixin:TrySetAsInterrupt()
+    if self.name and LBA.Interrupts[self.name] then
+        if LBA.state[self.destUnit].interrupt then
+            local castEnds = LBA.state[self.destUnit].interrupt
             if self:ReadyBefore(castEnds) then
                 self.expireTime = castEnds
                 self.displaySuggestion = true
@@ -522,11 +526,11 @@ end
 -- Soothe Config ---------------------------------------------------------------
 
 --[[
+-- Unused, Soothe is suggestion only now
 function LiteButtonAurasOverlayMixin:SetAsSoothe(auraData)
     local color = LBA.db.profile.color.enrage
     self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
-    -- self.Stacks:SetTextColor(color.r, color.g, color.b, 1.0)
-    self:SetAsAura(auraData)
+    self:SetAsAuraCommon(auraData)
 end
 ]]
 
@@ -540,11 +544,11 @@ function LiteButtonAurasOverlayMixin:IsSoothe()
     end
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsSoothe(unit)
+function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
     if not self:IsSoothe() then return end
-    if not UnitCanAttack('player', unit) then return end
+    if not UnitCanAttack('player', self.destUnit) then return end
 
-    for _, auraData in pairs(LBA.state[unit].buffs) do
+    for _, auraData in pairs(LBA.state[self.destUnit].buffs) do
         if auraData.isStealable and auraData.dispelName == "" and self:ReadyBefore(auraData.expirationTime) then
             self.expireTime = auraData.expirationTime
             self.displaySuggestion = true
@@ -555,38 +559,37 @@ end
 
 -- Taunt Config ----------------------------------------------------------------
 
-function LiteButtonAurasOverlayMixin:TrySetAsTaunt(unit)
-    if self.name and LBA.Taunts[self.name] and LBA.state[unit].taunt then
-        self:SetAsDebuff(LBA.state[unit].taunt)
+function LiteButtonAurasOverlayMixin:TrySetAsTaunt()
+    if self.name and LBA.Taunts[self.name] and LBA.state[self.destUnit].taunt then
+        self:SetAsDebuff(LBA.state[self.destUnit].taunt)
         return true
     end
 end
 
 -- Dispel Config ---------------------------------------------------------------
 
-function LiteButtonAurasOverlayMixin:SetAsDispel(auraData)
+function LiteButtonAurasOverlayMixin:SetAsHostileDispel(auraData)
     local color = DebuffTypeColor[auraData.dispelName or ""]
     local alpha = LBA.db.profile.glowAlpha
     self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
-    -- self.Stacks:SetTextColor(color.r, color.g, color.b, 1.0)
-    self:SetAsAura(auraData)
+    self:SetAsAuraCommon(auraData)
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsDispel(unit)
+function LiteButtonAurasOverlayMixin:TrySetAsHostileDispel()
     if not self.name then
         return
     end
 
-    if not UnitCanAttack('player', unit) then
+    if not UnitCanAttack('player', self.destUnit) then
         return
     end
 
     local dispels = LBA.HostileDispels[self.name]
     if dispels then
         for dispelName in pairs(dispels) do
-            for _, auraData in pairs(LBA.state[unit].buffs) do
+            for _, auraData in pairs(LBA.state[self.destUnit].buffs) do
                 if auraData.dispelName == dispelName then
-                    self:SetAsDispel(auraData)
+                    self:SetAsHostileDispel(auraData)
                     self.displaySuggestion = true
                     return true
                 end
