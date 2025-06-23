@@ -202,7 +202,7 @@ function LiteButtonAurasOverlayMixin:GetActionUnit(type, id, subType)
     end
 
     if IsModifiedClick('FOCUSCAST') then
-        self.unit = 'focus'
+        return 'focus'
     end
 
     return 'target'
@@ -342,6 +342,11 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
         if not stateOnly then
             self:SetUpAction()
         end
+
+        -- self.unit is the destination unit (usually 'target'). We could omit
+        -- passing it as arg here if we handled source unit (usually 'player')
+        -- separately. Is that a good idea? Dunno. But it's worth keeping in
+        -- mind that there are two units per spell, source and destination.
 
         if self:IsKnown() and LBA.state[self.unit] then
             if self:TrySetAsSoothe(self.unit) then
@@ -572,7 +577,7 @@ function LiteButtonAurasOverlayMixin:TrySetAsDispel(unit)
         return
     end
 
-    if not UnitCanAttack('player', self.unit) then
+    if not UnitCanAttack('player', unit) then
         return
     end
 
