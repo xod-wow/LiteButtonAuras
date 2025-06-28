@@ -62,8 +62,6 @@ function LiteButtonAurasControllerMixin:Initialize()
     LBA.SetupSlashCommand()
     LBA.UpdateAuraMap()
 
-    -- Now this is be delayed until PLAYER_LOGIN do we still need to list
-    -- list all possible LibActionButton derivatives in the TOC dependencies?
     LBA.BarIntegrations:Initialize()
     self:UpdateTrackedUnitList()
 
