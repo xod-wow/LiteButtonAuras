@@ -190,7 +190,7 @@ function LiteButtonAurasOverlayMixin:GetActionUnit(type, id, subType)
 
     if useMouseoverCasting and UnitExists('mouseover') then
         local actionID = self:GetActionID()
-        local isFriend = UnitIsFriend('mouseover')
+        local isFriend = UnitIsFriend('player', 'mouseover')
         if isFriend and C_ActionBar.IsHelpfulAction(actionID, true) then
             return 'mouseover'
         elseif not isFriend and C_ActionBar.IsHarmfulAction(actionID, true) then
