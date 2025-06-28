@@ -265,7 +265,9 @@ local function LABInitButton(event, actionButton)
     overlay.GetActionID = LABGetActionID
     overlay.GetActionInfo = LABGetActionInfo
     overlay.HasAction = LABHasAction
-    overlay:Update()
+    -- Only call for dynamically created buttons, at Initialize() time the
+    -- UnitState hasn't be set up yet and will error due to missing units.
+    if event ~= nil then overlay:Update() end
 end
 
 -- LAB doesn't fire OnButtonCreated until the end of CreateButton but
