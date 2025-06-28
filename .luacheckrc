@@ -85,6 +85,7 @@ read_globals =  {
     "NumberFontNormal",
     "OKAY",
     "ORANGE_FONT_COLOR",
+    "PixelUtil",
     "REMOVE",
     "SELECTED_CHAT_FRAME",
     "SETTINGS",
