@@ -34,6 +34,7 @@ local GetModifiedClick = GetModifiedClick
 local GetTime = GetTime
 local IsModifiedClick = IsModifiedClick
 local IsSpellOverlayed = IsSpellOverlayed
+local PixelUtil = PixelUtil
 local SecureCmdOptionParse = SecureCmdOptionParse
 local UnitCanAttack = UnitCanAttack
 local UnitExists = UnitExists
@@ -111,7 +112,7 @@ function LiteButtonAurasOverlayMixin:Style()
     local p = LBA.db.profile
 
     local parent = self:GetParent()
-    self:SetSize(parent:GetSize())
+    PixelUtil.SetSize(self, parent:GetSize())
 
     local point, x, y, justifyH
 
