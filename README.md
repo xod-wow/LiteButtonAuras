@@ -4,11 +4,15 @@ LiteButtonAuras shows your buffs on you and your debuffs on your target inside y
 colored border and timer. It is like AdiButtonAuras, and Inline Aura before it, just much dumber and much
 easier to maintain.
 
+Supports WoW retail, classic era (Vanilla) and classic (WotLK/MoP).
+
+## Display
+
 A buff you cast on yourself shows a green highlight in ability button:
 
 ![](https://i.imgur.com/vsf97X0.png)
 
-A buff you cast on your pet shows a blue highlight in the ability button.
+A buff you cast on your pet shows a blue highlight in the ability button (unless disabled in settings).
 
 A debuff you cast on your target shows red highlight in ability button:
 
@@ -17,21 +21,19 @@ A debuff you cast on your target shows red highlight in ability button:
 For all of your action buttons:
 
 - Suggest button (border glow/ants) with timer if:
-    - your target is casting a spell you can interrupt and the button action is an interrupt, or
-    - your target is enraged and the button action is a soothe
-    - your target has a buff you can purge and the button action is a purge/spellsteal
+    - your target is casting a spell you can interrupt and the button action is an interrupt; or
+    - your target is enraged and the button action is a soothe; or
+    - your target has a buff you can purge and the button action is a purge/spellsteal.
 - Show a green highlight and timer if:
-    - the action name matches a buff on you that you cast, or
-    - the action is a totem or guardian and it is summoned
+    - the action name matches a buff on you that you cast; or
+    - the action is a totem or guardian and it is summoned.
 - Show a blue highlight and timer if:
     - the action name matches a buff on your pet that you cast
 - Show a red highlight and timer if:
-    - the action name matches a debuff that you cast on your target
-    - the action is a taunt and another player has taunted your target
+    - the action name matches a debuff that you cast on your target; or
+    - the action is a taunt and another player has taunted your target.
 
 LiteButtonAuras works with the default Blizzard action bars, ElvUI, Dominos, Bartender, ButtonForge, ActionbarPlus, and anything that uses LibActionButton.
-
-Supports WoW retail, classic era (Vanilla) and classic (WotLK/MoP).
 
 ## Support for macro units (focus/mouseover/etc)
 
