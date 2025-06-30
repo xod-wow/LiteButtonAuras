@@ -355,19 +355,19 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
                 show = true
             elseif destOk and self:TrySetAsInterrupt() then
                 show = true
-            elseif self:TrySetAsPlayerTotem() then
+            elseif destOk and self:TrySetAsHostileDispel() then
                 show = true
             elseif destOk and self:TrySetAsTaunt() then
                 show = true
             elseif self:TrySetAsPlayerBuff() then
                 show = true
-            elseif destOk and self:TrySetAsDebuff() then
-                show = true
-            elseif self:TrySetAsPetBuff() then
+            elseif self:TrySetAsPlayerTotem() then
                 show = true
             elseif self:TrySetAsWeaponEnchant() then
                 show = true
-            elseif destOk and self:TrySetAsHostileDispel() then
+            elseif destOk and self:TrySetAsDebuff() then
+                show = true
+            elseif self:TrySetAsPetBuff() then
                 show = true
             end
         end
