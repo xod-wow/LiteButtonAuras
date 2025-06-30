@@ -8,6 +8,8 @@ A buff you cast on yourself shows a green highlight in ability button:
 
 ![](https://i.imgur.com/vsf97X0.png)
 
+A buff you cast on your pet shows a blue highlight in the ability button.
+
 A debuff you cast on your target shows red highlight in ability button:
 
 ![](https://i.imgur.com/HmN2WR5.png)
@@ -17,24 +19,78 @@ For all of your action buttons:
 - Suggest button (border glow/ants) with timer if:
     - your target is casting a spell you can interrupt and the button action is an interrupt, or
     - your target is enraged and the button action is a soothe
+    - your target has a buff you can purge and the button action is a purge/spellsteal
 - Show a green highlight and timer if:
     - the action name matches a buff on you that you cast, or
     - the action is a totem or guardian and it is summoned
+- Show a blue highlight and timer if:
+    - the action name matches a buff on your pet that you cast
 - Show a red highlight and timer if:
     - the action name matches a debuff that you cast on your target
-- Show a debuff-colored border (curse/disease/magic/poison) if:
-    - your target is an enemy, and
-    - you can purge the buff, and
-    - the button action is a purge/spellsteal
+    - the action is a taunt and another player has taunted your target
 
-LiteButtonAuras works with the default Blizzard action bars, Dominos, Bartender, ButtonForge, ActionbarPlus, and anything that uses LibActionButton (including ElvUI).
+LiteButtonAuras works with the default Blizzard action bars, ElvUI, Dominos, Bartender, ButtonForge, ActionbarPlus, and anything that uses LibActionButton.
 
-Supports WoW retail, classic era (Vanilla/SoD) and classic (WotLK).
+Supports WoW retail, classic era (Vanilla) and classic (WotLK/MoP).
 
-## WoW Classic Era Timers and Interrupts
+## Support for macro units (focus/mouseover/etc)
 
-Support for interrupts and timers on classic is now baseline in the WoW API. You don't need to install
-any other libraries.
+LiteButtonAuras has limited support for macros that use the '@unit' conditionals to change the unit that will be the target of the ability.
+
+The following units are supported:
+- arena1-5
+- boss1-8
+- focus
+- mouseover
+- party1-4
+- pet
+- player
+- target
+
+The limitations are:
+1. Only the above units are supported.
+1. You can't have /cast or /use lines without [@unit] before ones that do.
+1. You can't use macro commands that change target.
+
+For example, these work:
+
+```
+#showtooltip
+/cast [@focus,harm][@mouseover,harm][] Kick
+```
+
+```
+#showtooltip
+/focus [mod:ctrl,nodead,harm]
+/cast [@focus,harm] Kick
+/cast [@mouseover,harm] Kick
+/cast Kick
+```
+
+```
+#showtooltip
+/cast [@mousover,harm][harm] Paralysis
+/cast [@mouseover,help][] Detox
+```
+
+These __do not work__:
+```
+#showtooltip
+/cast Kick
+/cast [@focus] Tricks of the Trade
+```
+
+```
+#showtooltip
+/cleartarget
+/targetenemyplayer
+/cast Sap
+```
+
+## Support for Blizzard mouseover/focus casting
+
+There is experimental support for the Blizzard automatic mouseover casting and focus casting. I don't use it,
+I don't know how it works and I never tested it. If you do let me know how it went.
 
 ## Comparison with AdiButtonAuras
 
@@ -47,7 +103,6 @@ Compared to AdiButtonAuras (which this addon was modeled on), LiteButtonAuras:
 1. limited support for customizing (timer appearance, location, show stacks or not).
 1. doesn't show hints for using abilities, except for interrupt, purge and soothe.
 1. doesn't show holy power/chi/combo points/soul shards.
-1. doesn't handle macros that change the unit (always assumes target).
 
 AdiButtonAuras seems to be maintained again, so if you want some extra features give it a look.
 
@@ -97,8 +152,10 @@ and flags. There is no difference in LBA between `NumberFontNormal` and `NumberF
 
 ## Show Highlights for Other Auras
 
-By default LiteButtonAuras only shows highlights when the name of the buff/debuff and the name of
-the action match. (Plus a special case for totems and guardians like monk statues.)
+By default LiteButtonAuras only shows highlights when the name of the buff/debuff:
+- matches the name of the button action; or
+- matches the name of the button action's base spell that was overridden; or
+- matches a hard-coded list of totems/guardians like monk statues.
 
 Using the `/lba aura` command you can add extra auras that will highlight your abilities (for
 example, to show a debuff on the ability that triggers it).
@@ -140,9 +197,6 @@ yourself. Here are three ways to do this:
 
 ## Features I can't or won't support, and why
 
-1. __Macro @units__. There's no simple way to figure out what unit an action will target.
-   It can be done with a lot of complex processing, maybe. If Blizzard ever added a
-   GetActionUnit() I would do it in a heartbeat so I can have focus interrupt suggesting.
 1. __Non-Auras__. E.g. channeling time, combo/chi/holy power/etc points. A lot of these
    could be done, but LBA's focus is on auras only and I personally feel those are better
    done in other ways or by other addons.
