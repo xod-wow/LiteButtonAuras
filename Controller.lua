@@ -134,10 +134,14 @@ function LiteButtonAurasControllerMixin:UpdateAllOverlays(stateOnly)
     end
 end
 
+-- Triggered when the style options change in the DB
 function LiteButtonAurasControllerMixin:StyleAllOverlays()
     for _, overlay in pairs(self.overlayFrames) do
         overlay:Style()
         overlay:Update()
+        if MasqueGroup then
+            MasqueGroup:ReSkin(overlay)
+        end
     end
 end
 
