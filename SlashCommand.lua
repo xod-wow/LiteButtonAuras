@@ -36,6 +36,7 @@ local function PrintUsage()
     printf("  /lba timerposition point [offset]")
     printf("  /lba font FontName|default")
     printf("  /lba font path [ size [ flags ] ]")
+    printf("  /lba glowalpha 0-1")
     printf("  /lba aura help")
     printf("  /lba ignore help")
 end
@@ -209,10 +210,14 @@ local function SlashCommand(argstr)
     elseif cmd:lower() == 'timerposition' and WithinRange(#args, 1, 2) then
         LBA.SetOptionOutsideUI('timerAnchor', args[1])
         if args[2] then LBA.SetOptionOutsideUI('timerAdjust', args[2]) end
+    elseif cmd:lower() == 'glowalpha' and #args == 1 and WithinRange(tonumber(args[1]), 0, 1) then
+        LBA.SetOptionOutsideUI('glowAlpha', args[1])
     elseif cmd:lower() == 'aura' then
         AuraCommand(argstr)
     elseif cmd:lower() == 'ignore' then
         IgnoreCommand(argstr)
+    elseif cmd:lower() == 'style' then
+        LiteButtonAurasController:StyleAllOverlays()
     elseif cmd:lower() == 'dump' then
         LiteButtonAurasController:DumpAllOverlays()
     else

@@ -258,6 +258,37 @@ local options = {
                     max = 16,
                     step = 1,
                 },
+                preGlowHeaderGap = {
+                    name = "\n",
+                    type = "description",
+                    width = 'full',
+                    order = order(),
+                },
+                GlowHeader = {
+                    type = "header",
+                    name = L["Glow"],
+                    order = order(),
+                },
+                postGlowHeaderGap = {
+                    name = "",
+                    type = "description",
+                    width = 'full',
+                    order = order(),
+                },
+                preGlowAlphaSpacer = {
+                    name = "",
+                    type = "description",
+                    width = 0.05,
+                    order = order(),
+                },
+                glowAlpha = {
+                    type = "range",
+                    name = L["Glow alpha"],
+                    order = order(),
+                    min = 0,
+                    max = 1,
+                    step = 0.01,
+                },
             },
         },
         MappingGroup = {
