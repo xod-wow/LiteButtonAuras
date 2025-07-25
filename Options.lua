@@ -125,7 +125,7 @@ function LBA.SetOption(option, value, key)
 end
 
 function LBA.SetOptionOutsideUI(option, value, key)
-    LBA.Setoption(option, value, key)
+    LBA.SetOption(option, value, key)
     AceConfigRegistry:NotifyChange(addonName)
 end
 
