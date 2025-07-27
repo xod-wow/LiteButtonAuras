@@ -17,10 +17,11 @@ ignore = {
 }
 
 globals = {
-    "LiteButtonAuras_AddonCompartmentFunc",
     "LiteButtonAurasController",
     "LiteButtonAurasControllerMixin",
+    "LiteButtonAurasDB",
     "LiteButtonAurasOverlayMixin",
+    "LiteButtonAuras_AddonCompartmentFunc",
     "SlashCmdList",
 }
 
@@ -85,13 +86,16 @@ read_globals =  {
     "NumberFontNormal",
     "OKAY",
     "ORANGE_FONT_COLOR",
+    "PLAYER",
     "PixelUtil",
     "REMOVE",
     "SELECTED_CHAT_FRAME",
     "SETTINGS",
+    "SPELLS",
     "SecureCmdOptionParse",
     "Settings",
     "Spell",
+    "TARGET",
     "UIParent",
     "UnitCanAttack",
     "UnitCastingInfo",

@@ -560,7 +560,7 @@ local function GenerateOptions()
 
     local ignoreAbilities = {}
     local function ignoreSort(a, b) return a.spell:GetSpellName() < b.spell:GetSpellName() end
-    
+
     cc:ContinueOnLoad(
         function ()
             table.sort(ignoreSpellList, ignoreSort)
