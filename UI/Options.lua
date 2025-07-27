@@ -387,12 +387,12 @@ local options = {
         },
         IgnoreGroup = {
             type = "group",
-            name = L["Ignored abilities"],
+            name = L["Ignored spell IDs"],
             order = order(),
             inline = false,
             args = {
                 ignoreAbility = {
-                    name = L["Add ability"],
+                    name = L["Add spell ID"],
                     type = "input",
                     width = 1,
                     order = order(),
@@ -426,7 +426,7 @@ local options = {
                         function ()
                             local info = addIgnoreAbility and C_Spell.GetSpellInfo(addIgnoreAbility)
                             if info then
-                                LBA.AddIgnoreSpell(info.spellID)
+                                LBA.SetIgnoreSpell(info.spellID, { ability = true })
                                 addIgnoreAbility = nil
                             end
                         end,
@@ -484,7 +484,7 @@ local function GenerateOptions()
 
     local ignoreSpellList = {}
     local cc = ContinuableContainer:Create()
-    for spellID in pairs(LBA.db.profile.denySpells) do
+    for spellID, spellIgnoreData in pairs(LBA.db.profile.ignoreSpells) do
         local spell = Spell:CreateFromSpellID(spellID)
         if not spell:IsSpellEmpty() then
             if WOW_PROJECT_ID ~= 1 then
@@ -493,32 +493,78 @@ local function GenerateOptions()
                 spell.ContinueWithCancelOnItemLoad = spell.ContinueWithCancelOnSpellLoad
             end
             cc:AddContinuable(spell)
-            table.insert(ignoreSpellList, spell)
+            local data = CopyTable(spellIgnoreData)
+            data.spell = spell
+            table.insert(ignoreSpellList, data)
         end
     end
 
     local ignoreAbilities = {}
+    local function ignoreSort(a, b) return a.spell:GetSpellName() < b.spell:GetSpellName() end
+    
     cc:ContinueOnLoad(
         function ()
-            table.sort(ignoreSpellList, function (a, b) return a:GetSpellName() < b:GetSpellName() end)
-            for i, spell in ipairs(ignoreSpellList) do
-                ignoreAbilities["ability"..i] = {
+            table.sort(ignoreSpellList, ignoreSort)
+            for i, data in ipairs(ignoreSpellList) do
+                local spellName = data.spell:GetSpellName()
+                local spellID = data.spell:GetSpellID()
+                local newData = CopyTable(data)
+                ignoreAbilities["spell"..i] = {
                     name = format("%s (%d)",
-                                NORMAL_FONT_COLOR:WrapTextInColorCode(spell:GetSpellName()),
-                                spell:GetSpellID()),
+                                NORMAL_FONT_COLOR:WrapTextInColorCode(spellName),
+                                spellID),
                     type = "description",
-                    image = C_Spell.GetSpellTexture(spell.spellID),
+                    image = C_Spell.GetSpellTexture(spellID),
                     imageWidth = 22,
                     imageHeight = 22,
-                    width = 2.5,
+                    width = 1.5,
                     order = 10*i+1,
+                }
+                ignoreAbilities["ability"..i] = {
+                    name = SPELLS,
+                    desc = L["Spells and abilities on your action bars"],
+                    type = "toggle",
+                    order = 10*i+2,
+                    width = 0.5,
+                    get = function () return data.ability == true end,
+                    set =
+                        function (info, val)
+                            newData.ability = val and true or nil
+                            LBA.SetIgnoreSpell(spellID, newData)
+                        end
+                }
+                ignoreAbilities["player"..i] = {
+                    name = PLAYER,
+                    desc = L["Buffs and debuffs on player unit"],
+                    type = "toggle",
+                    order = 10*i+3,
+                    width = 0.5,
+                    get = function () return data.player == true end,
+                    set =
+                        function (info, val)
+                            newData.player = val and true or nil
+                            LBA.SetIgnoreSpell(spellID, newData)
+                        end
+                }
+                ignoreAbilities["unit"..i] = {
+                    name = TARGET,
+                    type = "toggle",
+                    desc = L["Buffs and debuffs on target unit"],
+                    order = 10*i+4,
+                    width = 0.5,
+                    get = function () return data.unit == true end,
+                    set =
+                        function (info, val)
+                            newData.unit = val and true or nil
+                            LBA.SetIgnoreSpell(spellID, newData)
+                        end
                 }
                 ignoreAbilities["delete"..i] = {
                     name = DELETE,
                     type = "execute",
-                    func = function () LBA.RemoveIgnoreSpell(spell:GetSpellID()) end,
+                    func = function () LBA.RemoveIgnoreSpell(data.spell:GetSpellID()) end,
                     width = 0.5,
-                    order = 10*i+2,
+                    order = 10*i+6,
                 }
             end
             options.args.IgnoreGroup.args.Abilities.plugins.ignoreAbilites = ignoreAbilities

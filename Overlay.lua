@@ -299,12 +299,12 @@ function LiteButtonAurasOverlayMixin:IsKnown()
     end
 end
 
-function LiteButtonAurasOverlayMixin:IsIgnoreSpell()
-    if self.spellID and LBA.db.profile.denySpells[self.spellID] then
+function LiteButtonAurasOverlayMixin:IsIgnoreAbility()
+    local p = LBA.db.profile
+    if p.ignoreSpells[self.spellID] and p.ignoreSpells[self.spellID].ability == true then
         return true
-    else
-        return false
     end
+    return false
 end
 
 function LiteButtonAurasOverlayMixin:GetMatchingAura(t)
@@ -314,7 +314,7 @@ function LiteButtonAurasOverlayMixin:GetMatchingAura(t)
                 return t[extraAuraName]
             end
         end
-    elseif self:IsIgnoreSpell() then
+    elseif self:IsIgnoreAbility(t) then
         return
     elseif LBA.db.profile.defaultNameMatching and t[self.name] then
         return t[self.name]
@@ -484,7 +484,7 @@ function LiteButtonAurasOverlayMixin:SetAsPlayerTotem(expireTime)
 end
 
 function LiteButtonAurasOverlayMixin:TrySetAsPlayerTotem()
-    if self:IsIgnoreSpell() or not LBA.db.profile.defaultNameMatching then
+    if self:IsIgnoreAbility() or not LBA.db.profile.defaultNameMatching then
         return
     elseif LBA.state.player.totems[self.name] then
         self:SetAsPlayerTotem(LBA.state.player.totems[self.name])

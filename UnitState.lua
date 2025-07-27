@@ -83,30 +83,6 @@ local WOW_PROJECT_ID = WOW_PROJECT_ID
 --
 -- https://warcraft.wiki.gg/wiki/API_C_UnitAuras.GetAuraDataBySlot
 
--- Also add a duplicate with any override name. This is awkward but there's no
--- inverse of C_Spell.GetOverrideSpell.
---
--- C_Spell.GetOverrideSpell returns the same ID if passed in an ID that's not
--- overridden (seems like no check is done if it's a valid spell or not).
---
--- It will return 0 if given a string that doesn't match to an ID (and not nil
--- like all the other C_Spell.GetX functions).
---
--- We call it with auraData.name because some of our faked up auraData (like
--- for weapon enchants) doesn't have a spellId in it.
-
-local function UpdateTableAura(t, auraData)
-    t[auraData.name] = auraData
-    if C_Spell.GetOverrideSpell then
-        local overrideID = C_Spell.GetOverrideSpell(auraData.name)
-        local overrideName = C_Spell.GetSpellName(overrideID)
-        if overrideName and overrideName ~= auraData.name then
-            -- Doesn't update the spell name in the auraData only the index name
-            t[overrideName] = auraData
-        end
-    end
-end
-
 -- Fake AuraData for weapon enchants, see BuffFrame.lua for how WoW does it
 local function WeaponEnchantAuraData(duration, charges, id)
     local name = LBA.WeaponEnchantSpellID[id]
@@ -140,6 +116,47 @@ function LBA.UnitState:Create(unit)
     return unitState
 end
 
+-- There is only "player" (which includes pet) and "not player"
+
+function LBA.UnitState:IsIgnoredAura(auraData)
+    local ignoreData = LBA.db.profile.ignoreSpells[auraData.spellId]
+    if ignoreData then
+        if self.unit == 'player' or self.unit == 'pet' then
+            return ignoreData.player == true
+        else
+            return ignoreData.unit == true
+        end
+    end
+    return false
+end
+
+-- Also add a duplicate with any override name. This is awkward but there's no
+-- inverse of C_Spell.GetOverrideSpell.
+--
+-- C_Spell.GetOverrideSpell returns the same ID if passed in an ID that's not
+-- overridden (seems like no check is done if it's a valid spell or not).
+--
+-- It will return 0 if given a string that doesn't match to an ID (and not nil
+-- like all the other C_Spell.GetX functions).
+--
+-- We call it with auraData.name because some of our faked up auraData (like
+-- for weapon enchants) doesn't have a spellId in it.
+
+function LBA.UnitState:UpdateTableAura(t, auraData)
+    if self:IsIgnoredAura(auraData) then
+        return
+    end
+    t[auraData.name] = auraData
+    if C_Spell.GetOverrideSpell then
+        local overrideID = C_Spell.GetOverrideSpell(auraData.name)
+        local overrideName = C_Spell.GetSpellName(overrideID)
+        if overrideName and overrideName ~= auraData.name then
+            -- Doesn't update the spell name in the auraData only the index name
+            t[overrideName] = auraData
+        end
+    end
+end
+
 function LBA.UnitState:UpdateAuras(auraInfo)
 
     -- XXX TODO handle auraInfo for efficiency
@@ -152,12 +169,12 @@ function LBA.UnitState:UpdateAuras(auraInfo)
         -- Hostile target buffs are only for dispels
         AuraUtil.ForEachAura(self.unit, 'HELPFUL', nil,
             function (auraData)
-                UpdateTableAura(self.buffs, auraData)
+                self:UpdateTableAura(self.buffs, auraData)
             end,
             true)
         AuraUtil.ForEachAura(self.unit, 'HARMFUL PLAYER', nil,
             function (auraData)
-                UpdateTableAura(self.debuffs, auraData)
+                self:UpdateTableAura(self.debuffs, auraData)
             end,
             true)
         AuraUtil.ForEachAura(self.unit, 'HARMFUL', nil,
@@ -172,7 +189,7 @@ function LBA.UnitState:UpdateAuras(auraInfo)
     else
         AuraUtil.ForEachAura(self.unit, 'HELPFUL PLAYER', nil,
             function (auraData)
-                UpdateTableAura(self.buffs, auraData)
+                self:UpdateTableAura(self.buffs, auraData)
             end,
             true)
         -- Inclue long-lasting buffs we can cast even if applied
@@ -180,7 +197,7 @@ function LBA.UnitState:UpdateAuras(auraInfo)
         AuraUtil.ForEachAura(self.unit, 'HELPFUL RAID', nil,
             function (auraData)
                 if auraData.duration >= 10*60 then
-                    UpdateTableAura(self.buffs, auraData)
+                    self:UpdateTableAura(self.buffs, auraData)
                 end
             end,
             true)
@@ -200,13 +217,13 @@ function LBA.UnitState:UpdateWeaponEnchants()
         if mhEnchant then
             local auraData = WeaponEnchantAuraData(mhDuration, mhCharges, mhID)
             if auraData then
-                UpdateTableAura(self.weaponEnchants, auraData)
+                self:UpdateTableAura(self.weaponEnchants, auraData)
             end
         end
         if ohEnchant then
             local auraData = WeaponEnchantAuraData(ohDuration, ohCharges, ohID)
             if auraData then
-                UpdateTableAura(self.weaponEnchants, auraData)
+                self:UpdateTableAura(self.weaponEnchants, auraData)
             end
         end
     end

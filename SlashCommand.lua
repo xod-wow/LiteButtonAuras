@@ -144,7 +144,7 @@ end
 
 local function PrintIgnoreList()
     local spells = { }
-    for spellID in pairs(LBA.db.profile.denySpells) do
+    for spellID in pairs(LBA.db.profile.ignoreSpells) do
         local spell = Spell:CreateFromSpellID(spellID)
         if not spell:IsSpellEmpty() then
             spell:ContinueOnSpellLoad(function () table.insert(spells, spell) end)
@@ -168,7 +168,7 @@ local function IgnoreCommand(argstr)
     elseif cmd == 'add' and spell then
         local info = C_Spell.GetSpellInfo(spell)
         if info then
-            LBA.AddIgnoreSpell(info.spellID)
+            LBA.SetIgnoreSpell(info.spellID, { ability = true })
         else
             printf(L["Error: unknown spell: %s"], spell)
         end
