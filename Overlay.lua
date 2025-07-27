@@ -425,7 +425,7 @@ end
 
 function LiteButtonAurasOverlayMixin:SetAsPlayerBuff(auraData)
     local color = LBA.db.profile.color.buff
-    self.Glow:SetVertexColor(color.r, color.g, color.b, alpha)
+    self.Glow:SetVertexColor(color.r, color.g, color.b)
     self:SetAsAuraCommon(auraData)
 end
 
