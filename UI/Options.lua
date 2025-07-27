@@ -75,6 +75,8 @@ end
 local addAuraMap = { }
 local addIgnoreAbility
 
+local ValidateTexture = UIParent:CreateTexture()
+
 local options = {
     type = "group",
     childGroups = "tab",
@@ -152,6 +154,17 @@ local options = {
                     width = 'full',
                     order = order(),
                 },
+                fontRestoreDefaults = {
+                    name = L["Restore font defaults"],
+                    type = "execute",
+                    width = "full",
+                    order = order(),
+                    func =
+                        function ()
+                            LBA.SetOption("fontPath", "default")
+                            LBA.SetOption("fontSize", "default")
+                        end,
+                },
                 preFontPathSpacer = {
                     name = "",
                     type = "description",
@@ -197,6 +210,19 @@ local options = {
                     type = "description",
                     width = 'full',
                     order = order(),
+                },
+                anchorRestoreDefaults = {
+                    name = L["Restore text defaults"],
+                    type = "execute",
+                    width = "full",
+                    order = order(),
+                    func =
+                        function ()
+                            LBA.SetOption("timerAnchor", "default")
+                            LBA.SetOption("timerAdjust", "default")
+                            LBA.SetOption("stacksAnchor", "default")
+                            LBA.SetOption("stacksAdjust", "default")
+                        end,
                 },
                 preTimerAnchorGap = {
                     name = "",
@@ -275,11 +301,32 @@ local options = {
                     width = 'full',
                     order = order(),
                 },
-                preGlowAlphaSpacer = {
-                    name = "",
-                    type = "description",
-                    width = 0.05,
+                glowRestoreDefaults = {
+                    name = L["Restore glow defaults"],
+                    type = "execute",
+                    width = "full",
                     order = order(),
+                    func =
+                        function ()
+                            LBA.SetOption("glowTexture", "default")
+                            LBA.SetOption("glowAlpha", "default")
+                            LBA.SetOption("glowUseMasque", "default")
+                        end,
+                },
+                glowTexture = {
+                    name = L["Glow texture"],
+                    type = "input",
+                    width = "full",
+                    order = order(),
+                    validate =
+                        function (info, value)
+                            ValidateTexture:SetTexture(value)
+                            if ValidateTexture:GetTexture() then
+                                return true
+                            else
+                                return L["Texture not found"]
+                            end
+                        end,
                 },
                 glowAlpha = {
                     type = "range",
@@ -288,6 +335,18 @@ local options = {
                     min = 0,
                     max = 1,
                     step = 0.01,
+                },
+                preGlowUseMasqueSpacer = {
+                    name = "",
+                    type = "description",
+                    width = 0.5,
+                    order = order(),
+                },
+                glowUseMasque = {
+                    name = L["Automatically use Masque textures"],
+                    type = "toggle",
+                    width = 2,
+                    order = order(),
                 },
             },
         },

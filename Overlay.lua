@@ -16,6 +16,8 @@ local C_Item = LBA.C_Item or C_Item
 
 local LibBG = LibStub("LibButtonGlow-1.0")
 
+local MasqueTextureFormat = "Interface/AddOns/Masque/Textures/%s/AutoCast-Mask"
+
 
 --[[------------------------------------------------------------------------]]--
 
@@ -108,6 +110,17 @@ function LiteButtonAurasOverlayMixin:OnLoad()
     self:Style()
 end
 
+function LiteButtonAurasOverlayMixin:StyleMasqueOverrides(parent, useTexture)
+    if parent.__MSQ_Enabled then
+        if useTexture and parent.__MSQ_Shape and parent.__MSQ_Shape ~= "Blizzard" then
+            self.Glow:SetTexture(string.format(MasqueTextureFormat, parent.__MSQ_Shape))
+        end
+        if parent.__MSQ_Scale then
+            self:SetScale(parent.__MSQ_Scale)
+        end
+    end
+end
+
 function LiteButtonAurasOverlayMixin:Style()
     local p = LBA.db.profile
 
@@ -128,7 +141,12 @@ function LiteButtonAurasOverlayMixin:Style()
     self.Stacks:SetPoint(point, self, x*p.stacksAdjust, y*p.stacksAdjust)
     self.Stacks:SetJustifyH(justifyH)
 
+    -- Defaults before Masque gets its dirty mitts on things
+    self.Glow:SetTexture(p.glowTexture)
     self.Glow:SetAlpha(p.glowAlpha)
+    self:SetScale(1)
+
+    self:StyleMasqueOverrides(parent, p.glowUseMasque)
 end
 
 -- From: https://warcraft.wiki.gg/wiki/UnitId

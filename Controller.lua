@@ -42,8 +42,7 @@ local WOW_PROJECT_ID = WOW_PROJECT_ID
 -- we have to make our own masque group. It's a bit weird because it lets  you
 -- style LBA differently from the ActionButton, but it's the simplest way.
 
-local Masque = LibStub('Masque', true)
-local MasqueGroup = Masque and Masque:Group(addonName)
+-- local Masque = LibStub('Masque', true)
 
 
 --[[------------------------------------------------------------------------]]--
@@ -112,14 +111,6 @@ function LiteButtonAurasControllerMixin:CreateOverlay(actionButton)
         local name = actionButton:GetName() .. "LiteButtonAurasOverlay"
         local overlay = CreateFrame('Frame', name, actionButton, "LiteButtonAurasOverlayTemplate")
         self.overlayFrames[actionButton] = overlay
-        if MasqueGroup then
-            MasqueGroup:AddButton(overlay, {
-                SpellHighlight = overlay.Glow,
-                Normal = false,
-                -- Duration = overlay.Timer,
-                -- Count = overlay.Count,
-            })
-        end
     end
     return self.overlayFrames[actionButton]
 end
@@ -139,9 +130,6 @@ function LiteButtonAurasControllerMixin:StyleAllOverlays()
     for _, overlay in pairs(self.overlayFrames) do
         overlay:Style()
         overlay:Update()
-        if MasqueGroup then
-            MasqueGroup:ReSkin(overlay)
-        end
     end
 end
 

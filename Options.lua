@@ -37,6 +37,8 @@ local defaults = {
             debuff  = { r=1.00, g=0.00, b=0.00 },
             enrage  = { r=1.00, g=0.25, b=0.00 }, -- unused
         },
+        glowTexture = [[Interface\Addons\LiteButtonAuras\Textures\Overlay]],
+        glowUseMasque = true,
         glowAlpha = 0.5,
         minAuraDuration = 1.5,
         showTimers = true,
