@@ -116,6 +116,7 @@ LBA.TotemOrGuardianModels = {
     [1616211] = C_Spell.GetSpellName(264119),   -- Summon Vilefiend (Warlock)
     [1709931] = C_Spell.GetSpellName(455476),   -- Summon Charhound (Warlock)
     [1709932] = C_Spell.GetSpellName(455465),   -- Summon Gloomhound (Warlock)
+    [ 132129] = C_Spell.GetSpellName(102693),   -- Grove Guardians (Druid)
 }
 
 LBA.WeaponEnchantSpellID = {
