@@ -187,9 +187,11 @@ function LBA.UnitState:UpdateAuras(auraInfo)
             end,
             true)
     else
-        AuraUtil.ForEachAura(self.unit, 'HELPFUL PLAYER', nil,
+        AuraUtil.ForEachAura(self.unit, 'HELPFUL', nil,
             function (auraData)
-                self:UpdateTableAura(self.buffs, auraData)
+                if auraData.isFromPlayerOrPlayerPet then
+                    self:UpdateTableAura(self.buffs, auraData)
+                end
             end,
             true)
         -- Inclue long-lasting buffs we can cast even if applied
