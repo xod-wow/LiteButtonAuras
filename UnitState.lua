@@ -25,9 +25,13 @@ LBA.state = {}
 local AuraUtil = LBA.AuraUtil or AuraUtil
 local GetTotemInfo = GetTotemInfo
 local MAX_TOTEMS = MAX_TOTEMS
+local IsInRaid = IsInRaid
 local UnitCanAttack = UnitCanAttack
 local UnitCastingInfo = UnitCastingInfo
 local UnitChannelInfo = UnitChannelInfo
+local UnitGUID = UnitGUID
+local UnitInAnyGroup = UnitInAnyGroup
+local UnitTokenFromGUID = UnitTokenFromGUID
 local WOW_PROJECT_ID = WOW_PROJECT_ID
 
 
@@ -107,6 +111,7 @@ function LBA.UnitState:Create(unit)
         unit = unit,
         buffs = {},
         debuffs = {},
+        appliedAuras = {},
         weaponEnchants = {},
         totems = {},
         channel = nil,
@@ -189,7 +194,7 @@ function LBA.UnitState:UpdateAuras(auraInfo)
     else
         AuraUtil.ForEachAura(self.unit, 'HELPFUL', nil,
             function (auraData)
-                if auraData.isFromPlayerOrPlayerPet then
+                if auraData.sourceUnit == 'player' then
                     self:UpdateTableAura(self.buffs, auraData)
                 end
             end,
@@ -268,6 +273,46 @@ function LBA.UnitState:UpdateInterrupt()
     end
 
     self.interrupt = nil
+end
+
+-- This is only friendly targets at this time
+function LBA.UnitState:UpdateAppliedAuras(guid)
+    local unit = UnitTokenFromGUID(guid)
+    -- note, could be nil but UnitInAnyGroup(nil) == false
+    if unit == 'player' or UnitInAnyGroup(unit) then
+        local auras = {}
+        AuraUtil.ForEachAura(unit, 'HELPFUL', nil,
+            function (auraData)
+                if auraData.sourceUnit == 'player' or (auraData.isRaid and auraData.duration > 600) then
+                    -- annotate, used in overlay to exclude player
+                    auraData.unit = unit
+                    auraData.guid = guid
+                    self:UpdateTableAura(auras, auraData)
+                end
+            end,
+            true)
+        if next(auras) then
+            self.appliedAuras[guid] = auras
+        else
+            self.appliedAuras[guid] = nil
+        end
+    end
+end
+
+function LBA.UnitState:UpdateAppliedAurasForGroupChange()
+    local unitPrefix = IsInRaid() and "raid" or "party"
+    for i = 1, GetNumGroupMembers() do
+        local unit = unitPrefix .. tostring(i)
+        local guid = UnitGUID(unit)
+        if guid and not self.appliedAuras[guid] then
+            self:UpdateAppliedAuras(guid)
+        end
+    end
+    for guid in pairs(self.appliedAuras) do
+        if not UnitTokenFromGUID(guid) then
+            self.appliedAuras[guid] = nil
+        end
+    end
 end
 
 -- Overlay is reading the states directly but we could add some accessors

@@ -30,12 +30,25 @@ local ANCHOR_SELECT_VALUES = {
 
 local function Getter(info)
     local k = info[#info]
-    return LBA.db.profile[k]
+    return LBA.GetOption(k)
 end
 
 local function Setter(info, val ,...)
     local k = info[#info]
     LBA.SetOption(k, val)
+end
+
+local function ColorGetter(info)
+    local k = info[#info]
+    local color = LBA.GetOption(k)
+    if color then
+        return color.r, color.g, color.b, color.a
+    end
+end
+
+local function ColorSetter(info, r, g, b, a)
+    local k = info[#info]
+    LBA.SetOption(k, { r=r, g=g, b=b, a=a })
 end
 
 local function FontPathGetter(info)
@@ -311,7 +324,40 @@ local options = {
                             LBA.SetOption("glowTexture", "default")
                             LBA.SetOption("glowAlpha", "default")
                             LBA.SetOption("glowUseMasque", "default")
+                            LBA.SetOption("color.buff", "default")
+                            LBA.SetOption("color.appliedBuff", "default")
+                            LBA.SetOption("color.petBuff", "default")
+                            LBA.SetOption("color.debuff", "default")
                         end,
+                },
+--- XXX FIXME LAYOUT XXX
+                ['color.buff'] = {
+                    name = L["Buff color"],
+                    type = "color",
+                    order = order(),
+                    get = ColorGetter,
+                    set = ColorSetter,
+                },
+                ['color.petBuff'] = {
+                    name = L["Pet buff color"],
+                    type = "color",
+                    order = order(),
+                    get = ColorGetter,
+                    set = ColorSetter,
+                },
+                ['color.debuff'] = {
+                    name = L["Debuff color"],
+                    type = "color",
+                    order = order(),
+                    get = ColorGetter,
+                    set = ColorSetter,
+                },
+                ['color.appliedBuff'] = {
+                    name = L["Applied buff color"],
+                    type = "color",
+                    order = order(),
+                    get = ColorGetter,
+                    set = ColorSetter,
                 },
                 glowTexture = {
                     name = L["Glow texture"],

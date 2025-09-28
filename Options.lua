@@ -30,12 +30,13 @@ local defaults = {
             [190356]    = { ability = true },   -- Blizzard (Mage)
             [425782]    = { ability = true },   -- Second Wind (Warrior passive / Skyriding)
         },
+        appliedAuraSpells = { },
         auraMap = { },
         color = {
-            buff    = { r=0.00, g=0.70, b=0.00 },
-            petBuff = { r=0.00, g=0.00, b=0.70 },
-            debuff  = { r=1.00, g=0.00, b=0.00 },
-            enrage  = { r=1.00, g=0.25, b=0.00 }, -- unused
+            buff        = { r=0.00, g=0.70, b=0.00 },
+            petBuff     = { r=0.00, g=0.00, b=0.70 },
+            debuff      = { r=1.00, g=0.00, b=0.00 },
+            appliedBuff = { r=0.00, g=0.70, b=0.00 },
         },
         glowTexture = [[Interface\Addons\LiteButtonAuras\Textures\Overlay]],
         glowUseMasque = true,
@@ -116,24 +117,57 @@ function LBA.InitializeOptions()
     ]]
 end
 
+local function GetPathOption(t, option)
+    local keys = { string.split('.', option) }
+    local current = t
+    for i, k in ipairs(keys) do
+        if i == #keys then
+            return current[k]
+        elseif type(current[k]) == 'table' then
+            current = current[k]
+        else
+            return
+        end
+    end
+end
+
+local function SetPathOption(t, option, val)
+    local keys = { string.split('.', option) }
+    for i, k in ipairs(keys) do
+        if i == #keys then
+            t[k] = val
+            return
+        else
+            t[k] = t[k] or {}
+            t = t[k]
+        end
+    end
+end
+
+function LBA.GetOption(option, key)
+    key = key or "profile"
+    return GetPathOption(LBA.db[key], option)
+end
+
 function LBA.SetOption(option, value, key)
     key = key or "profile"
     if not defaults[key] then return end
+    local defaultVal = GetPathOption(defaults[key], option)
     if value == "default" or value == DEFAULT:lower() or value == nil then
-        value = defaults[key][option]
+        value = defaultVal
     end
-    if type(defaults[key][option]) == 'boolean' then
-        LBA.db[key][option] = IsTrue(value)
+    if type(defaultVal) == 'boolean' then
+        SetPathOption(LBA.db[key], option, IsTrue(value))
     elseif type(defaults[key][option]) == 'number' then
         if tonumber(value) then
-            LBA.db[key][option] = tonumber(value)
+            SetPathOption(LBA.db[key], option, tonumber(value))
         end
-    elseif LBA.anchorSettings[defaults[key][option]] then
-        if  LBA.anchorSettings[value] then
-            LBA.db[key][option] = value
+    elseif LBA.anchorSettings[defaultVal] then
+        if LBA.anchorSettings[value] then
+            SetPathOption(LBA.db[key], option, value)
         end
     else
-        LBA.db[key][option] = value
+        SetPathOption(LBA.db[key], option, value)
     end
     LBA.db.callbacks:Fire('OnModified')
 end
