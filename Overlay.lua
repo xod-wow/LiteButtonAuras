@@ -340,6 +340,25 @@ function LiteButtonAurasOverlayMixin:GetMatchingAura(t)
     end
 end
 
+function LiteButtonAurasOverlayMixin:GetMatchingAuraMulti(t)
+    local matchingAuras = {}
+
+    if LBA.AuraMap[self.name] then
+        for _, extraAuraName in ipairs(LBA.AuraMap[self.name]) do
+            if t[extraAuraName] then
+                table.insert(matchingAuras, t[extraAuraName])
+                break
+            end
+        end
+    end
+
+    if not self:IsIgnoreAbility(t) and LBA.db.profile.defaultNameMatching and t[self.name] then
+        table.insert(matchingAuras, t[self.name])
+    end
+
+    return matchingAuras
+end
+
 function LiteButtonAurasOverlayMixin:AlreadyOverlayed()
     if WOW_PROJECT_ID == 1 then
         return (self.spellID and IsSpellOverlayed(self.spellID))
@@ -352,7 +371,7 @@ end
 function LiteButtonAurasOverlayMixin:Update(stateOnly)
     local show = false
 
-    self.expireTime = nil
+    self.expirationTime = nil
     self.stackCount = nil
     self.displayGlow = nil
     self.displaySuggestion = nil
@@ -380,6 +399,8 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
                 show = true
             elseif destOk and self:TrySetAsTaunt() then
                 show = true
+            elseif self:TrySetAsPlayerAppliedAura() then
+                show = true
             elseif self:TrySetAsPlayerBuff() then
                 show = true
             elseif self:TrySetAsPlayerTotem() then
@@ -395,7 +416,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
     end
 
     self:ShowGlow(self.displayGlow and not self:AlreadyOverlayed())
-    self:ShowTimer(self.expireTime ~= nil and LBA.db.profile.showTimers)
+    self:ShowTimer(self.expirationTime ~= nil and LBA.db.profile.showTimers)
     self:ShowStacks(self.stackCount ~= nil and LBA.db.profile.showStacks)
     self:ShowSuggestion(self.displaySuggestion and LBA.db.profile.showSuggestions)
     self:SetShown(show)
@@ -434,7 +455,7 @@ function LiteButtonAurasOverlayMixin:SetAsAuraCommon(auraData)
     end
     self.displayGlow = true
     if auraData.expirationTime and auraData.expirationTime ~= 0 then
-        self.expireTime = auraData.expirationTime
+        self.expirationTime = auraData.expirationTime
         self.timeMod = auraData.timeMod
     end
     if auraData.applications and auraData.applications > 1 then
@@ -452,6 +473,39 @@ function LiteButtonAurasOverlayMixin:TrySetAsPlayerBuff()
     local aura = self:GetMatchingAura(LBA.state.player.buffs)
     if aura then
         self:SetAsPlayerBuff(aura)
+        return true
+    end
+end
+
+local function AuraTimeLeftCompare(a, b)
+    local aTimeLeft = ( a.expirationTime - GetTime() ) / ( a.timeMod or 1 )
+    local bTimeLeft = ( b.expirationTime - GetTime() ) / ( b.timeMod or 1 )
+    return aTimeLeft < bTimeLeft
+end
+
+function LiteButtonAurasOverlayMixin:SetAsPlayerAppliedAura(auraMatches)
+    local color = LBA.db.profile.color.appliedBuff
+    self.Glow:SetVertexColor(color.r, color.g, color.b)
+    self.displayGlow = true
+    self.stackCount = #auraMatches
+    table.sort(auraMatches, AuraTimeLeftCompare)
+    self.expirationTime = auraMatches[1].expirationTime
+    self.timeMod = auraMatches[1].timeMod
+end
+
+function LiteButtonAurasOverlayMixin:TrySetAsPlayerAppliedAura()
+    local aggregateAuraMatches = {}
+    for _, t in pairs(LBA.state.player.appliedAuras) do
+        for _, aura in ipairs(self:GetMatchingAuraMulti(t)) do
+            if aura.duration == 0 or aura.duration >= LBA.db.profile.minAuraDuration then
+                table.insert(aggregateAuraMatches, aura)
+            end
+        end
+    end
+    if #aggregateAuraMatches == 1 and aggregateAuraMatches[1].unit == 'player' then
+        return -- handle player only matches in regular UnitState
+    elseif next(aggregateAuraMatches) then
+        self:SetAsPlayerAppliedAura(aggregateAuraMatches)
         return true
     end
 end
@@ -495,10 +549,10 @@ end
 
 -- Totem Config ----------------------------------------------------------------
 
-function LiteButtonAurasOverlayMixin:SetAsPlayerTotem(expireTime)
+function LiteButtonAurasOverlayMixin:SetAsPlayerTotem(expirationTime)
     local color = LBA.db.profile.color.buff
     self.Glow:SetVertexColor(color.r, color.g, color.b)
-    self.expireTime, self.modTime = expireTime, nil
+    self.expirationTime, self.modTime = expirationTime, nil
     self.displayGlow = true
 end
 
@@ -532,7 +586,7 @@ function LiteButtonAurasOverlayMixin:TrySetAsInterrupt()
         if LBA.state[self.destUnit].interrupt then
             local castEnds = LBA.state[self.destUnit].interrupt
             if self:ReadyBefore(castEnds) then
-                self.expireTime = castEnds
+                self.expirationTime = castEnds
                 self.displaySuggestion = true
                 return true
             end
@@ -541,15 +595,6 @@ function LiteButtonAurasOverlayMixin:TrySetAsInterrupt()
 end
 
 -- Soothe Config ---------------------------------------------------------------
-
---[[
--- Unused, Soothe is suggestion only now
-function LiteButtonAurasOverlayMixin:SetAsSoothe(auraData)
-    local color = LBA.db.profile.color.enrage
-    self.Glow:SetVertexColor(color.r, color.g, color.b, 0.7)
-    self:SetAsAuraCommon(auraData)
-end
-]]
 
 function LiteButtonAurasOverlayMixin:IsSoothe()
     -- Note this is handling self.name == nil case as well
@@ -567,7 +612,7 @@ function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
 
     for _, auraData in pairs(LBA.state[self.destUnit].buffs) do
         if auraData.isStealable and auraData.dispelName == "" and self:ReadyBefore(auraData.expirationTime) then
-            self.expireTime = auraData.expirationTime
+            self.expirationTime = auraData.expirationTime
             self.displaySuggestion = true
             return true
         end
@@ -702,7 +747,7 @@ end
 --
 
 function LiteButtonAurasOverlayMixin:UpdateTimer()
-    local duration = self.expireTime - GetTime()
+    local duration = self.expirationTime - GetTime()
     if self.timeMod and self.timeMod > 0 then
         duration = duration / self.timeMod
     end
