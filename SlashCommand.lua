@@ -109,7 +109,7 @@ local function PrintAuraMapList()
 end
 
 local function AuraCommand(argstr)
-    local _, cmd, cmdarg = strsplit(" ", argstr, 3)
+    local _, cmd, cmdarg = string.split(" ", argstr, 3)
     if cmd == 'list' then
         PrintAuraMapList()
     elseif cmd == 'add' and cmdarg then
@@ -158,7 +158,7 @@ local function PrintIgnoreList()
 end
 
 local function IgnoreCommand(argstr)
-    local _, cmd, spell = strsplit(" ", argstr, 3)
+    local _, cmd, spell = string.split(" ", argstr, 3)
     if cmd == 'list' then
         PrintIgnoreList()
     elseif cmd == 'default' then
@@ -186,7 +186,7 @@ local function IgnoreCommand(argstr)
 end
 
 local function SlashCommand(argstr)
-    local args = { strsplit(" ", argstr) }
+    local args = { string.split(" ", argstr) }
     local cmd = table.remove(args, 1)
     local n = cmd:len()
 

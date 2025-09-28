@@ -72,6 +72,8 @@ function LiteButtonAurasControllerMixin:Initialize()
         self:RegisterEvent('WEAPON_SLOT_CHANGED')
     end
 
+    self:RegisterEvent('COMBAT_LOG_EVENT_UNFILTERED')
+
     -- These are for noticing that the unit changed
     self:RegisterEvent('INSTANCE_ENCOUNTER_ENGAGE_UNIT')    -- @bossN
     self:RegisterEvent('ARENA_OPPONENT_UPDATE')             -- @arenaN
@@ -162,8 +164,18 @@ function LiteButtonAurasControllerMixin:MarkOverlaysDirty(stateOnly)
     self.isOverlayDirty = ( stateOnly == true and self.isOverlayDirty ~= false )
 end
 
--- Limit UNIT_AURA and UNIT_SPELLCAST overlay updates to one per frame
+function LiteButtonAurasControllerMixin:QueueAppliedAuras(guid)
+    self.appliedAuraQueue = self.appliedAuraQueue or {}
+    self.appliedAuraQueue[guid] = true
+end
+
+-- Limit various updates to one per frame
 function LiteButtonAurasControllerMixin:OnUpdate()
+    if self.appliedAuraQueue then
+        for guid in pairs(self.appliedAuraQueue) do
+            LBA.state.player:UpdateAppliedAuras(guid)
+        end
+    end
     if self.isOverlayDirty ~= nil then
         self:UpdateAllOverlays(self.isOverlayDirty)
         self.isOverlayDirty = nil
@@ -172,6 +184,19 @@ end
 
 function LiteButtonAurasControllerMixin:IsTrackedUnit(unit)
     return self.trackedUnitList[unit] == true
+end
+
+-- https://warcraft.wiki.gg/wiki/UnitFlag
+local COMBATLOG_OBJECT_AFFILIATION_MINE = COMBATLOG_OBJECT_AFFILIATION_MINE
+local COMBATLOG_OBJECT_AFFILIATION_PARTY = COMBATLOG_OBJECT_AFFILIATION_PARTY
+local COMBATLOG_OBJECT_AFFILIATION_RAID = COMBATLOG_OBJECT_AFFILIATION_RAID
+
+local function IsFlagsMine(flags)
+    return bit.band(flags, COMBATLOG_OBJECT_AFFILIATION_MINE) > 0
+end
+
+local function IsFlagsInGroup(flags)
+    return bit.band(flags, COMBATLOG_OBJECT_AFFILIATION_MINE + COMBATLOG_OBJECT_AFFILIATION_PARTY + COMBATLOG_OBJECT_AFFILIATION_RAID) > 0
 end
 
 function LiteButtonAurasControllerMixin:OnEvent(event, ...)
@@ -214,6 +239,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
                 self:MarkOverlaysDirty(true)
             end
         end
+        LBA.state.player:UpdateAppliedAurasForGroupChange()
     elseif event == 'INSTANCE_ENCOUNTER_ENGAGE_UNIT' then
         for i = 1, MAX_BOSS_FRAMES do
             local unit = "boss"..i
@@ -251,6 +277,12 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
         if UnitIsUnit(unit, 'mouseover') and self:IsTrackedUnit('mouseover') then
             LBA.state.mouseover:UpdateAuras(unitAuraUpdateInfo)
             self:MarkOverlaysDirty(true)
+        end
+    elseif event == 'COMBAT_LOG_EVENT_UNFILTERED' then
+        local _, clEvent, _, _, _, sourceFlags, _, destGUID, _, destFlags = CombatLogGetCurrentEventInfo()
+        if IsFlagsMine(sourceFlags) and IsFlagsInGroup(destFlags) and clEvent:sub(1, 10) == 'SPELL_AURA' then
+            self:QueueAppliedAuras(destGUID)
+            self:MarkOverlaysDirty()
         end
     elseif event == 'PLAYER_TOTEM_UPDATE' then
         LBA.state.player:UpdateTotems()
