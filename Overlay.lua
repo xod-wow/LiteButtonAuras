@@ -332,7 +332,8 @@ function LiteButtonAurasOverlayMixin:GetMatchingAura(t)
                 return t[extraAuraName]
             end
         end
-    elseif self:IsIgnoreAbility(t) then
+    end
+    if self:IsIgnoreAbility(t) then
         return
     elseif LBA.db.profile.defaultNameMatching and t[self.name] then
         return t[self.name]
