@@ -87,6 +87,7 @@ end
 
 local addAuraMap = { }
 local addIgnoreAbility
+local addAppliedAuraAbility
 
 local ValidateTexture = UIParent:CreateTexture()
 
@@ -331,12 +332,19 @@ local options = {
                         end,
                 },
 --- XXX FIXME LAYOUT XXX
+                preColor1Gap = {
+                    name = "",
+                    type = "description",
+                    width = 0.25,
+                    order = order(),
+                },
                 ['color.buff'] = {
                     name = L["Buff color"],
                     type = "color",
                     order = order(),
                     get = ColorGetter,
                     set = ColorSetter,
+                    width = 1.5,
                 },
                 ['color.petBuff'] = {
                     name = L["Pet buff color"],
@@ -344,6 +352,13 @@ local options = {
                     order = order(),
                     get = ColorGetter,
                     set = ColorSetter,
+                    width = 1.75,
+                },
+                preColor2Gap = {
+                    name = "",
+                    type = "description",
+                    width = 0.25,
+                    order = order(),
                 },
                 ['color.debuff'] = {
                     name = L["Debuff color"],
@@ -351,13 +366,15 @@ local options = {
                     order = order(),
                     get = ColorGetter,
                     set = ColorSetter,
+                    width = 1.5,
                 },
                 ['color.appliedBuff'] = {
-                    name = L["Applied buff color"],
+                    name = L["Party/Raid aura color"],
                     type = "color",
                     order = order(),
                     get = ColorGetter,
                     set = ColorSetter,
+                    width = 1.75,
                 },
                 glowTexture = {
                     name = L["Glow texture"],
@@ -546,6 +563,62 @@ local options = {
                 }
             }
         },
+        AppliedAurasGroup = {
+            type = "group",
+            name = L["Hot/Buff Tracking"],
+            order = order(),
+            inline = false,
+            args = {
+                appliedAuraAbility = {
+                    name = L["Add ability"],
+                    type = "input",
+                    width = 1,
+                    order = order(),
+                    get =
+                        function ()
+                            if addAppliedAuraAbility then
+                                local info = C_Spell.GetSpellInfo(addAppliedAuraAbility)
+                                return ("%s (%s)"):format(info.name, info.spellID) .. "\0" .. addAppliedAuraAbility
+                            end
+                        end,
+                    set =
+                        function (_, v)
+                            local info = C_Spell.GetSpellInfo(v)
+                            addAppliedAuraAbility = info and info.spellID or nil
+                        end,
+                    control = 'LBAInputFocus',
+                    validate = ValidateSpellValue,
+                },
+                AddButton = {
+                    name = ADD,
+                    type = "execute",
+                    width = 1,
+                    order = order(),
+                    disabled =
+                        function ()
+                            if addAppliedAuraAbility then
+                                return not C_Spell.GetSpellInfo(addAppliedAuraAbility)
+                            end
+                        end,
+                    func =
+                        function ()
+                            local info = addAppliedAuraAbility and C_Spell.GetSpellInfo(addAppliedAuraAbility)
+                            if info then
+                                LBA.SetAppliedAuraSpell(info.spellID, { minTimer = true })
+                                addAppliedAuraAbility = nil
+                            end
+                        end,
+                },
+                Abilities = {
+                    name = L["Party/Raid Aura Tracking Abilities"],
+                    type = "group",
+                    order = order(),
+                    inline = true,
+                    args = {},
+                    plugins = {},
+                }
+            }
+        },
     },
 }
 
@@ -605,11 +678,11 @@ local function GenerateOptions()
     end
 
     local ignoreAbilities = {}
-    local function ignoreSort(a, b) return a.spell:GetSpellName() < b.spell:GetSpellName() end
+    local function spellNameSort(a, b) return a.spell:GetSpellName() < b.spell:GetSpellName() end
 
     cc:ContinueOnLoad(
         function ()
-            table.sort(ignoreSpellList, ignoreSort)
+            table.sort(ignoreSpellList, spellNameSort)
             for i, data in ipairs(ignoreSpellList) do
                 local spellName = data.spell:GetSpellName()
                 local spellID = data.spell:GetSpellID()
@@ -674,6 +747,55 @@ local function GenerateOptions()
             end
             options.args.IgnoreGroup.args.Abilities.plugins.ignoreAbilites = ignoreAbilities
         end)
+
+    local appliedAuraAbilityList = {}
+    cc = ContinuableContainer:Create()
+    for spellID, appliedAuraData in pairs(LBA.db.profile.appliedAuraSpells) do
+        local spell = Spell:CreateFromSpellID(spellID)
+        if not spell:IsSpellEmpty() then
+            if WOW_PROJECT_ID ~= 1 then
+                spell.IsDataEvictable = function () return true end
+                spell.IsItemDataCached = spell.IsSpellDataCached
+                spell.ContinueWithCancelOnItemLoad = spell.ContinueWithCancelOnSpellLoad
+            end
+            cc:AddContinuable(spell)
+            local data = CopyTable(appliedAuraData)
+            data.spell = spell
+            table.insert(appliedAuraAbilityList, data)
+        end
+    end
+
+    local appliedAuraAbilities = {}
+
+    cc:ContinueOnLoad(
+        function ()
+            table.sort(appliedAuraAbilityList, spellNameSort)
+            for i, data in ipairs(appliedAuraAbilityList) do
+                local spellName = data.spell:GetSpellName()
+                local spellID = data.spell:GetSpellID()
+                local newData = CopyTable(data)
+                appliedAuraAbilities["spell"..i] = {
+                    name = format("%s (%d)",
+                                NORMAL_FONT_COLOR:WrapTextInColorCode(spellName),
+                                spellID),
+                    type = "description",
+                    image = C_Spell.GetSpellTexture(spellID),
+                    imageWidth = 22,
+                    imageHeight = 22,
+                    width = 3.0,
+                    order = 10*i+1,
+                }
+                appliedAuraAbilities["delete"..i] = {
+                    name = DELETE,
+                    type = "execute",
+                    func = function () LBA.RemoveAppliedAuraSpell(data.spell:GetSpellID()) end,
+                    width = 0.45,
+                    order = 10*i+2,
+                }
+            end
+            options.args.AppliedAurasGroup.args.Abilities.plugins.appliedAuraAbilities = appliedAuraAbilities
+        end)
+
     return options
 end
 

@@ -240,6 +240,26 @@ function LBA.WipeIgnoreSpells()
     AceConfigRegistry:NotifyChange(addonName)
 end
 
+function LBA.SetAppliedAuraSpell(spellID, data)
+    LBA.db.profile.appliedAuraSpells[spellID] = data
+    AceConfigRegistry:NotifyChange(addonName)
+end
+
+function LBA.RemoveAppliedAuraSpell(spellID)
+    LBA.db.profile.appliedAuraSpells[spellID] = nil
+    AceConfigRegistry:NotifyChange(addonName)
+end
+
+function LBA.DefaultAppliedAuraSpells()
+    LBA.db.profile.appliedAuraSpells = CopyTable(defaults.profile.appliedAuraSpells)
+    AceConfigRegistry:NotifyChange(addonName)
+end
+
+function LBA.WipeAppliedAuraSpells()
+    table.wipe(LBA.db.profile.appliedAuraSpells)
+    AceConfigRegistry:NotifyChange(addonName)
+end
+
 function LBA.SpellString(spellID, spellName)
     spellName = NORMAL_FONT_COLOR:WrapTextInColorCode(spellName)
     if spellID then

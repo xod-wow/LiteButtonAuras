@@ -317,6 +317,14 @@ function LiteButtonAurasOverlayMixin:IsKnown()
     end
 end
 
+function LiteButtonAurasOverlayMixin:IsPlayerAppliedAuraAbility()
+    local p = LBA.db.profile
+    if p.appliedAuraSpells[self.spellID] then
+        return true
+    end
+    return false
+end
+
 function LiteButtonAurasOverlayMixin:IsIgnoreAbility()
     local p = LBA.db.profile
     if p.ignoreSpells[self.spellID] and p.ignoreSpells[self.spellID].ability == true then
@@ -494,6 +502,9 @@ function LiteButtonAurasOverlayMixin:SetAsPlayerAppliedAura(auraMatches)
 end
 
 function LiteButtonAurasOverlayMixin:TrySetAsPlayerAppliedAura()
+    if not self:IsPlayerAppliedAuraAbility() then
+        return
+    end
     local aggregateAuraMatches = {}
     for _, t in pairs(LBA.state.player.appliedAuras) do
         for _, aura in ipairs(self:GetMatchingAuraMulti(t)) do
