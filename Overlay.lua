@@ -193,7 +193,9 @@ end
 -- out in a limited fashion. If this returns something that's not in
 -- self:GetTrackedUnits() we could be in trouble.
 
-function LiteButtonAurasOverlayMixin:GetActionUnit(type, id, subType)
+function LiteButtonAurasOverlayMixin:GetActionUnit()
+
+    local type, actionID = self:GetActionInfo()
 
     if type == 'macro' then
         local macroName = GetActionText(self:GetActionID())
@@ -203,27 +205,27 @@ function LiteButtonAurasOverlayMixin:GetActionUnit(type, id, subType)
         end
     end
 
-    -- From SecureButton_GetModifiedUnit
+    -- Adapted from SecureButton_GetModifiedUnit
 
-    local useMouseoverCasting = GetCVarBool('enableMouseoverCast') and
-                                (GetModifiedClick('MOUSEOVERCAST') == "NONE" or IsModifiedClick('MOUSEOVERCAST'))
+    if C_ActionBar.IsHarmfulAction(actionID, true) then
+        -- Complex because you can mouseover cast by enabling and either setting
+        -- a key, OR by setting no key in which case it always applies.
+        local useMouseoverCasting = GetCVarBool('enableMouseoverCast') and
+                                    (GetModifiedClick('MOUSEOVERCAST') == "NONE" or
+                                     IsModifiedClick('MOUSEOVERCAST'))
 
-    if useMouseoverCasting and UnitExists('mouseover') then
-        local actionID = self:GetActionID()
-        local isFriend = UnitIsFriend('player', 'mouseover')
-        if isFriend and C_ActionBar.IsHelpfulAction(actionID, true) then
-            return 'mouseover'
-        elseif not isFriend and C_ActionBar.IsHarmfulAction(actionID, true) then
-            return 'mouseover'
+        if useMouseoverCasting and UnitExists('mouseover') then
+            if not UnitIsFriend('player', 'mouseover') then
+                return 'mouseover'
+            end
         end
-    end
 
-    if IsModifiedClick('SELFCAST') then
-        return 'player'
-    end
-
-    if IsModifiedClick('FOCUSCAST') then
-        return 'focus'
+        -- Unlike mouseover, requires a modifier key
+        if IsModifiedClick('FOCUSCAST') and UnitExists('focus') then
+            if not UnitIsFriend('player', 'focus') then
+                return 'focus'
+            end
+        end
     end
 
     return 'target'
@@ -235,8 +237,6 @@ end
 function LiteButtonAurasOverlayMixin:SetUpAction()
 
     local type, id, subType = self:GetActionInfo()
-
-    self.destUnit = self:GetActionUnit(type, id, subType)
 
     if type == 'spell' then
         self.name = C_Spell.GetSpellName(id)
@@ -365,20 +365,25 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
             self:SetUpAction()
         end
 
+        -- Because mouseover cast and focus cast are very dynamic based on
+        -- modifier keypress, this can't be done in SetUpAction(), even though
+        -- it's much slower than I'd like for something in the inner loop.
+        local destUnit = self:GetActionUnit()
+
         -- It's worth keeping in mind that there are two units per spell, source
         -- and dest. Source is nearly always player.
 
         if self:IsKnown() then
-            local destOk = LBA.state[self.destUnit] ~= nil
+            local destOk = LBA.state[destUnit] ~= nil
             -- These are theoretically in priority order but I haven't put a
             -- lot of thought into it because the overlap cases are super rare.
-            if destOk and self:TrySetAsSoothe() then
+            if destOk and self:TrySetAsSoothe(destUnit) then
                 show = true
-            elseif destOk and self:TrySetAsInterrupt() then
+            elseif destOk and self:TrySetAsInterrupt(destUnit) then
                 show = true
-            elseif destOk and self:TrySetAsHostileDispel() then
+            elseif destOk and self:TrySetAsHostileDispel(destUnit) then
                 show = true
-            elseif destOk and self:TrySetAsTaunt() then
+            elseif destOk and self:TrySetAsTaunt(destUnit) then
                 show = true
             elseif self:TrySetAsPlayerBuff() then
                 show = true
@@ -386,7 +391,7 @@ function LiteButtonAurasOverlayMixin:Update(stateOnly)
                 show = true
             elseif self:TrySetAsWeaponEnchant() then
                 show = true
-            elseif destOk and self:TrySetAsDebuff() then
+            elseif destOk and self:TrySetAsDebuff(destUnit) then
                 show = true
             elseif self:TrySetAsPetBuff() then
                 show = true
@@ -478,8 +483,8 @@ function LiteButtonAurasOverlayMixin:SetAsDebuff(auraData)
     self:SetAsAuraCommon(auraData)
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsDebuff()
-    local aura = self:GetMatchingAura(LBA.state[self.destUnit].debuffs)
+function LiteButtonAurasOverlayMixin:TrySetAsDebuff(unit)
+    local aura = self:GetMatchingAura(LBA.state[unit].debuffs)
     if aura then
         self:SetAsDebuff(aura)
         return true
@@ -527,10 +532,10 @@ function LiteButtonAurasOverlayMixin:ReadyBefore(endTime)
     end
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsInterrupt()
+function LiteButtonAurasOverlayMixin:TrySetAsInterrupt(unit)
     if self.name and LBA.Interrupts[self.name] then
-        if LBA.state[self.destUnit].interrupt then
-            local castEnds = LBA.state[self.destUnit].interrupt
+        if LBA.state[unit].interrupt then
+            local castEnds = LBA.state[unit].interrupt
             if self:ReadyBefore(castEnds) then
                 self.expireTime = castEnds
                 self.displaySuggestion = true
@@ -561,11 +566,11 @@ function LiteButtonAurasOverlayMixin:IsSoothe()
     end
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsSoothe()
+function LiteButtonAurasOverlayMixin:TrySetAsSoothe(unit)
     if not self:IsSoothe() then return end
-    if not UnitCanAttack('player', self.destUnit) then return end
+    if not UnitCanAttack('player', unit) then return end
 
-    for _, auraData in pairs(LBA.state[self.destUnit].buffs) do
+    for _, auraData in pairs(LBA.state[unit].buffs) do
         if auraData.isStealable and auraData.dispelName == "" and self:ReadyBefore(auraData.expirationTime) then
             self.expireTime = auraData.expirationTime
             self.displaySuggestion = true
@@ -576,9 +581,9 @@ end
 
 -- Taunt Config ----------------------------------------------------------------
 
-function LiteButtonAurasOverlayMixin:TrySetAsTaunt()
-    if self.name and LBA.Taunts[self.name] and LBA.state[self.destUnit].taunt then
-        self:SetAsDebuff(LBA.state[self.destUnit].taunt)
+function LiteButtonAurasOverlayMixin:TrySetAsTaunt(unit)
+    if self.name and LBA.Taunts[self.name] and LBA.state[unit].taunt then
+        self:SetAsDebuff(LBA.state[unit].taunt)
         return true
     end
 end
@@ -591,19 +596,19 @@ function LiteButtonAurasOverlayMixin:SetAsHostileDispel(auraData)
     self:SetAsAuraCommon(auraData)
 end
 
-function LiteButtonAurasOverlayMixin:TrySetAsHostileDispel()
+function LiteButtonAurasOverlayMixin:TrySetAsHostileDispel(unit)
     if not self.name then
         return
     end
 
-    if not UnitCanAttack('player', self.destUnit) then
+    if not UnitCanAttack('player', unit) then
         return
     end
 
     local dispels = LBA.HostileDispels[self.name]
     if dispels then
         for dispelName in pairs(dispels) do
-            for _, auraData in pairs(LBA.state[self.destUnit].buffs) do
+            for _, auraData in pairs(LBA.state[unit].buffs) do
                 if auraData.dispelName == dispelName then
                     self:SetAsHostileDispel(auraData)
                     self.displaySuggestion = true
