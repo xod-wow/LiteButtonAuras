@@ -195,10 +195,10 @@ end
 
 function LiteButtonAurasOverlayMixin:GetActionUnit()
 
-    local type, actionID = self:GetActionInfo()
+    local actionID = self:GetActionID()
 
-    if type == 'macro' then
-        local macroName = GetActionText(self:GetActionID())
+    if self:GetActionInfo() == 'macro' then
+        local macroName = GetActionText(actionID)
         local unit = GetMacroUnit(macroName)
         if unit then
             return unit
@@ -208,8 +208,9 @@ function LiteButtonAurasOverlayMixin:GetActionUnit()
     -- Adapted from SecureButton_GetModifiedUnit
 
     if C_ActionBar.IsHarmfulAction(actionID, true) then
-        -- Complex because you can mouseover cast by enabling and either setting
-        -- a key, OR by setting no key in which case it always applies.
+        -- You can mouseover cast by enabling and either setting a key, OR by
+        -- setting no key in which case it always applies. In both cases it
+        -- will fall through to target.
         local useMouseoverCasting = GetCVarBool('enableMouseoverCast') and
                                     (GetModifiedClick('MOUSEOVERCAST') == "NONE" or
                                      IsModifiedClick('MOUSEOVERCAST'))
@@ -220,11 +221,9 @@ function LiteButtonAurasOverlayMixin:GetActionUnit()
             end
         end
 
-        -- Unlike mouseover, requires a modifier key
-        if IsModifiedClick('FOCUSCAST') and UnitExists('focus') then
-            if not UnitIsFriend('player', 'focus') then
-                return 'focus'
-            end
+        -- Unlike mouseover, requires a modifier key and no fallthrough.
+        if IsModifiedClick('FOCUSCAST') then
+            return 'focus'
         end
     end
 

@@ -287,7 +287,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
             self:MarkOverlaysDirty()
         end
     elseif event == 'MODIFIER_STATE_CHANGED' then
-        local key = ...
+        local key = select(1, ...):sub(2)
         if key == GetModifiedClick('MOUSEOVERCAST') then
             LBA.state.mouseover:UpdateAuras()
             LBA.state.mouseover:UpdateInterrupt()
