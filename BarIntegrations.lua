@@ -63,13 +63,14 @@ local function ClassicInitButton(actionButton)
 end
 
 function LBA.BarIntegrations:ClassicInit()
-    if WOW_PROJECT_ID == 1 then return end
-    for _, actionButton in pairs(ActionBarButtonEventsFrame.frames) do
-        if actionButton:GetName():sub(1,8) ~= 'Override' then
-            ClassicInitButton(actionButton)
+    if ActionButton_Update then
+        for _, actionButton in pairs(ActionBarButtonEventsFrame.frames) do
+            if actionButton:GetName():sub(1,8) ~= 'Override' then
+                ClassicInitButton(actionButton)
+            end
         end
+        hooksecurefunc('ActionButton_Update', ClassicButtonUpdate)
     end
-    hooksecurefunc('ActionButton_Update', ClassicButtonUpdate)
 end
 
 -- Blizzard Retail -------------------------------------------------------------
@@ -78,10 +79,11 @@ end
 -- we don't want to handle them.
 
 function LBA.BarIntegrations:RetailInit()
-    if WOW_PROJECT_ID ~= 1 then return end
-    for _, actionButton in pairs(ActionBarButtonEventsFrame.frames) do
-        if actionButton:GetName():sub(1,8) ~= 'Override' then
-            GenericInitButton(actionButton)
+    if ActionBarButtonEventsFrame.frames[1].Update then
+        for _, actionButton in pairs(ActionBarButtonEventsFrame.frames) do
+            if actionButton:GetName():sub(1,8) ~= 'Override' then
+                GenericInitButton(actionButton)
+            end
         end
     end
 end
@@ -151,7 +153,7 @@ end
 -- the ActionBarButton API enough for us.
 
 function LBA.BarIntegrations:DominosInit()
-    local Init = WOW_PROJECT_ID == 1 and GenericInitButton or ClassicInitButton
+    local Init = ActionButton_Update == nil and GenericInitButton or ClassicInitButton
     if Dominos and not Dominos.BlizzardActionButtons then
         -- "New" dominos with their own buttons
         for actionButton in pairs(Dominos.ActionButtons.buttons) do
