@@ -79,7 +79,7 @@ end
 -- we don't want to handle them.
 
 function LBA.BarIntegrations:RetailInit()
-    if ActionBarButtonEventsFrame.frames[1].Update then
+    if ActionBarActionButtonMixin and ActionBarActionButtonMixin.Update then
         for _, actionButton in pairs(ActionBarButtonEventsFrame.frames) do
             if actionButton:GetName():sub(1,8) ~= 'Override' then
                 GenericInitButton(actionButton)
