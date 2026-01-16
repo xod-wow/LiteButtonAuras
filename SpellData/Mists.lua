@@ -51,6 +51,7 @@ LBA.Taunts = {
 }
 
 LBA.TotemOrGuardianModels = {
+    [136119] = C_Spell.GetSpellName(46584),    -- Raise Dead (DK)
 }
 
 LBA.WeaponEnchantSpellID = {
