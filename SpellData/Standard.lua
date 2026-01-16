@@ -7,8 +7,6 @@
 
 local _, LBA = ...
 
-local C_Spell = LBA.C_Spell or C_Spell
-
 LBA.Interrupts = {
     [ 47528] = true,                -- Mind Freeze (Death Knight)
     [183752] = true,                -- Disrupt (Demon Hunter)

@@ -11,9 +11,6 @@
 
 local _, LBA = ...
 
-local C_Spell = LBA.C_Spell or C_Spell
-local C_Item = LBA.C_Item or C_Item
-
 local LibBG = LibStub("LibButtonGlow-1.0")
 
 local MasqueTextureFormat = "Interface/AddOns/Masque/Textures/%s/AutoCast-Mask"

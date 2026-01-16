@@ -9,8 +9,6 @@ local addonName, LBA = ...
 
 local L = LBA.L
 
-local C_Spell = LBA.C_Spell or C_Spell
-
 local AceConfigRegistry = LibStub("AceConfigRegistry-3.0")
 
 local fontPath, fontSize, fontFlags = NumberFontNormal:GetFont()

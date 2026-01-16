@@ -1,7 +1,5 @@
 local _, LBA = ...
 
-local C_Spell = LBA.C_Spell or C_Spell
-
 local AceGUI = LibStub("AceGUI-3.0")
 
 local Type = "LBAInputSpellID"

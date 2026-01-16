@@ -10,8 +10,6 @@ local addonName, LBA = ...
 
 local L = LBA.L
 
-local C_Spell = LBA.C_Spell or C_Spell
-
 local LSM = LibStub('LibSharedMedia-3.0')
 local FONT = LSM.MediaType.FONT
 local ALL_FONTS = LSM:HashTable(FONT)

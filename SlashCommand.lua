@@ -10,8 +10,6 @@
 
 local addonName, LBA = ...
 
-local C_Spell = LBA.C_Spell or C_Spell
-
 local L = LBA.L
 
 local function TrueStr(x)
