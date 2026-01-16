@@ -26,6 +26,7 @@ embeds.xml
 
 Localization.lua
 ClassicCompat.lua
+SpellData\[Game].lua
 SpellData.lua
 ColorGradient.lua
 BarIntegrations.lua
