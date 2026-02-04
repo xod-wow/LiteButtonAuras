@@ -78,7 +78,7 @@ function LiteButtonAurasControllerMixin:Initialize()
     self:RegisterEvent('PLAYER_FOCUS_CHANGED')              -- @focus
     self:RegisterEvent('UPDATE_MOUSEOVER_UNIT')             -- @mouseover
 
-    -- All of these are for the interrupt and player channel detection
+    -- All of these are for the interrupt detection
     self:RegisterEvent('UNIT_SPELLCAST_START')
     self:RegisterEvent('UNIT_SPELLCAST_STOP')
     self:RegisterEvent('UNIT_SPELLCAST_DELAYED')
@@ -187,7 +187,6 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
             LBA.state[unit]:UpdateInterrupt()
         end
         LBA.state.player:UpdateWeaponEnchants()
-        LBA.state.player:UpdateChannel()
         LBA.state.player:UpdateTotems()
         self:MarkOverlaysDirty()
     elseif event == 'PLAYER_TARGET_CHANGED' then
@@ -262,18 +261,13 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
     elseif event:sub(1, 14) == 'UNIT_SPELLCAST' then
         -- This fires a lot too, same applies as UNIT_AURA.
         local unit = ...
-        if unit == 'player' then
-            LBA.state.player:UpdateChannel()
+        if self:IsTrackedUnit(unit) then
+            LBA.state[unit]:UpdateInterrupt()
             self:MarkOverlaysDirty(true)
-        else
-            if self:IsTrackedUnit(unit) then
-                LBA.state[unit]:UpdateInterrupt()
-                self:MarkOverlaysDirty(true)
-            end
-            if UnitIsUnit(unit, 'mouseover') and self:IsTrackedUnit('mouseover') then
-                LBA.state.mouseover:UpdateInterrupt()
-                self:MarkOverlaysDirty(true)
-            end
+        end
+        if UnitIsUnit(unit, 'mouseover') and self:IsTrackedUnit('mouseover') then
+            LBA.state.mouseover:UpdateInterrupt()
+            self:MarkOverlaysDirty(true)
         end
     elseif event == 'ITEM_DATA_LOAD_RESULT' then
         self:MarkOverlaysDirty()

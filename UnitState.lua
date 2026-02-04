@@ -107,7 +107,6 @@ function LBA.UnitState:Create(unit)
         debuffs = {},
         weaponEnchants = {},
         totems = {},
-        channel = nil,
         taunt = nil,
     }
     setmetatable(unitState, { __index=self })
@@ -227,10 +226,6 @@ function LBA.UnitState:UpdateWeaponEnchants()
             end
         end
     end
-end
-
-function LBA.UnitState:UpdateChannel()
-    self.channel = UnitChannelInfo(self.unit)
 end
 
 function LBA.UnitState:UpdateTotems()
