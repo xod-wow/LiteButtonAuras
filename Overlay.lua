@@ -32,7 +32,7 @@ local GetMacroSpell = GetMacroSpell
 local GetModifiedClick = GetModifiedClick
 local GetTime = GetTime
 local IsModifiedClick = IsModifiedClick
-local IsSpellOverlayed = IsSpellOverlayed
+local C_SpellActivationOverlay = C_SpellActivationOverlay
 local PixelUtil = PixelUtil
 local SecureCmdOptionParse = SecureCmdOptionParse
 local UnitCanAttack = UnitCanAttack
@@ -337,8 +337,8 @@ function LiteButtonAurasOverlayMixin:GetMatchingAura(t)
 end
 
 function LiteButtonAurasOverlayMixin:AlreadyOverlayed()
-    if WOW_PROJECT_ID == 1 then
-        return (self.spellID and IsSpellOverlayed(self.spellID))
+    if C_SpellActivationOverlay then
+        return (self.spellID and C_SpellActivationOverlay.IsSpellOverlayed(self.spellID))
     else
         local parent = self:GetParent()
         return (parent.overlay and parent.overlay:IsShown())

@@ -104,6 +104,9 @@ function LiteButtonAurasControllerMixin:Initialize()
     -- Need to track modifier key state for mouseover/focus/self cast modifiers
     self:RegisterEvent('MODIFIER_STATE_CHANGED')
 
+    -- Secrets
+    self:RegisterEvent('ADDON_RESTRICTION_STATE_CHANGED')
+
     LBA.db.RegisterCallback(self, 'OnModified', 'StyleAllOverlays')
 end
 
@@ -289,5 +292,7 @@ function LiteButtonAurasControllerMixin:OnEvent(event, ...)
             LBA.state.focus:UpdateInterrupt()
             self:MarkOverlaysDirty(true)
         end
+    elseif event == "ADDON_RESTRICTION_STATE_CHANGED" then
+        C_Timer.After(0, function () self:OnEvent("PLAYER_ENTERING_WORLD") end)
     end
 end

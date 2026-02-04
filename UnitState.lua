@@ -140,6 +140,9 @@ end
 -- for weapon enchants) doesn't have a spellId in it.
 
 function LBA.UnitState:UpdateTableAura(t, auraData)
+    if issecretvalue(auraData.name) then
+        return
+    end
     if self:IsIgnoredAura(auraData) then
         return
     end
@@ -176,6 +179,9 @@ function LBA.UnitState:UpdateAuras(auraInfo)
             true)
         AuraUtil.ForEachAura(self.unit, 'HARMFUL', nil,
             function (auraData)
+                if issecretvalue(auraData.name) then
+                    return
+                end
                 if LBA.Taunts[auraData.spellId] and auraData.expirationTime then
                     if not self.taunt or auraData.expirationTime > self.taunt.expirationTime  then
                         self.taunt = auraData
@@ -186,6 +192,9 @@ function LBA.UnitState:UpdateAuras(auraInfo)
     else
         AuraUtil.ForEachAura(self.unit, 'HELPFUL', nil,
             function (auraData)
+                if issecretvalue(auraData.name) then
+                    return
+                end
                 if auraData.isFromPlayerOrPlayerPet then
                     self:UpdateTableAura(self.buffs, auraData)
                 end
@@ -195,11 +204,34 @@ function LBA.UnitState:UpdateAuras(auraInfo)
         -- by someone else, since we don't care who cast Battle Shout, etc.
         AuraUtil.ForEachAura(self.unit, 'HELPFUL RAID', nil,
             function (auraData)
+                if issecretvalue(auraData.name) then
+                    return
+                end
                 if auraData.duration >= 10*60 then
                     self:UpdateTableAura(self.buffs, auraData)
                 end
             end,
             true)
+    end
+
+    if C_Secrets.ShouldAurasBeSecret() then
+        for _, f in ipairs(BuffIconCooldownViewer:GetItemFrames()) do
+            if f.cooldownID then
+                local cdInfo = C_CooldownViewer.GetCooldownViewerCooldownInfo(f.cooldownID)
+                if cdInfo and f.Cooldown:IsShown() and f.auraDataUnit == self.unit and cdInfo.spellID then
+                    local info = C_Spell.GetSpellInfo(cdInfo.spellID)
+                    local auraData = {
+                        auraInstanceID = f.auraInstanceID,
+                        icon = info.iconID,
+                        spellId = info.spellID,
+                        name = info.name,
+                        expirationTime = 0,
+                        duration = 99999,
+                    }
+                    self:UpdateTableAura(self.buffs, auraData)
+                end
+            end
+        end
     end
 end
 
@@ -248,13 +280,13 @@ function LBA.UnitState:UpdateInterrupt()
 
     if UnitCanAttack('player', self.unit) then
         name, _, _, _, endTime, _, _, cantInterrupt = UnitCastingInfo(self.unit)
-        if name and not cantInterrupt then
+        if name and not issecretvalue(endTime) and not cantInterrupt then
             self.interrupt = endTime / 1000
             return
         end
 
         name, _, _, _, endTime, _, cantInterrupt = UnitChannelInfo(self.unit)
-        if name and not cantInterrupt then
+        if name and not issecretvalue(endTime) and not cantInterrupt then
             self.interrupt = endTime / 1000
             return
         end
