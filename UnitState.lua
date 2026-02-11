@@ -265,7 +265,7 @@ function LBA.UnitState:UpdateTotems()
         self.totems = {}
         for i = 1, MAX_TOTEMS do
             local exists, name, startTime, duration, model = GetTotemInfo(i)
-            if exists and name then
+            if not issecretvalue(exists) and exists and name then
                 if model then
                     name = LBA.TotemOrGuardianModels[model] or name
                 end
