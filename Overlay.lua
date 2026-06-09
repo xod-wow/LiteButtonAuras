@@ -15,15 +15,14 @@ local LibBG = LibStub("LibButtonGlow-1.0")
 
 local MasqueTextureFormat = "Interface/AddOns/Masque/Textures/%s/AutoCast-Mask"
 
-
 --[[------------------------------------------------------------------------]]--
 
 -- Cache a some things to be faster. This is annoying but it's really a lot
 -- faster. Only do this for things that are called in the event loop otherwise
 -- it's a pain to maintain.
 
+local AuraUtil = AuraUtil
 local C_ActionBar = C_ActionBar
-local DebuffTypeColor = DebuffTypeColor
 local GetActionText = GetActionText
 local GetCVarBool = GetCVarBool
 local GetMacroBody = GetMacroBody
@@ -587,8 +586,7 @@ end
 -- Dispel Config ---------------------------------------------------------------
 
 function LiteButtonAurasOverlayMixin:SetAsHostileDispel(auraData)
-    local color = DebuffTypeColor[auraData.dispelName or ""]
-    self.Glow:SetVertexColor(color.r, color.g, color.b)
+    AuraUtil.SetAuraBorderColor(self.Glow, auraData.dispelName)
     self:SetAsAuraCommon(auraData)
 end
 
