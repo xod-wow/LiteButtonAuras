@@ -23,6 +23,7 @@ local MasqueTextureFormat = "Interface/AddOns/Masque/Textures/%s/AutoCast-Mask"
 
 local AuraUtil = AuraUtil
 local C_ActionBar = C_ActionBar
+local DebuffTypeColor = DebuffTypeColor
 local GetActionText = GetActionText
 local GetCVarBool = GetCVarBool
 local GetMacroBody = GetMacroBody
@@ -586,7 +587,12 @@ end
 -- Dispel Config ---------------------------------------------------------------
 
 function LiteButtonAurasOverlayMixin:SetAsHostileDispel(auraData)
-    AuraUtil.SetAuraBorderColor(self.Glow, auraData.dispelName)
+    if AuraUtil.SetAuraBorderColor then
+        AuraUtil.SetAuraBorderColor(self.Glow, auraData.dispelName)
+    else
+        local color = DebuffTypeColor[auraData.dispelName or "none"]
+        self.Glow:SetVertexColor(color.r, color.g, color.b)
+    end
     self:SetAsAuraCommon(auraData)
 end
 
